@@ -125,7 +125,8 @@ KubernetesLabelConfigs:
 KnativeServiceDefaults:
   QueueProxyResourcePercentage: 30
   # The CPU / memory limit will be applied as a factor of the requested value
-  UserContainerLimitRequestFactor: 1
+  UserContainerCPULimitRequestFactor: 0
+  UserContainerMemoryLimitRequestFactor: 1
 
 # Spark App config for running on Kubernetes
 # This is specific to the environment that you Kubernetes cluster runs on.

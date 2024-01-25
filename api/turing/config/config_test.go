@@ -254,8 +254,9 @@ func TestLoad(t *testing.T) {
 					MaxAllowedReplica: 20,
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					QueueProxyResourcePercentage:    30,
-					UserContainerLimitRequestFactor: 1,
+					QueueProxyResourcePercentage:          30,
+					UserContainerCPULimitRequestFactor:    0,
+					UserContainerMemoryLimitRequestFactor: 1,
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -371,8 +372,9 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					QueueProxyResourcePercentage:    20,
-					UserContainerLimitRequestFactor: 1.25,
+					QueueProxyResourcePercentage:          20,
+					UserContainerCPULimitRequestFactor:    0,
+					UserContainerMemoryLimitRequestFactor: 1.25,
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -520,8 +522,9 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					QueueProxyResourcePercentage:    20,
-					UserContainerLimitRequestFactor: 1.25,
+					QueueProxyResourcePercentage:          20,
+					UserContainerCPULimitRequestFactor:    0,
+					UserContainerMemoryLimitRequestFactor: 1.25,
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -660,8 +663,9 @@ func TestLoad(t *testing.T) {
 					MaxOpenConns:     4,
 				},
 				KnativeServiceDefaults: &config.KnativeServiceDefaults{
-					QueueProxyResourcePercentage:    20,
-					UserContainerLimitRequestFactor: 1.25,
+					QueueProxyResourcePercentage:          20,
+					UserContainerCPULimitRequestFactor:    0,
+					UserContainerMemoryLimitRequestFactor: 1.25,
 				},
 				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType:   "dev",

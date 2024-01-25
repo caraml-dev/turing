@@ -62,16 +62,22 @@ type BaseService struct {
 	InitContainers []Container `json:"init_containers"`
 }
 
-func (cfg *BaseService) buildResourceReqs(userContainerLimitRequestFactor float64) corev1.ResourceRequirements {
+func (cfg *BaseService) buildResourceReqs(
+	UserContainerCPULimitRequestFactor float64,
+	UserContainerMemoryLimitRequestFactor float64,
+) corev1.ResourceRequirements {
 	reqs := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:    cfg.CPURequests,
 		corev1.ResourceMemory: cfg.MemoryRequests,
 	}
 
-	// Set resource limits to request * userContainerLimitRequestFactor
-	limits := map[corev1.ResourceName]resource.Quantity{
-		corev1.ResourceCPU:    ComputeResource(cfg.CPURequests, userContainerLimitRequestFactor),
-		corev1.ResourceMemory: ComputeResource(cfg.MemoryRequests, userContainerLimitRequestFactor),
+	// Set resource limits to request * userContainerCPULimitRequestFactor or UserContainerMemoryLimitRequestFactor
+	limits := map[corev1.ResourceName]resource.Quantity{}
+	if UserContainerCPULimitRequestFactor != 0 {
+		limits[corev1.ResourceCPU] = ComputeResource(cfg.CPURequests, UserContainerCPULimitRequestFactor)
+	}
+	if UserContainerMemoryLimitRequestFactor != 0 {
+		limits[corev1.ResourceMemory] = ComputeResource(cfg.MemoryRequests, UserContainerMemoryLimitRequestFactor)
 	}
 
 	return corev1.ResourceRequirements{

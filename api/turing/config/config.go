@@ -263,8 +263,9 @@ type KubernetesLabelConfigs struct {
 // KnativeServiceDefaults captures some of the configurable defaults specific to
 // Knative services
 type KnativeServiceDefaults struct {
-	QueueProxyResourcePercentage    int
-	UserContainerLimitRequestFactor float64
+	QueueProxyResourcePercentage          int
+	UserContainerCPULimitRequestFactor    float64 `json:"userContainerLimitCPURequestFactor"`
+	UserContainerMemoryLimitRequestFactor float64 `json:"userContainerLimitMemoryRequestFactor"`
 }
 
 // SinglePageApplicationConfig holds configuration required for serving SPAs
@@ -599,7 +600,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("DeployConfig::MaxAllowedReplica", "20")
 
 	v.SetDefault("KnativeServiceDefaults::QueueProxyResourcePercentage", "30")
-	v.SetDefault("KnativeServiceDefaults::UserContainerLimitRequestFactor", "1")
+	v.SetDefault("KnativeServiceDefaults::UserContainerCPULimitRequestFactor", "0")
+	v.SetDefault("KnativeServiceDefaults::UserContainerMemoryLimitRequestFactor", "1")
 
 	v.SetDefault("RouterDefaults::Image", "")
 	v.SetDefault("RouterDefaults::FiberDebugLogEnabled", "false")

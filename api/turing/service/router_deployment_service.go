@@ -176,7 +176,8 @@ func (ds *deploymentService) DeployRouterVersion(
 		secretName, experimentConfig,
 		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.QueueProxyResourcePercentage,
-		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
+		ds.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		ds.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	)
 	if err != nil {
 		return endpoint, err
@@ -283,7 +284,8 @@ func (ds *deploymentService) UndeployRouterVersion(
 		routerVersion, nil, project, ds.environmentType, "", nil,
 		ds.routerDefaults, ds.sentryEnabled, ds.sentryDSN,
 		ds.knativeServiceConfig.QueueProxyResourcePercentage,
-		ds.knativeServiceConfig.UserContainerLimitRequestFactor,
+		ds.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		ds.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	)
 	if err != nil {
 		return err
@@ -372,7 +374,8 @@ func (ds *deploymentService) createServices(
 	sentryEnabled bool,
 	sentryDSN string,
 	knativeQueueProxyResourcePercentage int,
-	userContainerLimitRequestFactor float64,
+	userContainerCPULimitRequestFactor float64,
+	userContainerMemoryLimitRequestFactor float64,
 ) ([]*cluster.KnativeService, error) {
 	services := []*cluster.KnativeService{}
 	namespace := servicebuilder.GetNamespace(project)
@@ -391,7 +394,8 @@ func (ds *deploymentService) createServices(
 		}
 		enricherSvc, err := ds.svcBuilder.NewEnricherService(
 			routerVersion, project, secretName,
-			knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currEnricherReplicas,
+			knativeQueueProxyResourcePercentage, userContainerCPULimitRequestFactor,
+			userContainerMemoryLimitRequestFactor, currEnricherReplicas,
 		)
 		if err != nil {
 			return services, err
@@ -413,7 +417,8 @@ func (ds *deploymentService) createServices(
 		}
 		ensemblerSvc, err := ds.svcBuilder.NewEnsemblerService(
 			routerVersion, project, secretName,
-			knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currEnsemblerReplicas,
+			knativeQueueProxyResourcePercentage, userContainerCPULimitRequestFactor,
+			userContainerMemoryLimitRequestFactor, currEnsemblerReplicas,
 		)
 		if err != nil {
 			return services, err
@@ -433,7 +438,8 @@ func (ds *deploymentService) createServices(
 	routerService, err := ds.svcBuilder.NewRouterService(
 		routerVersion, project, envType, secretName, experimentConfig,
 		routerDefaults, sentryEnabled, sentryDSN,
-		knativeQueueProxyResourcePercentage, userContainerLimitRequestFactor, currRouterReplicas,
+		knativeQueueProxyResourcePercentage, userContainerCPULimitRequestFactor,
+		userContainerMemoryLimitRequestFactor, currRouterReplicas,
 	)
 	if err != nil {
 		return services, err

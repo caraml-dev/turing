@@ -67,7 +67,8 @@ type ClusterServiceBuilder interface {
 		project *mlp.Project,
 		secretName string,
 		knativeQueueProxyResourcePercentage int,
-		userContainerLimitRequestFactor float64,
+		userContainerCPULimitRequestFactor float64,
+		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewEnsemblerService(
@@ -75,7 +76,8 @@ type ClusterServiceBuilder interface {
 		project *mlp.Project,
 		secretName string,
 		knativeQueueProxyResourcePercentage int,
-		userContainerLimitRequestFactor float64,
+		userContainerCPULimitRequestFactor float64,
+		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewRouterService(
@@ -88,7 +90,8 @@ type ClusterServiceBuilder interface {
 		sentryEnabled bool,
 		sentryDSN string,
 		knativeQueueProxyResourcePercentage int,
-		userContainerLimitRequestFactor float64,
+		userContainerCPULimitRequestFactor float64,
+		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewFluentdService(
@@ -149,7 +152,8 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	project *mlp.Project,
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
-	userContainerLimitRequestFactor float64,
+	userContainerCPULimitRequestFactor float64,
+	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
@@ -215,16 +219,17 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                  true,
-		ContainerPort:                   int32(enricher.Port),
-		MinReplicas:                     enricher.ResourceRequest.MinReplica,
-		MaxReplicas:                     enricher.ResourceRequest.MaxReplica,
-		InitialScale:                    initialScale,
-		AutoscalingMetric:               string(enricher.AutoscalingPolicy.Metric),
-		AutoscalingTarget:               enricher.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:       topologySpreadConstraints,
-		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
-		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
+		IsClusterLocal:                        true,
+		ContainerPort:                         int32(enricher.Port),
+		MinReplicas:                           enricher.ResourceRequest.MinReplica,
+		MaxReplicas:                           enricher.ResourceRequest.MaxReplica,
+		InitialScale:                          initialScale,
+		AutoscalingMetric:                     string(enricher.AutoscalingPolicy.Metric),
+		AutoscalingTarget:                     enricher.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:             topologySpreadConstraints,
+		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
 	})
 }
 
@@ -235,7 +240,8 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	project *mlp.Project,
 	secretName string,
 	knativeQueueProxyResourcePercentage int,
-	userContainerLimitRequestFactor float64,
+	userContainerCPULimitRequestFactor float64,
+	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
@@ -302,16 +308,17 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                  true,
-		ContainerPort:                   int32(docker.Port),
-		MinReplicas:                     docker.ResourceRequest.MinReplica,
-		MaxReplicas:                     docker.ResourceRequest.MaxReplica,
-		InitialScale:                    initialScale,
-		AutoscalingMetric:               string(docker.AutoscalingPolicy.Metric),
-		AutoscalingTarget:               docker.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:       topologySpreadConstraints,
-		QueueProxyResourcePercentage:    knativeQueueProxyResourcePercentage,
-		UserContainerLimitRequestFactor: userContainerLimitRequestFactor,
+		IsClusterLocal:                        true,
+		ContainerPort:                         int32(docker.Port),
+		MinReplicas:                           docker.ResourceRequest.MinReplica,
+		MaxReplicas:                           docker.ResourceRequest.MaxReplica,
+		InitialScale:                          initialScale,
+		AutoscalingMetric:                     string(docker.AutoscalingPolicy.Metric),
+		AutoscalingTarget:                     docker.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:             topologySpreadConstraints,
+		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
 	})
 }
 

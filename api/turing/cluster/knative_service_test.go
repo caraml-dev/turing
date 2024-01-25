@@ -172,15 +172,16 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	}{
 		"basic": {
 			serviceCfg: KnativeService{
-				BaseService:                     baseSvc,
-				ContainerPort:                   8080,
-				MinReplicas:                     1,
-				MaxReplicas:                     2,
-				AutoscalingMetric:               "concurrency",
-				AutoscalingTarget:               "1",
-				IsClusterLocal:                  true,
-				QueueProxyResourcePercentage:    30,
-				UserContainerLimitRequestFactor: 1.5,
+				BaseService:                           baseSvc,
+				ContainerPort:                         8080,
+				MinReplicas:                           1,
+				MaxReplicas:                           2,
+				AutoscalingMetric:                     "concurrency",
+				AutoscalingTarget:                     "1",
+				IsClusterLocal:                        true,
+				QueueProxyResourcePercentage:          30,
+				UserContainerCPULimitRequestFactor:    1.5,
+				UserContainerMemoryLimitRequestFactor: 1.5,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -222,16 +223,17 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		// upi has no liveness probe in pod spec and user-container is using h2c
 		"upi": {
 			serviceCfg: KnativeService{
-				BaseService:                     baseSvc,
-				ContainerPort:                   8080,
-				MinReplicas:                     1,
-				MaxReplicas:                     2,
-				AutoscalingMetric:               "concurrency",
-				AutoscalingTarget:               "1",
-				IsClusterLocal:                  true,
-				QueueProxyResourcePercentage:    30,
-				UserContainerLimitRequestFactor: 1.5,
-				Protocol:                        routerConfig.UPI,
+				BaseService:                           baseSvc,
+				ContainerPort:                         8080,
+				MinReplicas:                           1,
+				MaxReplicas:                           2,
+				AutoscalingMetric:                     "concurrency",
+				AutoscalingTarget:                     "1",
+				IsClusterLocal:                        true,
+				QueueProxyResourcePercentage:          30,
+				UserContainerCPULimitRequestFactor:    1.5,
+				UserContainerMemoryLimitRequestFactor: 1.5,
+				Protocol:                              routerConfig.UPI,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -291,14 +293,15 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 		"annotations": {
 			serviceCfg: KnativeService{
-				BaseService:                     baseSvc,
-				ContainerPort:                   8080,
-				MinReplicas:                     5,
-				MaxReplicas:                     6,
-				AutoscalingMetric:               "memory",
-				AutoscalingTarget:               "70",
-				IsClusterLocal:                  false,
-				UserContainerLimitRequestFactor: 1.5,
+				BaseService:                           baseSvc,
+				ContainerPort:                         8080,
+				MinReplicas:                           5,
+				MaxReplicas:                           6,
+				AutoscalingMetric:                     "memory",
+				AutoscalingTarget:                     "70",
+				IsClusterLocal:                        false,
+				UserContainerCPULimitRequestFactor:    1.5,
+				UserContainerMemoryLimitRequestFactor: 1.5,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -381,10 +384,11 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 						},
 					},
 				},
-				IsClusterLocal:                  true,
-				QueueProxyResourcePercentage:    30,
-				UserContainerLimitRequestFactor: 1.5,
-				Protocol:                        routerConfig.UPI,
+				IsClusterLocal:                        true,
+				QueueProxyResourcePercentage:          30,
+				UserContainerCPULimitRequestFactor:    1.5,
+				UserContainerMemoryLimitRequestFactor: 1.5,
+				Protocol:                              routerConfig.UPI,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
