@@ -92,7 +92,7 @@ type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
 	generateBuilderName(projectName string, modelName string, modelID models.ID, versionID string) string
 	// generateDockerImageName generate image name based on project and model
-	generateDockerImageName(projectName string, modelName string, versionID string) string
+	generateDockerImageName(projectName string, modelName string) string
 }
 
 type imageBuilder struct {
@@ -120,9 +120,9 @@ func newImageBuilder(
 }
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
-	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName, request.VersionID)
+	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName)
 	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.ResourceID)))
-	imageRef := fmt.Sprintf("%s:%d", imageName, request.ResourceID)
+	imageRef := fmt.Sprintf("%s:%s", imageName, request.VersionID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
 		return "", ErrUnableToGetImageRef

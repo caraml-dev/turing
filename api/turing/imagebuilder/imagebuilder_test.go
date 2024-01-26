@@ -80,7 +80,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		imageTag            string
 	}{
 		"success | no existing job": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName: projectName,
 			modelName:   modelName,
 			modelID:     modelVersion,
@@ -141,7 +141,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName: projectName,
 			modelName:   modelName,
 			modelID:     modelVersion,
@@ -203,7 +203,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
-			expected:    fmt.Sprintf("%s/%s-%s-%s-job:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName: projectName,
 			modelName:   modelName,
 			modelID:     modelVersion,
@@ -357,7 +357,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		imageTag                   string
 	}{
 		"success | no existing job": {
-			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName:   projectName,
 			modelName:     modelName,
 			modelID:       modelVersion,
@@ -418,7 +418,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageTag:            "3.7.*",
 		},
 		"success: existing job is running": {
-			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName:   projectName,
 			modelName:     modelName,
 			modelID:       modelVersion,
@@ -480,7 +480,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageTag:            "3.7.*",
 		},
 		"success: existing job failed": {
-			expectedImage: fmt.Sprintf("%s/%s-%s-%s-service:%d", dockerRegistry, projectName, modelName, runID, modelVersion),
+			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
 			projectName:   projectName,
 			modelName:     modelName,
 			modelID:       modelVersion,

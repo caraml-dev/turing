@@ -39,11 +39,8 @@ func (n *ensemblerJobNameGenerator) generateBuilderName(
 }
 
 // generateDockerImageName generate the name of docker image of prediction job that will be created from given model
-func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string,
-	modelName string,
-	runID string,
-) string {
-	return fmt.Sprintf("%s/%s-%s-%s-job", n.registry, projectName, modelName, runID)
+func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string, modelName string) string {
+	return fmt.Sprintf("%s/%s/ensembler-jobs/%s", n.registry, projectName, modelName)
 }
 
 // NewEnsemblerServiceImageBuilder create ImageBuilder for building docker image of the ensembling service (real-time)
@@ -78,12 +75,8 @@ func (n *ensemblerServiceNameGenerator) generateBuilderName(
 
 // generateServiceImageName generate the name of docker image of the ensembling service that will be created from given
 // model
-func (n *ensemblerServiceNameGenerator) generateDockerImageName(
-	projectName string,
-	modelName string,
-	runID string,
-) string {
-	return fmt.Sprintf("%s/%s-%s-%s-service", n.registry, projectName, modelName, runID)
+func (n *ensemblerServiceNameGenerator) generateDockerImageName(projectName string, modelName string) string {
+	return fmt.Sprintf("%s/%s/ensembler-services/%s", n.registry, projectName, modelName)
 }
 
 func getPartialVersionID(versionID string, numChar int) string {
