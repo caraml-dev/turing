@@ -115,7 +115,7 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 							},
 							VolumeMounts: svcConf.VolumeMounts,
 							LivenessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
+								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Port: intstr.FromInt(8080),
 										Path: "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",
@@ -127,7 +127,7 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 								FailureThreshold:    5,
 							},
 							ReadinessProbe: &corev1.Probe{
-								Handler: corev1.Handler{
+								ProbeHandler: corev1.ProbeHandler{
 									HTTPGet: &corev1.HTTPGetAction{
 										Port: intstr.FromInt(8080),
 										Path: "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",
