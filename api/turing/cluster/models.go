@@ -93,7 +93,7 @@ func (cfg *BaseService) buildContainerProbe(ptype probeType, port int) *corev1.P
 	}
 	buildProbe := func(httpPath string, port int) *corev1.Probe {
 		probe := &corev1.Probe{
-			Handler: corev1.Handler{
+			ProbeHandler: corev1.ProbeHandler{
 				HTTPGet: &corev1.HTTPGetAction{
 					Path: httpPath,
 				},
@@ -104,7 +104,7 @@ func (cfg *BaseService) buildContainerProbe(ptype probeType, port int) *corev1.P
 			FailureThreshold:    healthCheckDefaults.FailureThreshold,
 		}
 		if port != 0 {
-			probe.Handler.HTTPGet.Port = intstr.FromInt(port)
+			probe.ProbeHandler.HTTPGet.Port = intstr.FromInt(port)
 		}
 		return probe
 	}
