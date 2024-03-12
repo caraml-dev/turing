@@ -366,7 +366,8 @@ func getGCPSubDomains() []string {
 }
 
 func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (bool, error) {
-	keychain := authn.DefaultKeychain
+	var keychain authn.Keychain
+	keychain = authn.DefaultKeychain
 
 	for _, domain := range getGCPSubDomains() {
 		if strings.Contains(ib.imageBuildingConfig.DestinationRegistry, domain) {
