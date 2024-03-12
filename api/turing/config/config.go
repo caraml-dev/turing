@@ -72,7 +72,6 @@ type Config struct {
 	Port                          int `validate:"required"`
 	LogLevel                      string
 	AllowedOrigins                []string
-	AuthConfig                    *AuthorizationConfig
 	BatchEnsemblingConfig         BatchEnsemblingConfig         `validate:"required"`
 	EnsemblerServiceBuilderConfig EnsemblerServiceBuilderConfig `validate:"required"`
 	DbConfig                      *DatabaseConfig               `validate:"required"`
@@ -363,19 +362,6 @@ type UPIConfig struct {
 	KafkaBrokers string
 }
 
-// AuthorizationConfig captures the config for auth using mlp authz
-type AuthorizationConfig struct {
-	Enabled bool
-	URL     string
-	Caching *InMemoryCacheConfig `validate:"required_if=Enabled True"`
-}
-
-type InMemoryCacheConfig struct {
-	Enabled                     bool
-	KeyExpirySeconds            int `validate:"required_if=Enabled True"`
-	CacheCleanUpIntervalSeconds int `validate:"required_if=Enabled True"`
-}
-
 // ClusterConfig contains the cluster controller information.
 // Supported features are in cluster configuration and Kubernetes client CA certificates.
 type ClusterConfig struct {
@@ -580,11 +566,6 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("AllowedOrigins", "*")
 
-	v.SetDefault("AuthConfig::Enabled", "false")
-	v.SetDefault("AuthConfig::URL", "")
-	v.SetDefault("AuthConfig::Caching::KeyExpirySeconds", "600")
-	v.SetDefault("AuthConfig::Caching::CacheCleanUpIntervalSeconds", "900")
-
 	v.SetDefault("DbConfig::Host", "localhost")
 	v.SetDefault("DbConfig::Port", "5432")
 	v.SetDefault("DbConfig::User", "")
@@ -650,15 +631,6 @@ func setDefaultValues(v *viper.Viper) {
 
 func NewConfigValidator() (*validator.Validate, error) {
 	v := validator.New()
-
-	// Use struct level validation for AuthorizationConfig
-	v.RegisterStructValidation(func(sl validator.StructLevel) {
-		field := sl.Current().Interface().(AuthorizationConfig)
-		// If auth is enabled, URL should be set
-		if field.Enabled && field.URL == "" {
-			sl.ReportError(field.URL, "authorization_url", "URL", "url-set", "")
-		}
-	}, AuthorizationConfig{})
 
 	// Use struct level validation for PodDisruptionBudgetConfig
 	v.RegisterStructValidation(func(sl validator.StructLevel) {

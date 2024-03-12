@@ -3,7 +3,6 @@ package config_test
 import (
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -65,83 +64,6 @@ func TestGetters(t *testing.T) {
 		Port: 5000,
 	}
 	assert.Equal(t, ":5000", cfg.ListenAddress())
-}
-
-func TestAuthConfigValidation(t *testing.T) {
-	tests := map[string]struct {
-		cfg         config.AuthorizationConfig
-		success     bool
-		expectedErr string
-	}{
-		"success auth disabled": {
-			cfg: config.AuthorizationConfig{
-				Enabled: false,
-			},
-			success: true,
-		},
-		"success auth enabled": {
-			cfg: config.AuthorizationConfig{
-				Enabled: true,
-				URL:     "url",
-				Caching: &config.InMemoryCacheConfig{
-					Enabled: false,
-				},
-			},
-			success: true,
-		},
-		"success caching enabled": {
-			cfg: config.AuthorizationConfig{
-				Enabled: true,
-				URL:     "url",
-				Caching: &config.InMemoryCacheConfig{
-					Enabled:                     true,
-					KeyExpirySeconds:            100,
-					CacheCleanUpIntervalSeconds: 200,
-				},
-			},
-			success: true,
-		},
-		"failure auth enabled no url": {
-			cfg: config.AuthorizationConfig{
-				Enabled: true,
-			},
-			success: false,
-			expectedErr: strings.Join([]string{
-				"Key: 'AuthorizationConfig.Caching' ",
-				"Error:Field validation for 'Caching' failed on the 'required_if' tag",
-			}, ""),
-		},
-		"failure caching enabled no duration config": {
-			cfg: config.AuthorizationConfig{
-				Enabled: true,
-				URL:     "url",
-				Caching: &config.InMemoryCacheConfig{
-					Enabled: true,
-				},
-			},
-			success: false,
-			expectedErr: strings.Join([]string{
-				"Key: 'AuthorizationConfig.Caching.KeyExpirySeconds' ",
-				"Error:Field validation for 'KeyExpirySeconds' failed on the 'required_if' tag\n",
-				"Key: 'AuthorizationConfig.Caching.CacheCleanUpIntervalSeconds' ",
-				"Error:Field validation for 'CacheCleanUpIntervalSeconds' failed on the 'required_if' tag",
-			}, ""),
-		},
-	}
-
-	validate, err := config.NewConfigValidator()
-	require.NoError(t, err)
-
-	for name, data := range tests {
-		t.Run(name, func(t *testing.T) {
-			err := validate.Struct(data.cfg)
-			if data.success {
-				assert.NoError(t, err)
-			} else {
-				assert.Error(t, err)
-			}
-		})
-	}
 }
 
 func TestPDBConfigValidation(t *testing.T) {
@@ -230,12 +152,6 @@ func TestLoad(t *testing.T) {
 			want: &config.Config{
 				Port:           8080,
 				AllowedOrigins: []string{"*"},
-				AuthConfig: &config.AuthorizationConfig{
-					Caching: &config.InMemoryCacheConfig{
-						KeyExpirySeconds:            600,
-						CacheCleanUpIntervalSeconds: 900,
-					},
-				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "localhost",
 					Port:             5432,
@@ -305,14 +221,6 @@ func TestLoad(t *testing.T) {
 			want: &config.Config{
 				Port:           9999,
 				AllowedOrigins: []string{"http://foo.com", "http://bar.com"},
-				AuthConfig: &config.AuthorizationConfig{
-					Enabled: true,
-					URL:     "http://example.com",
-					Caching: &config.InMemoryCacheConfig{
-						KeyExpirySeconds:            600,
-						CacheCleanUpIntervalSeconds: 900,
-					},
-				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
@@ -455,14 +363,6 @@ func TestLoad(t *testing.T) {
 				Port:           10000,
 				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://foo2.com"},
-				AuthConfig: &config.AuthorizationConfig{
-					Enabled: false,
-					URL:     "http://example.com",
-					Caching: &config.InMemoryCacheConfig{
-						KeyExpirySeconds:            600,
-						CacheCleanUpIntervalSeconds: 900,
-					},
-				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
@@ -620,9 +520,6 @@ func TestLoad(t *testing.T) {
 			env: map[string]string{
 				"PORT":                                           "5000",
 				"ALLOWEDORIGINS":                                 "http://baz.com,http://qux.com",
-				"AUTHCONFIG_ENABLED":                             "true",
-				"AUTHCONFIG_URL":                                 "http://env.example.com",
-				"AUTHCONFIG_CACHING_ENABLED":                     "true",
 				"DBCONFIG_USER":                                  "dbuser-env",
 				"DBCONFIG_PASSWORD":                              "dbpassword-env",
 				"DEPLOYCONFIG_TIMEOUT":                           "10m",
@@ -641,15 +538,6 @@ func TestLoad(t *testing.T) {
 				Port:           5000,
 				LogLevel:       "DEBUG",
 				AllowedOrigins: []string{"http://baz.com", "http://qux.com"},
-				AuthConfig: &config.AuthorizationConfig{
-					Enabled: true,
-					URL:     "http://env.example.com",
-					Caching: &config.InMemoryCacheConfig{
-						Enabled:                     true,
-						KeyExpirySeconds:            600,
-						CacheCleanUpIntervalSeconds: 900,
-					},
-				},
 				DbConfig: &config.DatabaseConfig{
 					Host:             "127.0.0.1",
 					Port:             5432,
