@@ -16,14 +16,12 @@ import (
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
-	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 )
 
 // AppContext stores the entities relating to the application's context
 type AppContext struct {
-	Authorizer *middleware.Authorizer
 	// DAO
 	DeploymentService     service.DeploymentService
 	RoutersService        service.RoutersService
@@ -48,7 +46,6 @@ type AppContext struct {
 func NewAppContext(
 	db *gorm.DB,
 	cfg *config.Config,
-	authorizer *middleware.Authorizer,
 ) (*AppContext, error) {
 	// Init Experiments Service
 	expSvc, err := service.NewExperimentsService(cfg.Experiment)
@@ -171,7 +168,6 @@ func NewAppContext(
 	}
 
 	appContext := &AppContext{
-		Authorizer:            authorizer,
 		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
 		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
 		EnsemblersService:     ensemblersService,

@@ -24,10 +24,6 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	})
 	apiRouter.Use(corsHandler.Handler)
 
-	if appCtx.Authorizer != nil {
-		apiRouter.Use(appCtx.Authorizer.Middleware)
-	}
-
 	openapiMiddleware, err := openapiValidationMiddleware(path, cfg)
 	if err != nil {
 		return err
