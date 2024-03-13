@@ -11,6 +11,6 @@ func NewNopLogger() *NopLogger {
 }
 
 // write is a nop method that satisfies the NopLogger interface
-func (*NopLogger) write(turLogEntry *turing.TuringResultLogMessage) error {
+func (*NopLogger) write(_ *turing.TuringResultLogMessage) error {
 	return nil
 }

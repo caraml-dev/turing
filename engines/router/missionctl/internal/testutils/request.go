@@ -20,4 +20,4 @@ func MakeTestRequest(
 }
 
 // NopHTTPRequestModifier makes no modification to the input request
-func NopHTTPRequestModifier(req *http.Request) {}
+func NopHTTPRequestModifier(_ *http.Request) {}

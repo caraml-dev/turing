@@ -15,7 +15,7 @@ func TestPanicRecovery(t *testing.T) {
 			context.Background(),
 			&upiv1.PredictValuesRequest{},
 			nil,
-			func(ctx context.Context, req interface{}) (interface{}, error) {
+			func(_ context.Context, _ interface{}) (interface{}, error) {
 				panic("something wrong")
 			})
 		assert.Equal(t, "panic: something wrong", err.Error())

@@ -104,18 +104,18 @@ type mockSpan struct {
 func (s *mockSpan) Finish() {
 	s.Called()
 }
-func (*mockSpan) FinishWithOptions(opts opentracing.FinishOptions)            {}
-func (*mockSpan) Context() opentracing.SpanContext                            { return nil }
-func (*mockSpan) SetOperationName(operationName string) opentracing.Span      { return nil }
-func (*mockSpan) SetTag(key string, value interface{}) opentracing.Span       { return nil }
-func (*mockSpan) LogFields(fields ...opentracingLog.Field)                    {}
-func (*mockSpan) LogKV(alternatingKeyValues ...interface{})                   {}
-func (*mockSpan) SetBaggageItem(restrictedKey, value string) opentracing.Span { return nil }
-func (*mockSpan) BaggageItem(restrictedKey string) string                     { return "" }
-func (*mockSpan) Tracer() opentracing.Tracer                                  { return nil }
-func (*mockSpan) LogEvent(event string)                                       {}
-func (*mockSpan) LogEventWithPayload(event string, payload interface{})       {}
-func (*mockSpan) Log(data opentracing.LogData)                                {}
+func (*mockSpan) FinishWithOptions(_ opentracing.FinishOptions)   {}
+func (*mockSpan) Context() opentracing.SpanContext                { return nil }
+func (*mockSpan) SetOperationName(_ string) opentracing.Span      { return nil }
+func (*mockSpan) SetTag(_ string, _ interface{}) opentracing.Span { return nil }
+func (*mockSpan) LogFields(_ ...opentracingLog.Field)             {}
+func (*mockSpan) LogKV(_ ...interface{})                          {}
+func (*mockSpan) SetBaggageItem(_, _ string) opentracing.Span     { return nil }
+func (*mockSpan) BaggageItem(_ string) string                     { return "" }
+func (*mockSpan) Tracer() opentracing.Tracer                      { return nil }
+func (*mockSpan) LogEvent(_ string)                               {}
+func (*mockSpan) LogEventWithPayload(_ string, _ interface{})     {}
+func (*mockSpan) Log(_ opentracing.LogData)                       {}
 
 // mockTracer implements tracing.Tracer interface
 type mockTracer struct {
@@ -360,7 +360,7 @@ func TestTracingInterceptorAfterCompletion(t *testing.T) {
 
 	// Patch opentracing.SpanFromContext to return the mock span
 	monkey.Patch(opentracing.SpanFromContext,
-		func(ctx context.Context) opentracing.Span {
+		func(_ context.Context) opentracing.Span {
 			return mockSp
 		})
 	defer monkey.Unpatch(opentracing.SpanFromContext)
