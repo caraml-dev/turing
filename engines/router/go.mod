@@ -6,7 +6,7 @@ require (
 	bou.ke/monkey v1.0.2
 	cloud.google.com/go/bigquery v1.44.0
 	github.com/buger/jsonparser v1.1.1
-	github.com/caraml-dev/mlp v1.7.6
+	github.com/caraml-dev/mlp v1.12.0
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.6
 	github.com/fluent/fluent-logger-golang v1.5.0
@@ -26,9 +26,9 @@ require (
 	github.com/stretchr/testify v1.8.1
 	github.com/uber/jaeger-client-go v2.23.1+incompatible
 	go.einride.tech/protobuf-bigquery v0.7.0
-	go.uber.org/zap v1.25.0
-	google.golang.org/grpc v1.51.0
-	google.golang.org/protobuf v1.28.1
+	go.uber.org/zap v1.26.0
+	google.golang.org/grpc v1.52.3
+	google.golang.org/protobuf v1.29.0
 	gopkg.in/confluentinc/confluent-kafka-go.v1 v1.4.2
 )
 
@@ -81,14 +81,14 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/oauth2 v0.5.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.106.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/genproto v0.0.0-20230131230820-1c016267d619 // indirect
 	gopkg.in/errgo.v2 v2.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
