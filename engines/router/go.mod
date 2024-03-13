@@ -1,6 +1,6 @@
 module github.com/caraml-dev/turing/engines/router
 
-go 1.20
+go 1.22
 
 require (
 	bou.ke/monkey v1.0.2

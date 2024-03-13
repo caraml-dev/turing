@@ -71,7 +71,7 @@ library, which is added into the plugin module as the dependency in [`go.mod`](.
 ```shell
 module github.com/caraml-dev/turing/engines/experiment/examples/plugins/hardcoded
 
-go 1.20
+go 1.22
 
 require github.com/caraml-dev/turing/engines/experiment v1.0.0
 

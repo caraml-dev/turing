@@ -1,5 +1,5 @@
 # Build application binary
-FROM golang:1.20-alpine as builder
+FROM golang:1.22-alpine as builder
 ARG BIN_NAME=turing-router
 ARG VERSION
 ARG USER
