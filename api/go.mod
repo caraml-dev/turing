@@ -35,7 +35,7 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.4
 	github.com/xanzy/go-gitlab v0.32.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.26.0
 	golang.org/x/oauth2 v0.18.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.33.0
@@ -245,13 +245,12 @@ replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.4.0+incompatible
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.9.0
 
-	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20240313024046-19e25a9d7318
-	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20240308104105-82fe2bfed3f2
+	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20240313065547-6778bd14c119
+	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20240313065547-6778bd14c119
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
-	github.com/hashicorp/go-hclog => github.com/hashicorp/go-hclog v1.6.2
 
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.120.1
-	knative.dev/pkg => knative.dev/pkg v0.0.0-20240311075308-106b052bd1a4
+	knative.dev/pkg => knative.dev/pkg v0.0.0-20240116073220-b488e7be5902
 )
