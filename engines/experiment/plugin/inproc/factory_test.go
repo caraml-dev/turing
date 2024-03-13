@@ -47,7 +47,7 @@ func Test_NewEngineFactory(t *testing.T) {
 
 func withPatchedManagerRegistry(em manager.ExperimentManager, err string, fn func()) {
 	monkey.Patch(managerPlugin.Get,
-		func(name string, config json.RawMessage) (manager.ExperimentManager, error) {
+		func(_ string, _ json.RawMessage) (manager.ExperimentManager, error) {
 			if err != "" {
 				return em, errors.New(err)
 			}
@@ -92,7 +92,7 @@ func TestEngineFactory_GetExperimentManager(t *testing.T) {
 
 func withPatchedRunnerRegistry(er runner.ExperimentRunner, err string, fn func()) {
 	monkey.Patch(runnerPlugin.Get,
-		func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
+		func(_ string, _ json.RawMessage) (runner.ExperimentRunner, error) {
 			if err != "" {
 				return er, errors.New(err)
 			}
