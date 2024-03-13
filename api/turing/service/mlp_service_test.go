@@ -83,15 +83,14 @@ func TestNewMLPService(t *testing.T) {
 			// Create test client
 			merlinClient := &merlinClient{
 				api: &merlin.APIClient{
-					EnvironmentApi: &merlin.EnvironmentApiService{},
-					SecretApi:      &merlin.SecretApiService{},
+					EnvironmentAPI: &merlin.EnvironmentAPIService{},
+					SecretAPI:      &merlin.SecretAPIService{},
 				},
 			}
 			// Patch Get Environments
-			monkey.PatchInstanceMethod(reflect.TypeOf(merlinClient.api.EnvironmentApi), "EnvironmentsGet",
-				func(svc *merlin.EnvironmentApiService,
+			monkey.PatchInstanceMethod(reflect.TypeOf(merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
+				func(svc *merlin.EnvironmentAPIService,
 					ctx context.Context,
-					localVarOptionals *merlin.EnvironmentApiEnvironmentsGetOpts,
 				) ([]merlin.Environment, *http.Response, error) {
 					return environments, nil, nil
 				})
@@ -144,7 +143,11 @@ func TestNewMerlinClient(t *testing.T) {
 	mc := &merlin.APIClient{}
 	// Create expected Merlin config
 	expectedCfg := merlin.NewConfiguration()
-	expectedCfg.BasePath = "base-path"
+	expectedCfg.Servers = merlin.ServerConfigurations{
+		{
+			URL: "base-path",
+		},
+	}
 	expectedCfg.HTTPClient = gc
 
 	// Monkey patch merlin.NewAPIClient
@@ -203,18 +206,18 @@ func TestMLPServiceGetProject(t *testing.T) {
 
 func TestMLPServiceGetEnvironment(t *testing.T) {
 	defer monkey.UnpatchAll()
+	envID := int32(1)
 	environments := []merlin.Environment{
 		{
-			Id:   1,
+			Id:   &envID,
 			Name: "env",
 		},
 	}
 
 	svc := newTestMLPService()
-	monkey.PatchInstanceMethod(reflect.TypeOf(svc.merlinClient.api.EnvironmentApi), "EnvironmentsGet",
-		func(svc *merlin.EnvironmentApiService,
+	monkey.PatchInstanceMethod(reflect.TypeOf(svc.merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
+		func(svc *merlin.EnvironmentAPIService,
 			ctx context.Context,
-			localVarOptionals *merlin.EnvironmentApiEnvironmentsGetOpts,
 		) ([]merlin.Environment, *http.Response, error) {
 			return environments, nil, nil
 		})
@@ -270,8 +273,8 @@ func newTestMLPService() *mlpService {
 	svc := &mlpService{
 		merlinClient: &merlinClient{
 			api: &merlin.APIClient{
-				EnvironmentApi: &merlin.EnvironmentApiService{},
-				SecretApi:      &merlin.SecretApiService{},
+				EnvironmentAPI: &merlin.EnvironmentAPIService{},
+				SecretAPI:      &merlin.SecretAPIService{},
 			},
 		},
 		mlpClient: &mlpClient{

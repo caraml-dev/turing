@@ -48,7 +48,11 @@ type merlinClient struct {
 
 func newMerlinClient(googleClient *http.Client, basePath string) *merlinClient {
 	cfg := merlin.NewConfiguration()
-	cfg.BasePath = basePath
+	cfg.Servers = merlin.ServerConfigurations{
+		{
+			URL: basePath,
+		},
+	}
 	cfg.HTTPClient = googleClient
 
 	return &merlinClient{
@@ -229,7 +233,7 @@ func (service mlpService) GetEnvironments() ([]merlin.Environment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 
-	environments, resp, err := service.merlinClient.api.EnvironmentApi.EnvironmentsGet(ctx, nil)
+	environments, resp, err := service.merlinClient.api.EnvironmentAPI.EnvironmentsGet(ctx).Execute()
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
