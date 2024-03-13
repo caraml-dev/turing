@@ -56,7 +56,7 @@ func TestSafeChan_Simple(t *testing.T) {
 	}
 }
 
-func TestSafeChan_Intermediate(t *testing.T) {
+func TestSafeChan_Intermediate(_ *testing.T) {
 	consumer := func(safeChan *internal.SafeChan, n int, wg *sync.WaitGroup, result chan *big.Int) {
 		ch := safeChan.Read()
 

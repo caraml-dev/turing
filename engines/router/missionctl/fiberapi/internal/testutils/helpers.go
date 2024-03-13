@@ -17,7 +17,7 @@ import (
 type mockDispatcher struct {
 }
 
-func (m mockDispatcher) Do(request fiber.Request) fiber.Response {
+func (m mockDispatcher) Do(_ fiber.Request) fiber.Response {
 	return nil
 }
 

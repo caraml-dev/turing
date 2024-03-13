@@ -53,8 +53,8 @@ func (mc *BaseMockMissionControl) IsEnsemblerEnabled() bool {
 
 // Enrich appends ":Enrich" to the value in the json payload
 func (mc *BaseMockMissionControl) Enrich(
-	ctx context.Context,
-	header http.Header,
+	_ context.Context,
+	_ http.Header,
 	body []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
@@ -63,8 +63,8 @@ func (mc *BaseMockMissionControl) Enrich(
 
 // Route appends ":Route" to the value in the json payload
 func (mc *BaseMockMissionControl) Route(
-	ctx context.Context,
-	header http.Header,
+	_ context.Context,
+	_ http.Header,
 	body []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	mc.Called()
@@ -74,9 +74,9 @@ func (mc *BaseMockMissionControl) Route(
 
 // Ensemble appends ":Ensemble" to the value in the json payload
 func (mc *BaseMockMissionControl) Ensemble(
-	ctx context.Context,
+	_ context.Context,
 	header http.Header,
-	requestBody []byte,
+	_ []byte,
 	routerResponse []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called(header)
@@ -96,9 +96,9 @@ type MockMissionControlBadEnrich struct {
 
 // Enrich always returns an error
 func (mc *MockMissionControlBadEnrich) Enrich(
-	ctx context.Context,
-	header http.Header,
-	body []byte,
+	_ context.Context,
+	_ http.Header,
+	_ []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
 	return nil, errors.NewTuringError(fmt.Errorf("Bad Enrich Called"), fiberProtocol.HTTP)
@@ -112,9 +112,9 @@ type MockMissionControlBadRoute struct {
 
 // Route always returns an error
 func (mc *MockMissionControlBadRoute) Route(
-	ctx context.Context,
-	header http.Header,
-	body []byte,
+	_ context.Context,
+	_ http.Header,
+	_ []byte,
 ) (*experiment.Response, mchttp.Response, *errors.TuringError) {
 	mc.Called()
 	return nil, nil, errors.NewTuringError(fmt.Errorf("Bad Route Called"), fiberProtocol.HTTP)
@@ -128,10 +128,10 @@ type MockMissionControlBadEnsemble struct {
 
 // Ensemble always returns an error
 func (mc *MockMissionControlBadEnsemble) Ensemble(
-	ctx context.Context,
-	header http.Header,
-	requestBody []byte,
-	routerResponse []byte,
+	_ context.Context,
+	_ http.Header,
+	_ []byte,
+	_ []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called()
 	return nil, errors.NewTuringError(fmt.Errorf("Bad Ensemble Called"), fiberProtocol.HTTP)
