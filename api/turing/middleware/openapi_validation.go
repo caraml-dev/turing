@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -104,4 +105,17 @@ func (openapi *OpenAPIValidation) Middleware(next http.Handler) http.Handler {
 		return http.StripPrefix(openapi.apiPrefix, handlerFunc)
 	}
 	return handlerFunc
+}
+
+func jsonError(w http.ResponseWriter, msg string, status int) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(status)
+
+	if len(msg) > 0 {
+		errJSON, _ := json.Marshal(struct {
+			Error string `json:"error"`
+		}{msg})
+
+		_, _ = w.Write(errJSON)
+	}
 }
