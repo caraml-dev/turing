@@ -250,6 +250,7 @@ replace (
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
+	github.com/hashicorp/go-hclog => github.com/hashicorp/go-hclog v1.6.2
 
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.120.1
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20240311075308-106b052bd1a4
