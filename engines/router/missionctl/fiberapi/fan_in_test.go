@@ -102,7 +102,7 @@ func TestInitializeEnsemblingFanIn(t *testing.T) {
 			// Monkey patch functionality that is external to the current package and run
 			monkey.Patch(
 				runnerV1.Get,
-				func(name string, config json.RawMessage) (runner.ExperimentRunner, error) {
+				func(_ string, config json.RawMessage) (runner.ExperimentRunner, error) {
 					return nil, nil
 				},
 			)
