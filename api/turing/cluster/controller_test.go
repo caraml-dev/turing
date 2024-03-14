@@ -1748,7 +1748,7 @@ func TestApplyIstioVirtualService(t *testing.T) {
 						expected, ok := expAction.GetObject().(*v1beta1.VirtualService)
 						assert.True(t, ok)
 
-						assert.Equal(t, actual.ObjectMeta, actual.ObjectMeta)
+						assert.Equal(t, expected.ObjectMeta, actual.ObjectMeta)
 						assert.Equal(t, expected.Spec.String(), actual.Spec.String())
 						assert.Equal(t, expected.Status.String(), actual.Status.String())
 						// Nil error indicates Create success
