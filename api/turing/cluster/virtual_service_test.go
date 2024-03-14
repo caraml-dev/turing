@@ -3,12 +3,10 @@ package cluster
 import (
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/assert"
 	networking "istio.io/api/networking/v1beta1"
 	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	tu "github.com/caraml-dev/turing/api/turing/internal/testutils"
 )
 
 func TestBuildVirtualService(t *testing.T) {
@@ -62,6 +60,8 @@ func TestBuildVirtualService(t *testing.T) {
 		},
 	}
 	got := cfg.BuildVirtualService()
-	err := tu.CompareObjects(expected, *got)
-	assert.NilError(t, err)
+
+	assert.Equal(t, expected.ObjectMeta, got.ObjectMeta)
+	assert.Equal(t, expected.Spec.String(), got.Spec.String())
+	assert.Equal(t, expected.Status.String(), got.Status.String())
 }
