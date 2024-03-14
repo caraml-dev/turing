@@ -15,7 +15,7 @@ func CompareObjects(actual interface{}, expected interface{}) error {
 	if reflect.TypeOf(allowUnexportedOn).Kind() == reflect.Ptr {
 		allowUnexportedOn = reflect.ValueOf(actual).Elem().Interface()
 	}
-	if !cmp.Equal(actual, expected, DeepAllowUnexported(allowUnexportedOn)) {
+	if !cmp.Equal(actual, expected, DeepAllowUnexported(allowUnexportedOn, expected)) {
 		actualString := fmt.Sprintf("%+v", actual)
 		expectedString := fmt.Sprintf("%+v", expected)
 
