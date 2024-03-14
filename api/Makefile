@@ -40,7 +40,7 @@ vendor:
 .PHONY: test
 test: tidy
 	@echo "Running tests..."
-	gotest -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
+	gotest -gcflags=-l -race -short -cover -coverprofile cover.out ${SRC_ROOT}/... -tags integration
 	go tool cover -func cover.out
 
 .PHONY: build
