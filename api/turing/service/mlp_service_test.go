@@ -91,8 +91,13 @@ func TestNewMLPService(t *testing.T) {
 			monkey.PatchInstanceMethod(reflect.TypeOf(merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
 				func(svc *merlin.EnvironmentAPIService,
 					ctx context.Context,
-				) ([]merlin.Environment, *http.Response, error) {
-					return environments, nil, nil
+				) merlin.ApiEnvironmentsGetRequest {
+					apiRequest := merlin.ApiEnvironmentsGetRequest{}
+					monkey.PatchInstanceMethod(reflect.TypeOf(apiRequest), "Execute",
+						func(_ merlin.ApiEnvironmentsGetRequest) ([]merlin.Environment, *http.Response, error) {
+							return environments, nil, nil
+						})
+					return apiRequest
 				})
 			return merlinClient
 		},
@@ -218,8 +223,13 @@ func TestMLPServiceGetEnvironment(t *testing.T) {
 	monkey.PatchInstanceMethod(reflect.TypeOf(svc.merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
 		func(svc *merlin.EnvironmentAPIService,
 			ctx context.Context,
-		) ([]merlin.Environment, *http.Response, error) {
-			return environments, nil, nil
+		) merlin.ApiEnvironmentsGetRequest {
+			apiRequest := merlin.ApiEnvironmentsGetRequest{}
+			monkey.PatchInstanceMethod(reflect.TypeOf(apiRequest), "Execute",
+				func(_ merlin.ApiEnvironmentsGetRequest) ([]merlin.Environment, *http.Response, error) {
+					return environments, nil, nil
+				})
+			return apiRequest
 		})
 
 	// getting valid project should refresh cache and return the project

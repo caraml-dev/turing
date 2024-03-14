@@ -233,7 +233,9 @@ func (service mlpService) GetEnvironments() ([]merlin.Environment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), mlpQueryTimeoutSeconds*time.Second)
 	defer cancel()
 
-	environments, resp, err := service.merlinClient.api.EnvironmentAPI.EnvironmentsGet(ctx).Execute()
+	a := service.merlinClient.api.EnvironmentAPI.EnvironmentsGet(ctx)
+	fmt.Println(a)
+	environments, resp, err := a.Execute()
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close()
 	}
