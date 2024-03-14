@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	//nolint:all
@@ -1737,8 +1738,19 @@ func TestApplyIstioVirtualService(t *testing.T) {
 					resource: virtualServiceResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewCreateAction(virtualServiceResource, testNamespace, testVs)
+						// expAction.Object.Spec.state.atomicMessageInfo is nil, unlike action.Object.Spec.state.atomicMessageInfo
+						// we thus need to check each of the other field manually
 						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
+						actualAction, ok := action.(k8stesting.CreateAction)
+						assert.True(t, ok)
+						actual, ok := actualAction.GetObject().(*v1beta1.VirtualService)
+						assert.True(t, ok)
+						expected, ok := expAction.GetObject().(*v1beta1.VirtualService)
+						assert.True(t, ok)
+
+						assert.Equal(t, actual.ObjectMeta, actual.ObjectMeta)
+						assert.Equal(t, expected.Spec.String(), actual.Spec.String())
+						assert.Equal(t, expected.Status.String(), actual.Status.String())
 						// Nil error indicates Create success
 						return true, testVs, nil
 					},
