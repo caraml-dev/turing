@@ -41,7 +41,7 @@ var clients = &struct {
 type TuringRouterResources struct {
 	KnativeServices []knservingv1.Service
 	K8sServices     []coreV1.Service
-	IstioServices   []v1alpha3.VirtualService
+	IstioServices   []*v1alpha3.VirtualService
 	K8sDeployments  []appsV1.Deployment
 	ConfigMaps      []coreV1.ConfigMap
 	Secrets         []coreV1.Secret
