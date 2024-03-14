@@ -112,10 +112,10 @@ run-local-e2e:
 
 .PHONY: setup-e2e
 setup-e2e:
-	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.3.1
-	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.3.1
-	go get github.com/onsi/gomega@v1.22.1
-	go install github.com/onsi/ginkgo/v2/ginkgo@v2.3.1
+	go get github.com/onsi/ginkgo/v2/ginkgo/generators@v2.16.0
+	go get github.com/onsi/ginkgo/v2/ginkgo/internal@v2.16.0
+	go get github.com/onsi/gomega@v1.31.1
+	go install github.com/onsi/ginkgo/v2/ginkgo@v2.16.0
 
 .PHONY: test-e2e
 test-e2e:
