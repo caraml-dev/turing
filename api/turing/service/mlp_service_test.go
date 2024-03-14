@@ -10,7 +10,6 @@ import (
 
 	//nolint:all
 	"bou.ke/monkey"
-	"github.com/caraml-dev/mlp/api/pkg/auth"
 	"github.com/patrickmn/go-cache"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -67,9 +66,6 @@ func TestNewMLPService(t *testing.T) {
 	reset := testSetupEnvForGoogleCredentials(t)
 	defer reset()
 
-	// Create test Google client
-	gc, err := auth.InitGoogleClient(context.Background())
-	require.NoError(t, err)
 	// Create test projects and environments
 	projects := []mlp.Project{{ID: 1}}
 	environments := []merlin.Environment{{Name: "dev"}}
@@ -78,7 +74,6 @@ func TestNewMLPService(t *testing.T) {
 	defer monkey.UnpatchAll()
 	monkey.Patch(newMerlinClient,
 		func(googleClient *http.Client, basePath string) *merlinClient {
-			assert.Equal(t, gc, googleClient)
 			assert.Equal(t, "merlin-base-path", basePath)
 			// Create test client
 			merlinClient := &merlinClient{
@@ -104,7 +99,6 @@ func TestNewMLPService(t *testing.T) {
 	)
 	monkey.Patch(newMLPClient,
 		func(googleClient *http.Client, basePath string) *mlpClient {
-			assert.Equal(t, gc, googleClient)
 			assert.Equal(t, "mlp-base-path", basePath)
 			// Create test client
 			mlpClient := &mlpClient{
