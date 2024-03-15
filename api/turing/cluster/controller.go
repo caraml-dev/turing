@@ -680,7 +680,7 @@ func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appN
 
 func (c *controller) ApplyPodDisruptionBudget(
 	ctx context.Context,
-	namespace string,
+	_ string,
 	pdb PodDisruptionBudget,
 ) (*apipolicyv1.PodDisruptionBudget, error) {
 	pdbSpec, err := pdb.BuildPDBSpec()

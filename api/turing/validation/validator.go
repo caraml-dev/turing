@@ -304,11 +304,11 @@ func validateRouterConfig(sl validator.StructLevel) {
 	router := sl.Current().Interface().(request.RouterConfig)
 	instance := sl.Validator()
 
-	routeIds := make([]string, len(router.Routes))
+	routeIDs := make([]string, len(router.Routes))
 	for idx, route := range router.Routes {
-		routeIds[idx] = route.ID
+		routeIDs[idx] = route.ID
 	}
-	routeIdsStr := strings.Join(routeIds, " ")
+	routeIDsStr := strings.Join(routeIDs, " ")
 
 	// Validate default route
 	if router.Ensembler == nil || router.Ensembler.Type == models.EnsemblerStandardType {
@@ -316,7 +316,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 			sl.ReportError(router.DefaultRouteID, "default_route_id", "DefaultRouteID",
 				"should be set for chosen ensembler type", "")
 		} else {
-			if err := instance.Var(*router.DefaultRouteID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+			if err := instance.Var(*router.DefaultRouteID, fmt.Sprintf("oneof=%s", routeIDsStr)); err != nil {
 				ns := "DefaultRouteID"
 				sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 			}
@@ -348,7 +348,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 				for idx, routeID := range rule.Routes {
 					allRuleRoutesSet.Insert(routeID)
 					ns := fmt.Sprintf("TrafficRules[%d].Routes[%d]", ruleIdx, idx)
-					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIdsStr)); err != nil {
+					if err := instance.Var(routeID, fmt.Sprintf("oneof=%s", routeIDsStr)); err != nil {
 						sl.ReportValidationErrors(ns, ns, err.(validator.ValidationErrors))
 					}
 				}

@@ -78,7 +78,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 	queueProxyResourcePercentage int,
 	userContainerCPULimitRequestFactor float64,
 	userContainerMemoryLimitRequestFactor float64,
-	initialScale *int,
+	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -101,7 +101,7 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	queueProxyResourcePercentage int,
 	userContainerCPULimitRequestFactor float64,
 	userContainerMemoryLimitRequestFactor float64,
-	initialScale *int,
+	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
@@ -129,7 +129,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	queueProxyResourcePercentage int,
 	userContainerCPULimitRequestFactor float64,
 	userContainerMemoryLimitRequestFactor float64,
-	initialScale *int,
+	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
 		return nil, errors.New("Unexpected router version data")
