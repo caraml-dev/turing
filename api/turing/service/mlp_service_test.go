@@ -73,7 +73,7 @@ func TestNewMLPService(t *testing.T) {
 	// Patch new Merlin and MLP Client methods
 	defer monkey.UnpatchAll()
 	monkey.Patch(newMerlinClient,
-		func(googleClient *http.Client, basePath string) *merlinClient {
+		func(_ *http.Client, basePath string) *merlinClient {
 			assert.Equal(t, "merlin-base-path", basePath)
 			// Create test client
 			merlinClient := &merlinClient{
@@ -84,9 +84,7 @@ func TestNewMLPService(t *testing.T) {
 			}
 			// Patch Get Environments
 			monkey.PatchInstanceMethod(reflect.TypeOf(merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
-				func(svc *merlin.EnvironmentAPIService,
-					ctx context.Context,
-				) merlin.ApiEnvironmentsGetRequest {
+				func(_ *merlin.EnvironmentAPIService, _ context.Context) merlin.ApiEnvironmentsGetRequest {
 					apiRequest := merlin.ApiEnvironmentsGetRequest{}
 					monkey.PatchInstanceMethod(reflect.TypeOf(apiRequest), "Execute",
 						func(_ merlin.ApiEnvironmentsGetRequest) ([]merlin.Environment, *http.Response, error) {
@@ -98,7 +96,7 @@ func TestNewMLPService(t *testing.T) {
 		},
 	)
 	monkey.Patch(newMLPClient,
-		func(googleClient *http.Client, basePath string) *mlpClient {
+		func(_ *http.Client, basePath string) *mlpClient {
 			assert.Equal(t, "mlp-base-path", basePath)
 			// Create test client
 			mlpClient := &mlpClient{
@@ -108,7 +106,7 @@ func TestNewMLPService(t *testing.T) {
 			}
 			// Patch Get Projects
 			monkey.PatchInstanceMethod(reflect.TypeOf(mlpClient.api.ProjectApi), "V1ProjectsGet",
-				func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiV1ProjectsGetOpts,
+				func(_ *mlp.ProjectApiService, _ context.Context, _ *mlp.ProjectApiV1ProjectsGetOpts,
 				) ([]mlp.Project, *http.Response, error) {
 					return projects, nil, nil
 				})
@@ -188,7 +186,7 @@ func TestMLPServiceGetProject(t *testing.T) {
 
 	svc := newTestMLPService()
 	monkey.PatchInstanceMethod(reflect.TypeOf(svc.mlpClient.api.ProjectApi), "V1ProjectsGet",
-		func(svc *mlp.ProjectApiService, ctx context.Context, localVarOptionals *mlp.ProjectApiV1ProjectsGetOpts,
+		func(_ *mlp.ProjectApiService, _ context.Context, _ *mlp.ProjectApiV1ProjectsGetOpts,
 		) ([]mlp.Project, *http.Response, error) {
 			return projects, nil, nil
 		})
@@ -215,9 +213,7 @@ func TestMLPServiceGetEnvironment(t *testing.T) {
 
 	svc := newTestMLPService()
 	monkey.PatchInstanceMethod(reflect.TypeOf(svc.merlinClient.api.EnvironmentAPI), "EnvironmentsGet",
-		func(svc *merlin.EnvironmentAPIService,
-			ctx context.Context,
-		) merlin.ApiEnvironmentsGetRequest {
+		func(_ *merlin.EnvironmentAPIService, _ context.Context) merlin.ApiEnvironmentsGetRequest {
 			apiRequest := merlin.ApiEnvironmentsGetRequest{}
 			monkey.PatchInstanceMethod(reflect.TypeOf(apiRequest), "Execute",
 				func(_ merlin.ApiEnvironmentsGetRequest) ([]merlin.Environment, *http.Response, error) {
@@ -250,10 +246,7 @@ func TestMLPServiceGetSecret(t *testing.T) {
 	monkey.PatchInstanceMethod(
 		reflect.TypeOf(svc.mlpClient.api.SecretApi),
 		"V1ProjectsProjectIdSecretsGet",
-		func(svc *mlp.SecretApiService,
-			ctx context.Context,
-			projectId int32,
-		) ([]mlp.Secret, *http.Response, error) {
+		func(_ *mlp.SecretApiService, _ context.Context, projectId int32) ([]mlp.Secret, *http.Response, error) {
 			if projectId != 1 {
 				return []mlp.Secret{}, nil, nil
 			}

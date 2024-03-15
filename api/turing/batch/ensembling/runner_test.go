@@ -244,7 +244,7 @@ func TestRun(t *testing.T) {
 	}
 
 	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
+		t.Run(name, func(_ *testing.T) {
 			ensemblingController := tt.ensemblingController()
 			ensemblingJobService := tt.ensemblingJobService()
 			ensemblersService := tt.ensemblersService()

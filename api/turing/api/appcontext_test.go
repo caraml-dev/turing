@@ -221,21 +221,21 @@ func TestNewAppContext(t *testing.T) {
 		},
 	}
 	// Create mock MLP Service
-	mockEnvironmentId1 := int32(1)
+	mockEnvironmentID1 := int32(1)
 	mockGcpProject1 := "gcp-project"
-	mockEnvironmentId2 := int32(2)
+	mockEnvironmentID2 := int32(2)
 	mockGcpProject2 := "gcp-project-2"
 
 	mlpSvc := &svcmocks.MLPService{}
 	mlpSvc.On("GetEnvironments").Return([]merlin.Environment{
 		{
-			Id:         &mockEnvironmentId1,
+			Id:         &mockEnvironmentID1,
 			Name:       "N1",
 			Cluster:    "C1",
 			GcpProject: &mockGcpProject1,
 		},
 		{
-			Id:         &mockEnvironmentId2,
+			Id:         &mockEnvironmentID2,
 			Name:       "N2",
 			Cluster:    "C2",
 			GcpProject: &mockGcpProject2,
@@ -245,7 +245,7 @@ func TestNewAppContext(t *testing.T) {
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(service.NewExperimentsService,
-		func(experimentConfig map[string]config.EngineConfig) (service.ExperimentsService, error) {
+		func(_ map[string]config.EngineConfig) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -287,7 +287,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewGitlabOpsAlertService,
-		func(db *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
+		func(_ *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
 			assert.Equal(t, *testCfg.AlertConfig, config)
 			return nil, nil
 		},

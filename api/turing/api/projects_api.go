@@ -9,7 +9,7 @@ type ProjectsController struct {
 }
 
 func (c ProjectsController) ListProjects(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
