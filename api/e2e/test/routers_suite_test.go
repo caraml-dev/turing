@@ -15,8 +15,8 @@ import (
 	upiv1 "github.com/caraml-dev/universal-prediction-interface/gen/go/grpc/caraml/upi/v1"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/mitchellh/mapstructure"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -49,17 +49,17 @@ var defaultPredictHeaders = map[string]string{
 	"X-Mirror-Body": "true",
 }
 
-var _ = SynchronizedBeforeSuite(func() []byte {
+var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 	cfg, err := config.LoadFromFiles(configFile)
-	Expect(err).NotTo(HaveOccurred())
+	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	projects := config.NewHTTPExpect(GinkgoT(), cfg.APIBasePath).
+	projects := config.NewHTTPExpect(ginkgo.GinkgoT(), cfg.APIBasePath).
 		GET("/projects").
 		Expect().
 		Status(http.StatusOK).
 		JSON().Array().NotEmpty()
 
-	Expect(func() error {
+	gomega.Expect(func() error {
 		for _, p := range projects.Iter() {
 			if p.Object().Path("$.name").String().Raw() == cfg.Project.Name {
 				cfg.Project.ID = int(p.Object().Path("$.id").Number().Raw())
@@ -67,16 +67,16 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			}
 		}
 		return fmt.Errorf(`project "%s" doesn't exist in Turing`, cfg.Project.Name)
-	}()).To(Succeed())
+	}()).To(gomega.Succeed())
 
-	ensemblers := config.NewHTTPExpect(GinkgoT(), cfg.APIBasePath).
+	ensemblers := config.NewHTTPExpect(ginkgo.GinkgoT(), cfg.APIBasePath).
 		GET("/projects/{projectId}/ensemblers").
 		WithPath("projectId", cfg.Project.ID).
 		Expect().Status(http.StatusOK).
 		JSON().Object().
 		Path("$.results").Array()
 
-	Expect(func() error {
+	gomega.Expect(func() error {
 		wanted, got := []string{}, []string{}
 		for _, pythonVersion := range cfg.PythonVersions {
 			ensemblerName := fmt.Sprintf(`%s%s`, cfg.Ensemblers.BaseName, pythonVersion)
@@ -97,21 +97,21 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			return fmt.Errorf(`Not all ensemblers were found. Wanted: %v, got: %v`, wanted, got)
 		}
 		return nil
-	}()).To(Succeed())
-	Expect(cluster.InitClusterClients(cfg)).To(Succeed())
+	}()).To(gomega.Succeed())
+	gomega.Expect(cluster.InitClusterClients(cfg)).To(gomega.Succeed())
 
 	cfgYAML, err := yaml.Marshal(cfg)
-	Expect(err).NotTo(HaveOccurred())
+	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
 	return cfgYAML
 }, func(cfgYAML []byte) {
-	Expect(yaml.Unmarshal(cfgYAML, &cfg)).To(Succeed())
-	Expect(cluster.InitClusterClients(&cfg)).To(Succeed())
+	gomega.Expect(yaml.Unmarshal(cfgYAML, &cfg)).To(gomega.Succeed())
+	gomega.Expect(cluster.InitClusterClients(&cfg)).To(gomega.Succeed())
 })
 
 func TestEndToEnd(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Router Suite")
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	ginkgo.RunSpecs(t, "Router Suite")
 }
 
 func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, args ...interface{}) bool {
@@ -136,15 +136,15 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 		testCaseName = payloadTpl
 	}
 
-	return Context("Turing", append(args, Ordered, func() {
+	return ginkgo.Context("Turing", append(args, ginkgo.Ordered, func() {
 		var (
 			e         *httpexpect.Expect
 			routerCtx RouterContext
 			router    *httpexpect.Object
 		)
 
-		BeforeAll(func() {
-			e = config.NewHTTPExpect(GinkgoT(), cfg.APIBasePath)
+		ginkgo.BeforeAll(func() {
+			e = config.NewHTTPExpect(ginkgo.GinkgoT(), cfg.APIBasePath)
 
 			var ensembler config.EnsemblerData
 			if pythonVersion != "" {
@@ -157,7 +157,7 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 						break
 					}
 				}
-				Expect(ensembler.EnsemblerID).ShouldNot(Equal(0))
+				gomega.Expect(ensembler.EnsemblerID).ShouldNot(gomega.Equal(0))
 			}
 
 			testData := TestData{cfg, ensembler}
@@ -166,26 +166,26 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 				Expect().Status(http.StatusOK).
 				JSON().Object()
 
-			DeferCleanup(func() {
-				Expect(
+			ginkgo.DeferCleanup(func() {
+				gomega.Expect(
 					cluster.CleanupRouterDeployment(cfg.Project.Name, router.Value("name").String().Raw()),
-				).To(Succeed())
+				).To(gomega.Succeed())
 			})
 
 			routerID := int(router.Value("id").Number().Raw())
 
-			Eventually(func(g Gomega) {
+			gomega.Eventually(func(g gomega.Gomega) {
 				router = api.GetRouter(e, cfg.Project.ID, routerID)
 
-				g.Expect(router.Value("status").Raw()).ShouldNot(Equal(api.Status.Pending))
-			}, defaultDeploymentIntervals...).Should(Succeed())
+				g.Expect(router.Value("status").Raw()).ShouldNot(gomega.Equal(api.Status.Pending))
+			}, defaultDeploymentIntervals...).Should(gomega.Succeed())
 
 			router.
 				HasValue("status", "deployed").
 				Value("config").Object().HasValue("version", 1)
 
 			endpoint, err := url.Parse(router.Value("endpoint").String().Raw())
-			Expect(err).ShouldNot(HaveOccurred())
+			gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 			endpoint.Path = "/"
 
@@ -197,7 +197,7 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 				}
 			} else {
 				endpoint, err := url.Parse(router.Value("endpoint").String().Raw())
-				Expect(err).ShouldNot(HaveOccurred())
+				gomega.Expect(err).ShouldNot(gomega.HaveOccurred())
 
 				endpoint.Path = "/"
 
@@ -210,7 +210,7 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 
 		})
 
-		When(fmt.Sprintf("%s router is deployed", testCaseName), func() {
+		ginkgo.When(fmt.Sprintf("%s router is deployed", testCaseName), func() {
 			// Istio VirtualService configuration is applied asynchronously, so the fact that it
 			// exists in the cluster doesn't mean that it was already being in use.
 			// In the newer version of Istio (starting from v1.6), it is possible to wait for the
@@ -220,9 +220,9 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 			// Istio some time to apply the changes.
 			//
 			// TODO: Remove once Turing is migrated on a newer version of Istio
-			When("virtual service configuration is applied", func() {
-				It("responds with a status, that is not 404 NotFound", func() {
-					Eventually(func(g Gomega) {
+			ginkgo.When("virtual service configuration is applied", func() {
+				ginkgo.It("responds with a status, that is not 404 NotFound", func() {
+					gomega.Eventually(func(g gomega.Gomega) {
 						if protocol == routerConfig.UPI {
 							conn, _ := grpc.Dial(routerCtx.Endpoint,
 								grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -234,9 +234,9 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 							_, err := client.PredictValues(metadata.NewOutgoingContext(context.Background(), headers),
 								upiRequest)
 
-							g.Expect(err).To(BeNil())
+							g.Expect(err).To(gomega.BeNil())
 						} else {
-							resp := config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint).
+							resp := config.NewHTTPExpect(ginkgo.GinkgoT(), routerCtx.Endpoint).
 								GET("/v1/predict").
 								Expect().Raw()
 
@@ -244,9 +244,9 @@ func DeployedRouterContext(payloadTpl string, protocol routerConfig.Protocol, ar
 								defer resp.Body.Close()
 							}
 
-							g.Expect(resp.StatusCode).NotTo(Equal(http.StatusNotFound))
+							g.Expect(resp.StatusCode).NotTo(gomega.Equal(http.StatusNotFound))
 						}
-					}, istioVirtualServiceIntervals...).Should(Succeed())
+					}, istioVirtualServiceIntervals...).Should(gomega.Succeed())
 				})
 			})
 
