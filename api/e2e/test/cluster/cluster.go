@@ -188,7 +188,8 @@ func CleanupRouterDeployment(
 		names := make([]string, slice.Len())
 
 		for i := 0; i < slice.Len(); i++ {
-			names[i] = slice.Index(i).FieldByName("ObjectMeta").
+			// The use of indirect is needed to handle VirtualServices which are returned by Istio as a list of pointers
+			names[i] = reflect.Indirect(slice.Index(i)).FieldByName("ObjectMeta").
 				Interface().(metav1.ObjectMeta).Name
 		}
 		return names
