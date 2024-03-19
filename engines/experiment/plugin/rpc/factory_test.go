@@ -22,7 +22,7 @@ const (
 
 func withPatchedConnect(client goPlugin.ClientProtocol, err string, fn func()) {
 	monkey.Patch(rpc.Connect,
-		func(pluginBinary string, logger *zap.Logger) (goPlugin.ClientProtocol, error) {
+		func(_ string, _ *zap.Logger) (goPlugin.ClientProtocol, error) {
 			if err != "" {
 				return nil, errors.New(err)
 			}

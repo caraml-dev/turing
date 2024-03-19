@@ -41,7 +41,7 @@ var clients = &struct {
 type TuringRouterResources struct {
 	KnativeServices []knservingv1.Service
 	K8sServices     []coreV1.Service
-	IstioServices   []v1alpha3.VirtualService
+	IstioServices   []*v1alpha3.VirtualService
 	K8sDeployments  []appsV1.Deployment
 	ConfigMaps      []coreV1.ConfigMap
 	Secrets         []coreV1.Secret
@@ -188,7 +188,8 @@ func CleanupRouterDeployment(
 		names := make([]string, slice.Len())
 
 		for i := 0; i < slice.Len(); i++ {
-			names[i] = slice.Index(i).FieldByName("ObjectMeta").
+			// The use of indirect is needed to handle VirtualServices which are returned by Istio as a list of pointers
+			names[i] = reflect.Indirect(slice.Index(i)).FieldByName("ObjectMeta").
 				Interface().(metav1.ObjectMeta).Name
 		}
 		return names

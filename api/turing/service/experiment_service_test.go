@@ -563,7 +563,7 @@ func TestValidateExperimentConfig(t *testing.T) {
 	}{
 		"failure | std exp mgr": {
 			engine: "test-engine",
-			managers: func(engine string, cfg json.RawMessage, err error) map[string]manager.ExperimentManager {
+			managers: func(_ string, _ json.RawMessage, _ error) map[string]manager.ExperimentManager {
 				return map[string]manager.ExperimentManager{}
 			},
 			err: errors.New("Unknown experiment engine test-engine"),

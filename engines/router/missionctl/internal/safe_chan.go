@@ -63,11 +63,6 @@ func (sc *SafeChan) WriteAsync(data interface{}) {
 func (sc *SafeChan) Close() {
 	close(sc.closingCh)
 
-	go func() {
-		for range sc.ch {
-		}
-	}()
-
 	sc.writersWGMutex.Lock()
 	sc.writersWG.Wait()
 	sc.writersWGMutex.Unlock()

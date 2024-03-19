@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	//nolint:all
@@ -81,7 +82,7 @@ func TestDeployKnativeService(t *testing.T) {
 	}
 
 	// Define reactor for a successful get
-	getSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
+	getSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
 		return true, &knservingv1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: testName,
@@ -219,7 +220,7 @@ func TestDeployKubernetesService(t *testing.T) {
 
 	replicas := int32(1)
 	// Define reactor for a successful get
-	getDeploymentSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
+	getDeploymentSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
 		return true, &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:       testName,
@@ -241,7 +242,7 @@ func TestDeployKubernetesService(t *testing.T) {
 			},
 		}, nil
 	}
-	getSvcSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
+	getSvcSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
 		return true, testK8sSvc, nil
 	}
 
@@ -362,7 +363,7 @@ func TestDeployKubernetesService(t *testing.T) {
 			monkey.PatchInstanceMethod(
 				reflect.TypeOf(svcConf),
 				"BuildKubernetesServiceConfig",
-				func(service *KubernetesService) (*appsv1.Deployment, *corev1.Service) {
+				func(_ *KubernetesService) (*appsv1.Deployment, *corev1.Service) {
 					return testK8sDeployment, testK8sSvc
 				},
 			)
@@ -803,7 +804,7 @@ func TestGetJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "job",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
 					},
 				},
@@ -816,7 +817,7 @@ func TestGetJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "jobs",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &batchv1.Job{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: jobName,
@@ -862,7 +863,7 @@ func TestDeleteJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Delete,
 					resource: "job",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
 					},
 				},
@@ -874,7 +875,7 @@ func TestDeleteJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Delete,
 					resource: "jobs",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, nil
 					},
 				},
@@ -915,7 +916,7 @@ func TestCreateServiceAccount(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "serviceaccount",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &corev1.ServiceAccount{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: serviceAccountName,
@@ -932,7 +933,7 @@ func TestCreateServiceAccount(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "serviceaccount",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &corev1.ServiceAccount{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: serviceAccountName,
@@ -986,7 +987,7 @@ func TestCreateRole(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "role",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.Role{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleName,
@@ -1003,7 +1004,7 @@ func TestCreateRole(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "role",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.Role{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleName,
@@ -1059,7 +1060,7 @@ func TestCreateRoleBinding(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "rolebinding",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.RoleBinding{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleBindingName,
@@ -1076,7 +1077,7 @@ func TestCreateRoleBinding(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "rolebinding",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.RoleBinding{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleBindingName,
@@ -1125,7 +1126,7 @@ func TestCreateSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Create,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, &sparkv1beta2.SparkApplication{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "spark",
@@ -1173,7 +1174,7 @@ func TestGetSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Get,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, &sparkv1beta2.SparkApplication{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "spark",
@@ -1203,7 +1204,7 @@ func TestDeleteSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Get,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, nil, nil
 			},
 		)
@@ -1821,8 +1822,19 @@ func TestApplyIstioVirtualService(t *testing.T) {
 					resource: virtualServiceResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
 						expAction := k8stesting.NewCreateAction(virtualServiceResource, testNamespace, testVs)
+						// expAction.Object.Spec.state.atomicMessageInfo is nil, unlike action.Object.Spec.state.atomicMessageInfo
+						// we thus need to check each of the other field manually
 						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
+						actualAction, ok := action.(k8stesting.CreateAction)
+						assert.True(t, ok)
+						actual, ok := actualAction.GetObject().(*v1beta1.VirtualService)
+						assert.True(t, ok)
+						expected, ok := expAction.GetObject().(*v1beta1.VirtualService)
+						assert.True(t, ok)
+
+						assert.Equal(t, expected.ObjectMeta, actual.ObjectMeta)
+						assert.Equal(t, expected.Spec.String(), actual.Spec.String())
+						assert.Equal(t, expected.Status.String(), actual.Status.String())
 						// Nil error indicates Create success
 						return true, testVs, nil
 					},

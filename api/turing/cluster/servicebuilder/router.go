@@ -427,7 +427,7 @@ func buildTrafficSplittingFiberConfig(
 	protocol fiberProtocol.Protocol,
 ) (fiberConfig.Config, error) {
 	// IDs of routes, that are part of at least one traffic-splitting rule
-	conditionalRouteIds := rules.ConditionalRouteIds()
+	conditionalRouteIDs := rules.ConditionalRouteIDs()
 
 	// routes, that are not part of any traffic-splitting rule
 	alwaysActiveRoutes := models.Routes{}
@@ -438,7 +438,7 @@ func buildTrafficSplittingFiberConfig(
 
 		// build slice of routes, that are not assigned to any
 		// traffic-splitting rule and should be active for any request
-		if _, exist := conditionalRouteIds[route.ID]; !exist {
+		if _, exist := conditionalRouteIDs[route.ID]; !exist {
 			alwaysActiveRoutes = append(alwaysActiveRoutes, route)
 		}
 	}

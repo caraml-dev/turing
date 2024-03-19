@@ -41,7 +41,7 @@ type TimeLoggingInterceptor struct {
 // BeforeDispatch associates the start time to the context
 func (i *TimeLoggingInterceptor) BeforeDispatch(
 	ctx context.Context,
-	req fiber.Request,
+	_ fiber.Request,
 ) context.Context {
 	ctx = context.WithValue(ctx, startTimeKey, time.Now())
 	return ctx
@@ -51,8 +51,8 @@ func (i *TimeLoggingInterceptor) BeforeDispatch(
 // and the response status
 func (i *TimeLoggingInterceptor) AfterCompletion(
 	ctx context.Context,
-	req fiber.Request,
-	queue fiber.ResponseQueue,
+	_ fiber.Request,
+	_ fiber.ResponseQueue,
 ) {
 	cID := ctx.Value(fiber.CtxComponentIDKey)
 	turingReqID, _ := turingctx.GetRequestID(ctx)
@@ -83,7 +83,7 @@ type ErrorLoggingInterceptor struct {
 // AfterCompletion logs the response summary if any route returns an error
 func (i *ErrorLoggingInterceptor) AfterCompletion(
 	ctx context.Context,
-	req fiber.Request,
+	_ fiber.Request,
 	queue fiber.ResponseQueue,
 ) {
 	cID := ctx.Value(fiber.CtxComponentIDKey)
@@ -124,7 +124,7 @@ type MetricsInterceptor struct {
 // BeforeDispatch associates the start time to the context
 func (i *MetricsInterceptor) BeforeDispatch(
 	ctx context.Context,
-	req fiber.Request,
+	_ fiber.Request,
 ) context.Context {
 	ctx = context.WithValue(ctx, startTimeKey, time.Now())
 	return ctx
@@ -134,7 +134,7 @@ func (i *MetricsInterceptor) BeforeDispatch(
 // to the metrics collector
 func (i *MetricsInterceptor) AfterCompletion(
 	ctx context.Context,
-	req fiber.Request,
+	_ fiber.Request,
 	queue fiber.ResponseQueue,
 ) {
 	cID := ctx.Value(fiber.CtxComponentIDKey)
@@ -190,7 +190,7 @@ type TracingInterceptor struct {
 // BeforeDispatch starts a new / child span and associates it with the context
 func (i *TracingInterceptor) BeforeDispatch(
 	ctx context.Context,
-	req fiber.Request,
+	_ fiber.Request,
 ) context.Context {
 	// Get the component id to be used as the operation name
 	cID := ctx.Value(fiber.CtxComponentIDKey)
@@ -202,8 +202,8 @@ func (i *TracingInterceptor) BeforeDispatch(
 // AfterCompletion retrieves the span from the context, if exists, and finishes the trace
 func (i *TracingInterceptor) AfterCompletion(
 	ctx context.Context,
-	req fiber.Request,
-	queue fiber.ResponseQueue,
+	_ fiber.Request,
+	_ fiber.ResponseQueue,
 ) {
 	span := opentracing.SpanFromContext(ctx)
 	if span != nil {

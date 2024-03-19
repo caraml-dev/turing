@@ -144,13 +144,13 @@ func (s *rpcServer) GetTreatmentForRequest(req *GetTreatmentRequest, resp *runne
 	return nil
 }
 
-func (s *rpcServer) RegisterMetricsCollector(brokerIds []uint32, _ *interface{}) (err error) {
-	collectorConn, err := s.MuxBroker.Dial(brokerIds[0])
+func (s *rpcServer) RegisterMetricsCollector(brokerIDs []uint32, _ *interface{}) (err error) {
+	collectorConn, err := s.MuxBroker.Dial(brokerIDs[0])
 	if err != nil {
 		return err
 	}
 
-	metricsRegistrationHelperConn, err := s.MuxBroker.Dial(brokerIds[1])
+	metricsRegistrationHelperConn, err := s.MuxBroker.Dial(brokerIDs[1])
 	if err != nil {
 		return err
 	}

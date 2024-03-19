@@ -29,16 +29,20 @@ func (cfg VirtualService) BuildVirtualService() *v1beta1.VirtualService {
 		},
 		Weight: 100,
 	}
-	httpMatches := make([]*networking.HTTPMatchRequest, len(cfg.MatchURIPrefixes))
-	for index, prefix := range cfg.MatchURIPrefixes {
-		uri := networking.HTTPMatchRequest{
-			Uri: &networking.StringMatch{
-				MatchType: &networking.StringMatch_Prefix{
-					Prefix: prefix,
+
+	var httpMatches []*networking.HTTPMatchRequest
+	if len(cfg.MatchURIPrefixes) > 0 {
+		httpMatches = make([]*networking.HTTPMatchRequest, len(cfg.MatchURIPrefixes))
+		for index, prefix := range cfg.MatchURIPrefixes {
+			uri := networking.HTTPMatchRequest{
+				Uri: &networking.StringMatch{
+					MatchType: &networking.StringMatch_Prefix{
+						Prefix: prefix,
+					},
 				},
-			},
+			}
+			httpMatches[index] = &uri
 		}
-		httpMatches[index] = &uri
 	}
 
 	return &v1beta1.VirtualService{
