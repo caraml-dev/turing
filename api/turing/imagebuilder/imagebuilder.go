@@ -8,10 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caraml-dev/turing/api/turing/cluster"
-	"github.com/caraml-dev/turing/api/turing/config"
-	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/google"
@@ -22,6 +18,11 @@ import (
 	apicorev1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/caraml-dev/turing/api/turing/cluster"
+	"github.com/caraml-dev/turing/api/turing/config"
+	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
 )
 
 var (
@@ -356,11 +357,22 @@ func (ib *imageBuilder) createKanikoJob(
 	)
 }
 
+// getGCPSubDomains returns the list of GCP container registry and artifact registry subdomains.
+//
+// GCP container registry and artifact registry domains are used to determine which keychain
+// to use when interacting with container registry.
+// This is needed because GCP registries use different authentication method than other container registry.
+func getGCPSubDomains() []string {
+	return []string{"gcr.io", "pkg.dev"}
+}
+
 func (ib *imageBuilder) checkIfImageExists(imageName string, imageTag string) (bool, error) {
 	keychain := authn.DefaultKeychain
 
-	if strings.Contains(ib.imageBuildingConfig.DestinationRegistry, "gcr.io") {
-		keychain = google.Keychain
+	for _, domain := range getGCPSubDomains() {
+		if strings.Contains(ib.imageBuildingConfig.DestinationRegistry, domain) {
+			keychain = google.Keychain
+		}
 	}
 
 	repo, err := name.NewRepository(imageName)
