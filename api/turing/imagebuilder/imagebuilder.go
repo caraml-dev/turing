@@ -359,7 +359,8 @@ func (ib *imageBuilder) createKanikoJob(
 
 // getGCPSubDomains returns the list of GCP container registry and artifact registry subdomains.
 //
-// GCP container registry and artifact registry domains are used to determine which keychain to use when interacting with container registry.
+// GCP container registry and artifact registry domains are used to determine which keychain
+// to use when interacting with container registry.
 // This is needed because GCP registries use different authentication method than other container registry.
 func getGCPSubDomains() []string {
 	return []string{"gcr.io", "pkg.dev"}
