@@ -283,8 +283,6 @@ func TestDeployEndpoint(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com", routerVersion.Router.Name), endpoint)
 	controller.AssertCalled(t, "CreateNamespace", mock.Anything, testNamespace)
-	controller.AssertCalled(t, "ApplyPersistentVolumeClaim", mock.Anything,
-		testNamespace, &cluster.PersistentVolumeClaim{Name: "pvc"})
 	controller.AssertCalled(t, "DeployKubernetesService", mock.Anything, &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  fmt.Sprintf("%s-fluentd-logger-%d", routerVersion.Router.Name, routerVersion.Version),

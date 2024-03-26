@@ -352,29 +352,29 @@ func (c *controller) DeployKubernetesService(
 	ctx context.Context,
 	svcConf *KubernetesService,
 ) error {
-	desiredDeployment, desiredSvc := svcConf.BuildKubernetesServiceConfig()
+	desiredStatefulSet, desiredSvc := svcConf.BuildKubernetesServiceConfig()
 
-	// Deploy deployment
-	deployments := c.k8sAppsClient.Deployments(svcConf.Namespace)
+	// Deploy stateful set
+	statefulSets := c.k8sAppsClient.StatefulSets(svcConf.Namespace)
 	// Check if deployment already exists. If exists, update it. If not, create.
-	var existingDeployment *apiappsv1.Deployment
+	var existingStatefulSet *apiappsv1.StatefulSet
 	var err error
-	existingDeployment, err = deployments.Get(ctx, svcConf.Name, metav1.GetOptions{})
+	existingStatefulSet, err = statefulSets.Get(ctx, svcConf.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create new deployment
-			_, err = deployments.Create(ctx, desiredDeployment, metav1.CreateOptions{})
+			_, err = statefulSets.Create(ctx, desiredStatefulSet, metav1.CreateOptions{})
 		} else {
 			// Unexpected error, return it
 			return err
 		}
 	} else {
 		// Check for differences between current and new specs
-		if !k8sDeploymentSemanticEquals(desiredDeployment, existingDeployment) {
+		if !k8sStatefulSetSemanticEquals(existingStatefulSet, existingStatefulSet) {
 			// Update the existing service with the new config
-			existingDeployment.Spec.Template = desiredDeployment.Spec.Template
-			existingDeployment.ObjectMeta.Labels = desiredDeployment.ObjectMeta.Labels
-			_, err = deployments.Update(ctx, existingDeployment, metav1.UpdateOptions{})
+			existingStatefulSet.Spec.Template = desiredStatefulSet.Spec.Template
+			existingStatefulSet.ObjectMeta.Labels = desiredStatefulSet.ObjectMeta.Labels
+			_, err = statefulSets.Update(ctx, existingStatefulSet, metav1.UpdateOptions{})
 		}
 	}
 	if err != nil {
@@ -405,7 +405,7 @@ func (c *controller) DeployKubernetesService(
 	}
 
 	// Wait until deployment ready and return any errors
-	return c.waitDeploymentReady(ctx, svcConf.Name, svcConf.Namespace)
+	return c.waitStatefulSetReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
 // DeleteKubernetesDeployment deletes a kubernetes deployment
@@ -813,31 +813,31 @@ func (c *controller) getKnativePodTerminationMessage(ctx context.Context, svcNam
 	return terminationMessage
 }
 
-// waitDeploymentReady waits for the given k8s deployment to become ready, until the
+// waitStatefulSetReady waits for the given k8s stateful set to become ready, until the
 // default timeout
-func (c *controller) waitDeploymentReady(
+func (c *controller) waitStatefulSetReady(
 	ctx context.Context,
-	deploymentName string,
+	statefulSetName string,
 	namespace string,
 ) error {
 	// Init ticker to check status every second
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
-	// Init knative ServicesGetter
-	deployments := c.k8sAppsClient.Deployments(namespace)
+	// Init stateful set getter
+	statefulSets := c.k8sAppsClient.StatefulSets(namespace)
 
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for deployment %s to be ready", deploymentName)
+			return fmt.Errorf("timeout waiting for stateful set %s to be ready", statefulSetName)
 		case <-ticker.C:
-			deployment, err := deployments.Get(ctx, deploymentName, metav1.GetOptions{})
+			statefulSet, err := statefulSets.Get(ctx, statefulSetName, metav1.GetOptions{})
 			if err != nil {
-				return fmt.Errorf("unable to get deployment status for %s: %v", deploymentName, err)
+				return fmt.Errorf("unable to get stateful set status for %s: %v", statefulSetName, err)
 			}
 
-			if deploymentReady(deployment) {
+			if statefulSetReady(statefulSet) {
 				// Service is completely ready
 				return nil
 			}
@@ -845,15 +845,15 @@ func (c *controller) waitDeploymentReady(
 	}
 }
 
-func deploymentReady(deployment *apiappsv1.Deployment) bool {
-	if deployment.Generation <= deployment.Status.ObservedGeneration {
-		cond := deployment.Status.Conditions[0]
-		ready := cond.Type == apiappsv1.DeploymentAvailable
-		if deployment.Spec.Replicas != nil {
+func statefulSetReady(statefulSet *apiappsv1.StatefulSet) bool {
+	if statefulSet.Generation <= statefulSet.Status.ObservedGeneration {
+		cond := statefulSet.Status.Conditions[0]
+		ready := cond.Type == "Available"
+		if statefulSet.Spec.Replicas != nil {
 			// Account for replica surge during updates
 			ready = ready &&
-				deployment.Status.ReadyReplicas == *deployment.Spec.Replicas &&
-				deployment.Status.Replicas == *deployment.Spec.Replicas
+				statefulSet.Status.ReadyReplicas == *statefulSet.Spec.Replicas &&
+				statefulSet.Status.Replicas == *statefulSet.Spec.Replicas
 		}
 		return ready
 	}
@@ -876,10 +876,10 @@ func knServiceSemanticEquals(desiredService, service *knservingv1.Service) bool 
 		equality.Semantic.DeepEqual(desiredService.ObjectMeta.Labels, service.ObjectMeta.Labels)
 }
 
-func k8sDeploymentSemanticEquals(desiredDeployment, deployment *apiappsv1.Deployment) bool {
-	return equality.Semantic.DeepEqual(desiredDeployment.Spec.Template, deployment.Spec.Template) &&
-		equality.Semantic.DeepEqual(desiredDeployment.ObjectMeta.Labels, deployment.ObjectMeta.Labels) &&
-		desiredDeployment.Spec.Replicas == deployment.Spec.Replicas
+func k8sStatefulSetSemanticEquals(desiredStatefulSet, statefulSet *apiappsv1.StatefulSet) bool {
+	return equality.Semantic.DeepEqual(desiredStatefulSet.Spec.Template, statefulSet.Spec.Template) &&
+		equality.Semantic.DeepEqual(desiredStatefulSet.ObjectMeta.Labels, statefulSet.ObjectMeta.Labels) &&
+		desiredStatefulSet.Spec.Replicas == statefulSet.Spec.Replicas
 }
 
 func k8sServiceSemanticEquals(desiredService, service *apicorev1.Service) bool {

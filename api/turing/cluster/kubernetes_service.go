@@ -28,13 +28,13 @@ type KubernetesService struct {
 	SecurityContext *corev1.PodSecurityContext `json:"security_context"`
 }
 
-func (cfg *KubernetesService) BuildKubernetesServiceConfig() (*appsv1.Deployment, *corev1.Service) {
-	deployment := cfg.buildDeployment(cfg.Labels)
+func (cfg *KubernetesService) BuildKubernetesServiceConfig() (*appsv1.StatefulSet, *corev1.Service) {
+	statefulSet := cfg.buildStatefulSet(cfg.Labels)
 	service := cfg.buildService(cfg.Labels)
-	return deployment, service
+	return statefulSet, service
 }
 
-func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.Deployment {
+func (cfg *KubernetesService) buildStatefulSet(labels map[string]string) *appsv1.StatefulSet {
 	replicas := int32(cfg.Replicas)
 
 	labels["app"] = cfg.Name
@@ -44,13 +44,13 @@ func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.
 		initContainers[idx] = containerCfg.Build()
 	}
 
-	return &appsv1.Deployment{
+	return &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cfg.Name,
 			Namespace: cfg.Namespace,
 			Labels:    labels,
 		},
-		Spec: appsv1.DeploymentSpec{
+		Spec: appsv1.StatefulSetSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
@@ -84,9 +84,10 @@ func (cfg *KubernetesService) buildDeployment(labels map[string]string) *appsv1.
 					SecurityContext: cfg.SecurityContext,
 				},
 			},
-			Strategy: appsv1.DeploymentStrategy{
-				Type: appsv1.RollingUpdateDeploymentStrategyType,
+			UpdateStrategy: appsv1.StatefulSetUpdateStrategy{
+				Type: appsv1.RollingUpdateStatefulSetStrategyType,
 			},
+			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{*cfg.PersistentVolumeClaim.BuildPersistentVolumeClaim()},
 		},
 	}
 
