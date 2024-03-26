@@ -66,8 +66,8 @@ type Controller interface {
 	ApplyIstioVirtualService(ctx context.Context, routerEndpoint *VirtualService) error
 	DeleteIstioVirtualService(ctx context.Context, svcName string, namespace string) error
 
-	// Deployment
-	DeleteKubernetesDeployment(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
+	// StatefulSet
+	DeleteKubernetesStatefulSet(ctx context.Context, name string, namespace string, ignoreNotFound bool) error
 
 	// Service
 	DeployKubernetesService(ctx context.Context, svc *KubernetesService) error
@@ -408,22 +408,22 @@ func (c *controller) DeployKubernetesService(
 	return c.waitStatefulSetReady(ctx, svcConf.Name, svcConf.Namespace)
 }
 
-// DeleteKubernetesDeployment deletes a kubernetes deployment
-func (c *controller) DeleteKubernetesDeployment(
+// DeleteKubernetesStatefulSet deletes a stateful set
+func (c *controller) DeleteKubernetesStatefulSet(
 	ctx context.Context,
 	name string,
 	namespace string,
 	ignoreNotFound bool,
 ) error {
-	deployments := c.k8sAppsClient.Deployments(namespace)
-	_, err := deployments.Get(ctx, name, metav1.GetOptions{})
+	statefulSets := c.k8sAppsClient.StatefulSets(namespace)
+	_, err := statefulSets.Get(ctx, name, metav1.GetOptions{})
 	if err != nil {
 		if ignoreNotFound {
 			return nil
 		}
 		return err
 	}
-	return deployments.Delete(ctx, name, metav1.DeleteOptions{})
+	return statefulSets.Delete(ctx, name, metav1.DeleteOptions{})
 }
 
 // DeleteKubernetesService deletes a kubernetes service

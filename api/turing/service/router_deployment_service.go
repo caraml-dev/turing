@@ -531,7 +531,7 @@ func deleteK8sService(
 	service *cluster.KubernetesService,
 	isCleanUp bool,
 ) error {
-	err := controller.DeleteKubernetesDeployment(context.Background(), service.Name, service.Namespace, isCleanUp)
+	err := controller.DeleteKubernetesStatefulSet(context.Background(), service.Name, service.Namespace, isCleanUp)
 	if err != nil {
 		return err
 	}

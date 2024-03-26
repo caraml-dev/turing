@@ -485,7 +485,7 @@ func TestDeleteKnativeService(t *testing.T) {
 	}
 }
 
-func TestDeleteKubernetesDeployment(t *testing.T) {
+func TestDeleteKubernetesStatefulSet(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	deploymentResourceItem := schema.GroupVersionResource{
 		Group:    "apps",
@@ -571,7 +571,7 @@ func TestDeleteKubernetesDeployment(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteKubernetesDeployment(ctx, testName, testNamespace, tc.ignoreNotFound)
+			err := c.DeleteKubernetesStatefulSet(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
