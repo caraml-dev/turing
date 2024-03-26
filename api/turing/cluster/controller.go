@@ -82,7 +82,8 @@ type Controller interface {
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 
 	// PVC
-	DeleteStatefulSetPersistentVolumeClaims(ctx context.Context, statefulSetName string, namespace string, ignoreNotFound bool) error
+	DeleteStatefulSetPersistentVolumeClaims(ctx context.Context, statefulSetName string, namespace string,
+		ignoreNotFound bool) error
 
 	// Pod
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
