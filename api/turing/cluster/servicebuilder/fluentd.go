@@ -16,8 +16,8 @@ import (
 
 const (
 	FluentdReplicaCount  = 2
-	fluentdCPURequest    = "2"
-	fluentdMemRequest    = "2Gi"
+	fluentdCPURequest    = "1"
+	fluentdMemRequest    = "1Gi"
 	fluentdPort          = 24224
 	cacheVolumeMountPath = "/cache/"
 	cacheVolumeSize      = "2Gi"
