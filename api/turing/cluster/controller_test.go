@@ -46,11 +46,13 @@ var reactorVerbs = struct {
 	Create string
 	Update string
 	Delete string
+	List   string
 }{
 	Get:    "get",
 	Create: "create",
 	Update: "update",
 	Delete: "delete",
+	List:   "list",
 }
 
 const (
@@ -1583,109 +1585,23 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
-func TestCreatePVC(t *testing.T) {
+func TestDeleteStatefulSetPersistentVolumeClaims(t *testing.T) {
 	pvcResource := schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
 		Resource: "persistentvolumeclaims",
 	}
+
+	groupVersionKind := schema.GroupVersionKind{
+		Group:   "",
+		Version: "v1",
+		Kind:    "PersistentVolumeClaim",
+	}
+
 	testNamespace := "namespace"
 
-	cacheVolumeSize := "2Gi"
-	volSize, _ := resource.ParseQuantity(cacheVolumeSize) // drop error since this volume size is a constant
-
-	pvcConf := PersistentVolumeClaim{
-		Name:        "test-svc-turing-pvc",
-		AccessModes: []string{"ReadWriteOnce"},
-		Size:        volSize,
-	}
-	testPvc := pvcConf.BuildPersistentVolumeClaim()
-	cs := fake.NewSimpleClientset()
-	tests := []struct {
-		name     string
-		reactors []reactor
-		hasErr   bool
-	}{
-		{"new_pvc",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, testPvc.Name)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testPvc.Name)
-					},
-				},
-				{
-					verb:     reactorVerbs.Create,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewCreateAction(pvcResource, testNamespace, testPvc)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Nil error indicates Create success
-						return true, testPvc, nil
-					},
-				},
-			},
-			false,
-		},
-		{
-			"pvc_exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, testPvc.Name)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, testPvc, nil
-					},
-				},
-				{
-					verb:     reactorVerbs.Update,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewUpdateAction(pvcResource, testNamespace, testPvc)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Nil error indicates Create success
-						return true, testPvc, nil
-					},
-				},
-			},
-			false,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create test controller
-			c := createTestK8sController(cs, tc.reactors)
-
-			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
-			defer cancel()
-
-			// Run test
-			err := c.ApplyPersistentVolumeClaim(ctx, testNamespace, &pvcConf)
-			// Validate no error
-			assert.Equal(t, tc.hasErr, err != nil)
-		})
-	}
-}
-
-func TestDeletePVC(t *testing.T) {
-	pvcResource := schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "persistentvolumeclaims",
-	}
-	testNamespace := "namespace"
+	statefulSetName := "test-svc-turing-fluentd-logger-0"
+	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
 
 	cacheVolumeSize := "2Gi"
 	volSize, _ := resource.ParseQuantity(cacheVolumeSize) // drop error since this volume size is a constant
@@ -1707,10 +1623,10 @@ func TestDeletePVC(t *testing.T) {
 			"not_exists; ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Return nil object and error to indicate non existent object
@@ -1725,10 +1641,10 @@ func TestDeletePVC(t *testing.T) {
 			"exists; ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						return true, nil, nil
@@ -1751,10 +1667,10 @@ func TestDeletePVC(t *testing.T) {
 			"not_exists; do not ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Return nil object and error to indicate non existent object
@@ -1776,7 +1692,7 @@ func TestDeletePVC(t *testing.T) {
 			defer cancel()
 
 			// Run test
-			err := c.DeletePersistentVolumeClaim(ctx, pvcConf.Name, testNamespace, tc.ignoreNotFound)
+			err := c.DeleteStatefulSetPersistentVolumeClaims(ctx, statefulSetName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
 		})

@@ -82,8 +82,7 @@ type Controller interface {
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 
 	// PVC
-	ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *PersistentVolumeClaim) error
-	DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error
+	DeleteStatefulSetPersistentVolumeClaims(ctx context.Context, statefulSetName string, namespace string, ignoreNotFound bool) error
 
 	// Pod
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
@@ -347,7 +346,7 @@ func (c *controller) GetKnativeServiceDesiredReplicas(
 	return int(*rev.Status.DesiredReplicas), nil
 }
 
-// DeployKubernetesService deploys a kubernetes service and deployment
+// DeployKubernetesService deploys a kubernetes service and stateful set
 func (c *controller) DeployKubernetesService(
 	ctx context.Context,
 	svcConf *KubernetesService,
@@ -517,44 +516,23 @@ func (c *controller) GetKnativeServiceURL(ctx context.Context, svcName string, n
 	return url
 }
 
-// ApplyPersistentVolumeClaim creates a PVC in the given namespace.
-// If the PVC already exists, it will update the existing PVC.
-func (c *controller) ApplyPersistentVolumeClaim(
+// DeleteStatefulSetPersistentVolumeClaims deletes all PVCs belonging to the specified stateful set in the given
+// namespace.
+func (c *controller) DeleteStatefulSetPersistentVolumeClaims(
 	ctx context.Context,
-	namespace string,
-	pvcCfg *PersistentVolumeClaim,
-) error {
-	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
-	existingPVC, err := pvcs.Get(ctx, pvcCfg.Name, metav1.GetOptions{})
-	pvc := pvcCfg.BuildPersistentVolumeClaim()
-
-	// If not exists, create
-	if err != nil {
-		_, err := pvcs.Create(ctx, pvc, metav1.CreateOptions{})
-		return err
-	}
-	// If exists, update
-	existingPVC.Spec.Resources = pvc.Spec.Resources
-	_, err = pvcs.Update(ctx, existingPVC, metav1.UpdateOptions{})
-	return err
-}
-
-// DeletePersistentVolumeClaim deletes the PVC in the given namespace.
-func (c *controller) DeletePersistentVolumeClaim(
-	ctx context.Context,
-	pvcName string,
+	statefulSetName string,
 	namespace string,
 	ignoreNotFound bool,
 ) error {
-	pvcs := c.k8sCoreClient.PersistentVolumeClaims(namespace)
-	_, err := pvcs.Get(ctx, pvcName, metav1.GetOptions{})
+	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
+	_, err := c.k8sCoreClient.PersistentVolumeClaims(namespace).List(ctx, listOptions)
 	if err != nil {
 		if ignoreNotFound {
 			return nil
 		}
-		return fmt.Errorf("unable to get pvc with name %s: %s", pvcName, err.Error())
+		return fmt.Errorf("unable to get pvcs of the stateful set name %s: %s", statefulSetName, err.Error())
 	}
-	return pvcs.Delete(ctx, pvcName, metav1.DeleteOptions{})
+	return c.k8sCoreClient.PersistentVolumeClaims(namespace).DeleteCollection(ctx, metav1.DeleteOptions{}, listOptions)
 }
 
 func (c *controller) ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error) {
@@ -847,15 +825,11 @@ func (c *controller) waitStatefulSetReady(
 
 func statefulSetReady(statefulSet *apiappsv1.StatefulSet) bool {
 	if statefulSet.Generation <= statefulSet.Status.ObservedGeneration {
-		cond := statefulSet.Status.Conditions[0]
-		ready := cond.Type == "Available"
 		if statefulSet.Spec.Replicas != nil {
 			// Account for replica surge during updates
-			ready = ready &&
-				statefulSet.Status.ReadyReplicas == *statefulSet.Spec.Replicas &&
+			return statefulSet.Status.ReadyReplicas == *statefulSet.Spec.Replicas &&
 				statefulSet.Status.Replicas == *statefulSet.Spec.Replicas
 		}
-		return ready
 	}
 	return false
 }

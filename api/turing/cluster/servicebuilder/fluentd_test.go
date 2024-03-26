@@ -116,7 +116,7 @@ func TestNewFluentdService(t *testing.T) {
 				},
 			},
 		},
-		Replicas: fluentdReplicaCount,
+		Replicas: FluentdReplicaCount,
 		Ports: []cluster.Port{
 			{
 				Name:     "tcp-input",
