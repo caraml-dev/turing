@@ -54,20 +54,6 @@ func (_m *Controller) ApplyIstioVirtualService(ctx context.Context, routerEndpoi
 	return r0
 }
 
-// ApplyPersistentVolumeClaim provides a mock function with given fields: ctx, namespace, pvc
-func (_m *Controller) ApplyPersistentVolumeClaim(ctx context.Context, namespace string, pvc *cluster.PersistentVolumeClaim) error {
-	ret := _m.Called(ctx, namespace, pvc)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *cluster.PersistentVolumeClaim) error); ok {
-		r0 = rf(ctx, namespace, pvc)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // ApplyPodDisruptionBudget provides a mock function with given fields: ctx, namespace, pdb
 func (_m *Controller) ApplyPodDisruptionBudget(ctx context.Context, namespace string, pdb cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error) {
 	ret := _m.Called(ctx, namespace, pdb)
@@ -336,20 +322,6 @@ func (_m *Controller) DeleteKubernetesStatefulSet(ctx context.Context, name stri
 	return r0
 }
 
-// DeletePersistentVolumeClaim provides a mock function with given fields: ctx, pvcName, namespace, ignoreNotFound
-func (_m *Controller) DeletePersistentVolumeClaim(ctx context.Context, pvcName string, namespace string, ignoreNotFound bool) error {
-	ret := _m.Called(ctx, pvcName, namespace, ignoreNotFound)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
-		r0 = rf(ctx, pvcName, namespace, ignoreNotFound)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeletePodDisruptionBudget provides a mock function with given fields: ctx, namespace, pdbName
 func (_m *Controller) DeletePodDisruptionBudget(ctx context.Context, namespace string, pdbName string) error {
 	ret := _m.Called(ctx, namespace, pdbName)
@@ -385,6 +357,20 @@ func (_m *Controller) DeleteSparkApplication(ctx context.Context, namespace stri
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
 		r0 = rf(ctx, namespace, appName)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteStatefulSetPersistentVolumeClaims provides a mock function with given fields: ctx, statefulSetName, namespace, ignoreNotFound
+func (_m *Controller) DeleteStatefulSetPersistentVolumeClaims(ctx context.Context, statefulSetName string, namespace string, ignoreNotFound bool) error {
+	ret := _m.Called(ctx, statefulSetName, namespace, ignoreNotFound)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, bool) error); ok {
+		r0 = rf(ctx, statefulSetName, namespace, ignoreNotFound)
 	} else {
 		r0 = ret.Error(0)
 	}

@@ -353,18 +353,23 @@ func (sb *clusterSvcBuilder) NewSecret(
 }
 
 // NewPodDisruptionBudget creates a new `cluster.PodDisruptionBudget`
-// for the given service (router/enricher/ensembler).
+// for the given service (router/enricher/ensembler/fluentd logger).
 func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	componentType string,
 	pdbConfig config.PodDisruptionBudgetConfig,
 ) *cluster.PodDisruptionBudget {
+	var appNameSuffix string
+	if componentType != ComponentTypes.FluentdLogger {
+		appNameSuffix = "-0"
+	}
 	selector := &metav1.LabelSelector{
 		MatchLabels: map[string]string{
 			"app": fmt.Sprintf(
-				"%s-0",
+				"%s%s",
 				GetComponentName(routerVersion, componentType),
+				appNameSuffix,
 			),
 		},
 	}

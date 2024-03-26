@@ -293,7 +293,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
-		err = deletePVC(controller, project.Name, fluentdService.PersistentVolumeClaim, isCleanUp)
+		err = deleteStatefulSetPVCs(controller, project.Name, fluentdService.Name, isCleanUp)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -557,13 +557,13 @@ func deleteSecret(controller cluster.Controller, secret *cluster.Secret, isClean
 	return controller.DeleteSecret(context.Background(), secret.Name, secret.Namespace, isCleanUp)
 }
 
-func deletePVC(
+func deleteStatefulSetPVCs(
 	controller cluster.Controller,
 	namespace string,
-	pvc *cluster.PersistentVolumeClaim,
+	statefulSetName string,
 	isCleanUp bool,
 ) error {
-	return controller.DeletePersistentVolumeClaim(context.Background(), pvc.Name, namespace, isCleanUp)
+	return controller.DeleteStatefulSetPersistentVolumeClaims(context.Background(), statefulSetName, namespace, isCleanUp)
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -794,6 +794,19 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 			ds.pdbConfig,
 		)
 		pdbs = append(pdbs, routerPdb)
+	}
+
+	// Fluentd logger's PDB
+	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger &&
+		math.Ceil(float64(servicebuilder.FluentdReplicaCount)*
+			minAvailablePercent) < float64(servicebuilder.FluentdReplicaCount) {
+		fluentdPdb := ds.svcBuilder.NewPodDisruptionBudget(
+			routerVersion,
+			project,
+			servicebuilder.ComponentTypes.FluentdLogger,
+			ds.pdbConfig,
+		)
+		pdbs = append(pdbs, fluentdPdb)
 	}
 
 	return pdbs

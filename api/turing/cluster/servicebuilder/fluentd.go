@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	fluentdReplicaCount  = 1
+	FluentdReplicaCount  = 2
 	fluentdCPURequest    = "2"
 	fluentdMemRequest    = "2Gi"
 	fluentdPort          = 24224
@@ -77,7 +77,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 			Volumes:               volumes,
 			VolumeMounts:          volumeMounts,
 		},
-		Replicas: fluentdReplicaCount,
+		Replicas: FluentdReplicaCount,
 		Ports: []cluster.Port{
 			{
 				Name:     "tcp-input",
