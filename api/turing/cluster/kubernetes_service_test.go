@@ -68,13 +68,13 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 
 	replicas := int32(1)
 	labels["app"] = "test-svc-fluentd-logger"
-	expectedDeployment := appsv1.Deployment{
+	expectedStatefulSet := appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-svc-fluentd-logger",
 			Namespace: "namespace",
 			Labels:    labels,
 		},
-		Spec: appsv1.DeploymentSpec{
+		Spec: appsv1.StatefulSetSpec{
 			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
@@ -149,9 +149,10 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 					},
 				},
 			},
-			Strategy: appsv1.DeploymentStrategy{
-				Type: appsv1.RollingUpdateDeploymentStrategyType,
+			UpdateStrategy: appsv1.StatefulSetUpdateStrategy{
+				Type: appsv1.RollingUpdateStatefulSetStrategyType,
 			},
+			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{*svcConf.PersistentVolumeClaim.BuildPersistentVolumeClaim()},
 		},
 	}
 
@@ -176,8 +177,8 @@ func TestBuildKubernetesServiceConfig(t *testing.T) {
 			Type: corev1.ServiceTypeClusterIP,
 		},
 	}
-	gotDeployment, gotService := svcConf.BuildKubernetesServiceConfig()
-	err := tu.CompareObjects(*gotDeployment, expectedDeployment)
+	gotStatefulSet, gotService := svcConf.BuildKubernetesServiceConfig()
+	err := tu.CompareObjects(*gotStatefulSet, expectedStatefulSet)
 	assert.NoError(t, err)
 	err = tu.CompareObjects(*gotService, expectedService)
 	assert.NoError(t, err)
