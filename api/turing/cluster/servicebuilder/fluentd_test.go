@@ -104,14 +104,6 @@ func TestNewFluentdService(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: ComponentTypes.CacheVolume,
-					VolumeSource: corev1.VolumeSource{
-						PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-							ClaimName: "test-svc-turing-cache-volume-1",
-						},
-					},
-				},
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
@@ -119,12 +111,12 @@ func TestNewFluentdService(t *testing.T) {
 					MountPath: secretMountPath,
 				},
 				{
-					Name:      ComponentTypes.CacheVolume,
+					Name:      "test-svc-turing-cache-volume-1",
 					MountPath: cacheVolumeMountPath,
 				},
 			},
 		},
-		Replicas: fluentdReplicaCount,
+		Replicas: FluentdReplicaCount,
 		Ports: []cluster.Port{
 			{
 				Name:     "tcp-input",
