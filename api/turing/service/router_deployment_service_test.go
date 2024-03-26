@@ -413,7 +413,7 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller := &mocks.Controller{}
 	controller.On("DeleteKnativeService", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
-	controller.On("DeleteKubernetesDeployment", mock.Anything, mock.Anything,
+	controller.On("DeleteKubernetesStatefulSet", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
 	controller.On("DeleteKubernetesService", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
