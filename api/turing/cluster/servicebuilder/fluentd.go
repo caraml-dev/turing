@@ -125,17 +125,8 @@ func buildFluentdVolumes(
 		MountPath: secretMountPath,
 	})
 
-	volumes = append(volumes, corev1.Volume{
-		Name: ComponentTypes.CacheVolume,
-		VolumeSource: corev1.VolumeSource{
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-				ClaimName: cacheVolumePVCName,
-			},
-		},
-	})
-
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{
-		Name:      ComponentTypes.CacheVolume,
+		Name:      cacheVolumePVCName,
 		MountPath: cacheVolumeMountPath,
 	})
 
