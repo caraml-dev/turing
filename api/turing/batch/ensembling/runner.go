@@ -400,6 +400,7 @@ func (r *ensemblingJobRunner) buildLabels(
 		Stream: mlpProject.Stream,
 		Team:   mlpProject.Team,
 		App:    *ensemblingJob.InfraConfig.EnsemblerName,
+		Labels: mlpProject.Labels,
 	}
 
 	return labeller.BuildLabels(rq)

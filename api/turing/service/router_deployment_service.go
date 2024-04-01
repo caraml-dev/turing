@@ -469,6 +469,7 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 				Stream: project.Stream,
 				Team:   project.Team,
 				App:    ensembler.Name,
+				Labels: project.Labels,
 			},
 		),
 		EnsemblerFolder: EnsemblerFolder,

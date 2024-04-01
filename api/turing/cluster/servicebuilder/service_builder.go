@@ -427,6 +427,7 @@ func buildLabels(
 		Stream: project.Stream,
 		Team:   project.Team,
 		App:    router.Name,
+		Labels: project.Labels,
 	}
 	return labeller.BuildLabels(r)
 }
