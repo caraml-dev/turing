@@ -62,11 +62,12 @@ func TestNewEnricherService(t *testing.T) {
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/enricher-service-account.json"},
 					},
 					Labels: map[string]string{
-						"app":          "test-svc",
-						"environment":  "",
-						"orchestrator": "turing",
-						"stream":       "test-stream",
-						"team":         "test-team",
+						"app":              "test-svc",
+						"environment":      "",
+						"orchestrator":     "turing",
+						"stream":           "test-stream",
+						"team":             "test-team",
+						"custom-label-key": "value-1",
 					},
 					Volumes: []corev1.Volume{
 						{
@@ -108,6 +109,7 @@ func TestNewEnricherService(t *testing.T) {
 				Name:   "test-project",
 				Stream: "test-stream",
 				Team:   "test-team",
+				Labels: []mlp.Label{{Key: "custom-label-key", Value: "value-1"}},
 			}
 			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 0, 1.5, data.initialScale)
 			if data.err == "" {
