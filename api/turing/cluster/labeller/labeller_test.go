@@ -106,7 +106,7 @@ func TestBuildLabels(t *testing.T) {
 				Team:   "testTeam",
 				App:    "testApp",
 				Labels: []mlp.Label{
-					{Key: "invalid.Label", Value: "value1"}, // Invalid label key
+					{Key: "invalid Label", Value: "value1"}, // Invalid label key
 				},
 			},
 			expected: map[string]string{
