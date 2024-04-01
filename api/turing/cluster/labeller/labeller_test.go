@@ -76,7 +76,7 @@ func TestBuildLabels(t *testing.T) {
 				"stream":       "testStream",
 				"team":         "testTeam",
 				"app":          "testApp",
-				"environment":  "production",
+				"environment":  "dev",
 				"customLabel1": "value1",
 				"customLabel2": "value2",
 			},
@@ -96,7 +96,7 @@ func TestBuildLabels(t *testing.T) {
 				"stream":       "testStream",
 				"team":         "testTeam",
 				"app":          "testApp",
-				"environment":  "production",
+				"environment":  "dev",
 			},
 		},
 		{
@@ -114,7 +114,7 @@ func TestBuildLabels(t *testing.T) {
 				"stream":       "testStream",
 				"team":         "testTeam",
 				"app":          "testApp",
-				"environment":  "production",
+				"environment":  "dev",
 			},
 		},
 	}
