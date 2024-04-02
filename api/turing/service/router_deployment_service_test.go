@@ -615,7 +615,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-enricher-3-0",
+							"serving.knative.dev/service": "test-turing-enricher-3",
 						},
 					},
 				},
@@ -626,7 +626,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},
@@ -637,7 +637,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-router-3-0",
+							"serving.knative.dev/service": "test-turing-router-3",
 						},
 					},
 				},
@@ -691,7 +691,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-enricher-3-0",
+							"serving.knative.dev/service": "test-turing-enricher-3",
 						},
 					},
 				},
@@ -702,7 +702,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},
@@ -713,7 +713,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-router-3-0",
+							"serving.knative.dev/service": "test-turing-router-3",
 						},
 					},
 				},
@@ -762,7 +762,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},
