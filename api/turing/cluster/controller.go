@@ -356,7 +356,7 @@ func (c *controller) DeployKubernetesService(
 
 	// Deploy stateful set
 	statefulSets := c.k8sAppsClient.StatefulSets(svcConf.Namespace)
-	// Check if deployment already exists. If exists, update it. If not, create.
+	// Check if stateful set already exists. If exists, update it. If not, create.
 	var existingStatefulSet *apiappsv1.StatefulSet
 	var err error
 	existingStatefulSet, err = statefulSets.Get(ctx, svcConf.Name, metav1.GetOptions{})
