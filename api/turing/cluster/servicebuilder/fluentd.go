@@ -40,7 +40,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
 		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + secretKeyNameRouter},
 		{Name: "FLUENTD_BUFFER_LIMIT", Value: "10g"},
-		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS", Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds)},
+		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS", Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds * FluentdReplicaCount)},
 		{Name: "FLUENTD_TAG", Value: fluentdConfig.Tag},
 		{Name: "FLUENTD_GCP_PROJECT", Value: tableSplit[0]},
 		{Name: "FLUENTD_BQ_DATASET", Value: tableSplit[1]},
