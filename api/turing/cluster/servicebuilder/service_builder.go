@@ -360,17 +360,15 @@ func (sb *clusterSvcBuilder) NewPodDisruptionBudget(
 	componentType string,
 	pdbConfig config.PodDisruptionBudgetConfig,
 ) *cluster.PodDisruptionBudget {
-	var appNameSuffix string
+	var matchLabelKey string
 	if componentType != ComponentTypes.FluentdLogger {
-		appNameSuffix = "-0"
+		matchLabelKey = cluster.KnativeServiceLabelKey
+	} else {
+		matchLabelKey = labeller.AppLabel
 	}
 	selector := &metav1.LabelSelector{
 		MatchLabels: map[string]string{
-			"app": fmt.Sprintf(
-				"%s%s",
-				GetComponentName(routerVersion, componentType),
-				appNameSuffix,
-			),
+			matchLabelKey: GetComponentName(routerVersion, componentType),
 		},
 	}
 	return &cluster.PodDisruptionBudget{
