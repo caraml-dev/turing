@@ -1585,7 +1585,7 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
-func TestDeleteStatefulSetPersistentVolumeClaims(t *testing.T) {
+func TestDeletePVCs(t *testing.T) {
 	pvcResource := schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
@@ -1692,7 +1692,7 @@ func TestDeleteStatefulSetPersistentVolumeClaims(t *testing.T) {
 			defer cancel()
 
 			// Run test
-			err := c.DeleteStatefulSetPersistentVolumeClaims(ctx, statefulSetName, testNamespace, tc.ignoreNotFound)
+			err := c.DeletePVCs(ctx, listOptions, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
 		})

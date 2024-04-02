@@ -82,8 +82,7 @@ type Controller interface {
 	DeleteSecret(ctx context.Context, secretName string, namespace string, ignoreNotFound bool) error
 
 	// PVC
-	DeleteStatefulSetPersistentVolumeClaims(ctx context.Context, statefulSetName string, namespace string,
-		ignoreNotFound bool) error
+	DeletePVCs(ctx context.Context, listOptions metav1.ListOptions, namespace string, ignoreNotFound bool) error
 
 	// Pod
 	ListPods(ctx context.Context, namespace string, labelSelector string) (*apicorev1.PodList, error)
@@ -517,21 +516,19 @@ func (c *controller) GetKnativeServiceURL(ctx context.Context, svcName string, n
 	return url
 }
 
-// DeleteStatefulSetPersistentVolumeClaims deletes all PVCs belonging to the specified stateful set in the given
-// namespace.
-func (c *controller) DeleteStatefulSetPersistentVolumeClaims(
+// DeletePVCs deletes all PVCs specified by the given list options in the given namespace.
+func (c *controller) DeletePVCs(
 	ctx context.Context,
-	statefulSetName string,
+	listOptions metav1.ListOptions,
 	namespace string,
 	ignoreNotFound bool,
 ) error {
-	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
 	_, err := c.k8sCoreClient.PersistentVolumeClaims(namespace).List(ctx, listOptions)
 	if err != nil {
 		if ignoreNotFound {
 			return nil
 		}
-		return fmt.Errorf("unable to get pvcs of the stateful set name %s: %s", statefulSetName, err.Error())
+		return err
 	}
 	return c.k8sCoreClient.PersistentVolumeClaims(namespace).DeleteCollection(ctx, metav1.DeleteOptions{}, listOptions)
 }

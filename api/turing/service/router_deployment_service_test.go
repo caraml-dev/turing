@@ -418,8 +418,7 @@ func TestDeleteEndpoint(t *testing.T) {
 		mock.Anything, false).Return(nil)
 	controller.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 	controller.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
-	controller.On("DeleteStatefulSetPersistentVolumeClaims", mock.Anything, mock.Anything, mock.Anything,
-		false).Return(nil)
+	controller.On("DeletePVCs", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 	controller.On("DeletePodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	// Create test router version
@@ -480,8 +479,7 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-ensembler-1", testNs, false)
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-router-1", testNs, false)
 	controller.AssertCalled(t, "DeleteSecret", mock.Anything, "test-svc-svc-acct-secret-1", testNs, false)
-	controller.AssertCalled(t, "DeleteStatefulSetPersistentVolumeClaims", mock.Anything,
-		"test-svc-fluentd-logger-1", testNs, false)
+	controller.AssertCalled(t, "DeletePVCs", mock.Anything, mock.Anything, testNs, false)
 	controller.AssertCalled(t, "DeletePodDisruptionBudget", mock.Anything, testNs, mock.Anything)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
 	controller.AssertNumberOfCalls(t, "DeletePodDisruptionBudget", 3)

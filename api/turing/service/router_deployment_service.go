@@ -14,6 +14,7 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
@@ -557,13 +558,19 @@ func deleteSecret(controller cluster.Controller, secret *cluster.Secret, isClean
 	return controller.DeleteSecret(context.Background(), secret.Name, secret.Namespace, isCleanUp)
 }
 
+// deleteStatefulSetPVCs deletes all PVCs belonging to the specified stateful set in the given namespace.
 func deleteStatefulSetPVCs(
 	controller cluster.Controller,
 	namespace string,
 	statefulSetName string,
 	isCleanUp bool,
 ) error {
-	return controller.DeleteStatefulSetPersistentVolumeClaims(context.Background(), statefulSetName, namespace, isCleanUp)
+	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
+	err := controller.DeletePVCs(context.Background(), listOptions, namespace, isCleanUp)
+	if err != nil {
+		return fmt.Errorf("unable to get pvcs of the stateful set name %s: %s", statefulSetName, err.Error())
+	}
+	return nil
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
