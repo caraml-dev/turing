@@ -220,7 +220,6 @@ func TestDeployEndpoint(t *testing.T) {
 	controller.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("CreateSecret", mock.Anything, mock.Anything).Return(nil)
-	controller.On("ApplyPersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyIstioVirtualService", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyPodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).
 		Return(&policyv1.PodDisruptionBudget{}, nil)
@@ -283,8 +282,6 @@ func TestDeployEndpoint(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("http://%s-router.models.example.com", routerVersion.Router.Name), endpoint)
 	controller.AssertCalled(t, "CreateNamespace", mock.Anything, testNamespace)
-	controller.AssertCalled(t, "ApplyPersistentVolumeClaim", mock.Anything,
-		testNamespace, &cluster.PersistentVolumeClaim{Name: "pvc"})
 	controller.AssertCalled(t, "DeployKubernetesService", mock.Anything, &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  fmt.Sprintf("%s-fluentd-logger-%d", routerVersion.Router.Name, routerVersion.Version),
@@ -384,7 +381,7 @@ func TestDeployEndpoint(t *testing.T) {
 			},
 		},
 	})
-	controller.AssertNumberOfCalls(t, "ApplyPodDisruptionBudget", 2)
+	controller.AssertNumberOfCalls(t, "ApplyPodDisruptionBudget", 3)
 
 	// Verify endpoint for upi routers
 	routerVersion.Protocol = routerConfig.UPI
@@ -415,13 +412,13 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller := &mocks.Controller{}
 	controller.On("DeleteKnativeService", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
-	controller.On("DeleteKubernetesDeployment", mock.Anything, mock.Anything,
+	controller.On("DeleteKubernetesStatefulSet", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
 	controller.On("DeleteKubernetesService", mock.Anything, mock.Anything,
 		mock.Anything, false).Return(nil)
 	controller.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 	controller.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
-	controller.On("DeletePersistentVolumeClaim", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+	controller.On("DeletePVCs", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
 	controller.On("DeletePodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
 	// Create test router version
@@ -482,10 +479,10 @@ func TestDeleteEndpoint(t *testing.T) {
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-ensembler-1", testNs, false)
 	controller.AssertCalled(t, "DeleteKnativeService", mock.Anything, "test-svc-router-1", testNs, false)
 	controller.AssertCalled(t, "DeleteSecret", mock.Anything, "test-svc-svc-acct-secret-1", testNs, false)
-	controller.AssertCalled(t, "DeletePersistentVolumeClaim", mock.Anything, "pvc", testNs, false)
+	controller.AssertCalled(t, "DeletePVCs", mock.Anything, mock.Anything, testNs, false)
 	controller.AssertCalled(t, "DeletePodDisruptionBudget", mock.Anything, testNs, mock.Anything)
 	controller.AssertNumberOfCalls(t, "DeleteKnativeService", 3)
-	controller.AssertNumberOfCalls(t, "DeletePodDisruptionBudget", 2)
+	controller.AssertNumberOfCalls(t, "DeletePodDisruptionBudget", 3)
 }
 
 func TestBuildEnsemblerServiceImage(t *testing.T) {
@@ -602,6 +599,9 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
+				LogConfig: &models.LogConfig{
+					ResultLoggerType: models.BigQueryLogger,
+				},
 			},
 			pdbConfig: config.PodDisruptionBudgetConfig{
 				Enabled:                true,
@@ -615,7 +615,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-enricher-3-0",
+							"serving.knative.dev/service": "test-turing-enricher-3",
 						},
 					},
 				},
@@ -626,7 +626,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},
@@ -637,7 +637,18 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-router-3-0",
+							"serving.knative.dev/service": "test-turing-router-3",
+						},
+					},
+				},
+				{
+					Name:                   "test-turing-fluentd-logger-3-pdb",
+					Namespace:              "ns",
+					Labels:                 testRouterLabels,
+					MinAvailablePercentage: &twenty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-fluentd-logger-3",
 						},
 					},
 				},
@@ -664,6 +675,9 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
+				LogConfig: &models.LogConfig{
+					ResultLoggerType: models.BigQueryLogger,
+				},
 			},
 			pdbConfig: config.PodDisruptionBudgetConfig{
 				Enabled:                  true,
@@ -677,7 +691,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-enricher-3-0",
+							"serving.knative.dev/service": "test-turing-enricher-3",
 						},
 					},
 				},
@@ -688,7 +702,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},
@@ -699,7 +713,18 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MaxUnavailablePercentage: &eighty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-router-3-0",
+							"serving.knative.dev/service": "test-turing-router-3",
+						},
+					},
+				},
+				{
+					Name:                     "test-turing-fluentd-logger-3-pdb",
+					Namespace:                "ns",
+					Labels:                   testRouterLabels,
+					MaxUnavailablePercentage: &eighty,
+					Selector: &apimetav1.LabelSelector{
+						MatchLabels: map[string]string{
+							"app": "test-turing-fluentd-logger-3",
 						},
 					},
 				},
@@ -721,6 +746,9 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 						},
 					},
 				},
+				LogConfig: &models.LogConfig{
+					ResultLoggerType: models.NopLogger,
+				},
 			},
 			pdbConfig: config.PodDisruptionBudgetConfig{
 				Enabled:                true,
@@ -734,7 +762,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					MinAvailablePercentage: &twenty,
 					Selector: &apimetav1.LabelSelector{
 						MatchLabels: map[string]string{
-							"app": "test-turing-ensembler-3-0",
+							"serving.knative.dev/service": "test-turing-ensembler-3",
 						},
 					},
 				},

@@ -14,6 +14,7 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
@@ -187,13 +188,6 @@ func (ds *deploymentService) DeployRouterVersion(
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
 		fluentdService := ds.svcBuilder.NewFluentdService(routerVersion, project,
 			secretName, ds.routerDefaults.FluentdConfig)
-		// Create pvc
-		err = createPVC(ctx, controller, project.Name, fluentdService.PersistentVolumeClaim)
-		if err != nil {
-			eventsCh.Write(models.NewErrorEvent(
-				models.EventStageDeployingDependencies, "failed to deploy fluentd service: %s", err.Error()))
-			return endpoint, err
-		}
 		// Deploy fluentd
 		err = deployK8sService(ctx, controller, fluentdService)
 		if err != nil {
@@ -300,7 +294,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
-		err = deletePVC(controller, project.Name, fluentdService.PersistentVolumeClaim, isCleanUp)
+		err = deleteStatefulSetPVCs(controller, project.Name, fluentdService.Name, isCleanUp)
 		if err != nil {
 			errs = append(errs, err.Error())
 		}
@@ -538,7 +532,7 @@ func deleteK8sService(
 	service *cluster.KubernetesService,
 	isCleanUp bool,
 ) error {
-	err := controller.DeleteKubernetesDeployment(context.Background(), service.Name, service.Namespace, isCleanUp)
+	err := controller.DeleteKubernetesStatefulSet(context.Background(), service.Name, service.Namespace, isCleanUp)
 	if err != nil {
 		return err
 	}
@@ -564,27 +558,19 @@ func deleteSecret(controller cluster.Controller, secret *cluster.Secret, isClean
 	return controller.DeleteSecret(context.Background(), secret.Name, secret.Namespace, isCleanUp)
 }
 
-func createPVC(
-	ctx context.Context,
+// deleteStatefulSetPVCs deletes all PVCs belonging to the specified stateful set in the given namespace.
+func deleteStatefulSetPVCs(
 	controller cluster.Controller,
 	namespace string,
-	pvc *cluster.PersistentVolumeClaim,
-) error {
-	select {
-	case <-ctx.Done():
-		return errors.New("timeout deploying service")
-	default:
-		return controller.ApplyPersistentVolumeClaim(ctx, namespace, pvc)
-	}
-}
-
-func deletePVC(
-	controller cluster.Controller,
-	namespace string,
-	pvc *cluster.PersistentVolumeClaim,
+	statefulSetName string,
 	isCleanUp bool,
 ) error {
-	return controller.DeletePersistentVolumeClaim(context.Background(), pvc.Name, namespace, isCleanUp)
+	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
+	err := controller.DeletePVCs(context.Background(), listOptions, namespace, isCleanUp)
+	if err != nil {
+		return fmt.Errorf("unable to get pvcs of the stateful set name %s: %s", statefulSetName, err.Error())
+	}
+	return nil
 }
 
 // deployKnServices deploys all services simulateneously and waits for all of them to
@@ -815,6 +801,19 @@ func (ds *deploymentService) createPodDisruptionBudgets(
 			ds.pdbConfig,
 		)
 		pdbs = append(pdbs, routerPdb)
+	}
+
+	// Fluentd logger's PDB
+	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger &&
+		math.Ceil(float64(servicebuilder.FluentdReplicaCount)*
+			minAvailablePercent) < float64(servicebuilder.FluentdReplicaCount) {
+		fluentdPdb := ds.svcBuilder.NewPodDisruptionBudget(
+			routerVersion,
+			project,
+			servicebuilder.ComponentTypes.FluentdLogger,
+			ds.pdbConfig,
+		)
+		pdbs = append(pdbs, fluentdPdb)
 	}
 
 	return pdbs

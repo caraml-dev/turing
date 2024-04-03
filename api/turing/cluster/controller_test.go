@@ -46,11 +46,13 @@ var reactorVerbs = struct {
 	Create string
 	Update string
 	Delete string
+	List   string
 }{
 	Get:    "get",
 	Create: "create",
 	Update: "update",
 	Delete: "delete",
+	List:   "list",
 }
 
 const (
@@ -81,7 +83,7 @@ func TestDeployKnativeService(t *testing.T) {
 	}
 
 	// Define reactor for a successful get
-	getSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
+	getSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
 		return true, &knservingv1.Service{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: testName,
@@ -189,10 +191,10 @@ func TestDeployKnativeService(t *testing.T) {
 
 func TestDeployKubernetesService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
-	deploymentResourceItem := schema.GroupVersionResource{
+	statefulSetResourceItem := schema.GroupVersionResource{
 		Group:    "apps",
 		Version:  "v1",
-		Resource: "deployments",
+		Resource: "statefulsets",
 	}
 	svcResourceItem := schema.GroupVersionResource{
 		Version:  "v1",
@@ -204,7 +206,7 @@ func TestDeployKubernetesService(t *testing.T) {
 			Namespace: testNamespace,
 		},
 	}
-	testK8sDeployment := &appsv1.Deployment{
+	testK8sStatefulSet := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testName,
 			Namespace: testNamespace,
@@ -219,29 +221,29 @@ func TestDeployKubernetesService(t *testing.T) {
 
 	replicas := int32(1)
 	// Define reactor for a successful get
-	getDeploymentSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
-		return true, &appsv1.Deployment{
+	getStatefulSetSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
+		return true, &appsv1.StatefulSet{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:       testName,
 				Namespace:  testNamespace,
 				Generation: 1,
 			},
-			Spec: appsv1.DeploymentSpec{
+			Spec: appsv1.StatefulSetSpec{
 				Replicas: &replicas,
 			},
-			Status: appsv1.DeploymentStatus{
+			Status: appsv1.StatefulSetStatus{
 				ObservedGeneration: 1,
 				Replicas:           1,
 				ReadyReplicas:      1,
-				Conditions: []appsv1.DeploymentCondition{
+				Conditions: []appsv1.StatefulSetCondition{
 					{
-						Type: appsv1.DeploymentAvailable,
+						Type: "Available",
 					},
 				},
 			},
 		}, nil
 	}
-	getSvcSuccess := func(action k8stesting.Action) (bool, runtime.Object, error) {
+	getSvcSuccess := func(_ k8stesting.Action) (bool, runtime.Object, error) {
 		return true, testK8sSvc, nil
 	}
 
@@ -255,9 +257,9 @@ func TestDeployKubernetesService(t *testing.T) {
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
-					resource: deploymentResourceItem.String(),
+					resource: statefulSetResourceItem.String(),
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						expAction := k8stesting.NewGetAction(statefulSetResourceItem, testNamespace, testName)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Return nil object and error to indicate non existent object
@@ -266,15 +268,15 @@ func TestDeployKubernetesService(t *testing.T) {
 				},
 				{
 					verb:     reactorVerbs.Create,
-					resource: "deployments",
+					resource: "statefulsets",
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewCreateAction(deploymentResourceItem, testNamespace, testK8sDeployment)
+						expAction := k8stesting.NewCreateAction(statefulSetResourceItem, testNamespace, testK8sStatefulSet)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Prepend a new get reactor for waitK8sServiceReady to use
-						cs.PrependReactor(reactorVerbs.Get, "deployments", getDeploymentSuccess)
+						cs.PrependReactor(reactorVerbs.Get, "statefulsets", getStatefulSetSuccess)
 						// Nil error indicates Create success
-						return true, testK8sDeployment, nil
+						return true, testK8sStatefulSet, nil
 					},
 				},
 				{
@@ -308,26 +310,26 @@ func TestDeployKubernetesService(t *testing.T) {
 			[]reactor{
 				{
 					verb:     reactorVerbs.Get,
-					resource: "deployments",
+					resource: "statefulsets",
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(deploymentResourceItem, testNamespace, testName)
+						expAction := k8stesting.NewGetAction(statefulSetResourceItem, testNamespace, testName)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
-						return true, testK8sDeployment, nil
+						return true, testK8sStatefulSet, nil
 					},
 				},
 				{
 					verb:     reactorVerbs.Update,
-					resource: "deployments",
+					resource: "statefulsets",
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewUpdateAction(deploymentResourceItem,
-							testNamespace, testK8sDeployment)
+						expAction := k8stesting.NewUpdateAction(statefulSetResourceItem,
+							testNamespace, testK8sStatefulSet)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Prepend a new get reactor for waitK8sServiceReady to use
-						cs.PrependReactor(reactorVerbs.Get, "deployments", getDeploymentSuccess)
+						cs.PrependReactor(reactorVerbs.Get, "statefulsets", getStatefulSetSuccess)
 						// Nil error indicates Update success
-						return true, testK8sDeployment, nil
+						return true, testK8sStatefulSet, nil
 					},
 				},
 				{
@@ -362,8 +364,8 @@ func TestDeployKubernetesService(t *testing.T) {
 			monkey.PatchInstanceMethod(
 				reflect.TypeOf(svcConf),
 				"BuildKubernetesServiceConfig",
-				func(service *KubernetesService) (*appsv1.Deployment, *corev1.Service) {
-					return testK8sDeployment, testK8sSvc
+				func(_ *KubernetesService) (*appsv1.StatefulSet, *corev1.Service) {
+					return testK8sStatefulSet, testK8sSvc
 				},
 			)
 			monkey.Patch(k8sServiceSemanticEquals,
@@ -371,8 +373,8 @@ func TestDeployKubernetesService(t *testing.T) {
 					// Make method return false always, so that an update will be triggered
 					return false
 				})
-			monkey.Patch(k8sDeploymentSemanticEquals,
-				func(*appsv1.Deployment, *appsv1.Deployment) bool {
+			monkey.Patch(k8sStatefulSetSemanticEquals,
+				func(*appsv1.StatefulSet, *appsv1.StatefulSet) bool {
 					// Make method return false always, so that an update will be triggered
 					return false
 				})
@@ -485,7 +487,7 @@ func TestDeleteKnativeService(t *testing.T) {
 	}
 }
 
-func TestDeleteKubernetesDeployment(t *testing.T) {
+func TestDeleteKubernetesStatefulSet(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	deploymentResourceItem := schema.GroupVersionResource{
 		Group:    "apps",
@@ -571,7 +573,7 @@ func TestDeleteKubernetesDeployment(t *testing.T) {
 			// Create test controller
 			c := createTestK8sController(cs, tc.reactors)
 			// Run test
-			err := c.DeleteKubernetesDeployment(ctx, testName, testNamespace, tc.ignoreNotFound)
+			err := c.DeleteKubernetesStatefulSet(ctx, testName, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, err != nil, tc.hasErr)
 		})
@@ -803,7 +805,7 @@ func TestGetJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "job",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
 					},
 				},
@@ -816,7 +818,7 @@ func TestGetJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "jobs",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &batchv1.Job{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: jobName,
@@ -862,7 +864,7 @@ func TestDeleteJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Delete,
 					resource: "job",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, jobName)
 					},
 				},
@@ -874,7 +876,7 @@ func TestDeleteJob(t *testing.T) {
 				{
 					verb:     reactorVerbs.Delete,
 					resource: "jobs",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, nil, nil
 					},
 				},
@@ -915,7 +917,7 @@ func TestCreateServiceAccount(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "serviceaccount",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &corev1.ServiceAccount{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: serviceAccountName,
@@ -932,7 +934,7 @@ func TestCreateServiceAccount(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "serviceaccount",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &corev1.ServiceAccount{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: serviceAccountName,
@@ -986,7 +988,7 @@ func TestCreateRole(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "role",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.Role{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleName,
@@ -1003,7 +1005,7 @@ func TestCreateRole(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "role",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.Role{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleName,
@@ -1059,7 +1061,7 @@ func TestCreateRoleBinding(t *testing.T) {
 				{
 					verb:     reactorVerbs.Get,
 					resource: "rolebinding",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.RoleBinding{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleBindingName,
@@ -1076,7 +1078,7 @@ func TestCreateRoleBinding(t *testing.T) {
 				{
 					verb:     reactorVerbs.Create,
 					resource: "rolebinding",
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
+					rFunc: func(_ k8stesting.Action) (bool, runtime.Object, error) {
 						return true, &rbacv1.RoleBinding{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: roleBindingName,
@@ -1125,7 +1127,7 @@ func TestCreateSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Create,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, &sparkv1beta2.SparkApplication{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "spark",
@@ -1173,7 +1175,7 @@ func TestGetSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Get,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, &sparkv1beta2.SparkApplication{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: "spark",
@@ -1203,7 +1205,7 @@ func TestDeleteSparkApplication(t *testing.T) {
 		cs.PrependReactor(
 			reactorVerbs.Get,
 			"sparkapplication",
-			func(action k8stesting.Action) (bool, runtime.Object, error) {
+			func(_ k8stesting.Action) (bool, runtime.Object, error) {
 				return true, nil, nil
 			},
 		)
@@ -1583,109 +1585,23 @@ func TestDeleteSecret(t *testing.T) {
 	}
 }
 
-func TestCreatePVC(t *testing.T) {
+func TestDeletePVCs(t *testing.T) {
 	pvcResource := schema.GroupVersionResource{
 		Group:    "",
 		Version:  "v1",
 		Resource: "persistentvolumeclaims",
 	}
+
+	groupVersionKind := schema.GroupVersionKind{
+		Group:   "",
+		Version: "v1",
+		Kind:    "PersistentVolumeClaim",
+	}
+
 	testNamespace := "namespace"
 
-	cacheVolumeSize := "2Gi"
-	volSize, _ := resource.ParseQuantity(cacheVolumeSize) // drop error since this volume size is a constant
-
-	pvcConf := PersistentVolumeClaim{
-		Name:        "test-svc-turing-pvc",
-		AccessModes: []string{"ReadWriteOnce"},
-		Size:        volSize,
-	}
-	testPvc := pvcConf.BuildPersistentVolumeClaim()
-	cs := fake.NewSimpleClientset()
-	tests := []struct {
-		name     string
-		reactors []reactor
-		hasErr   bool
-	}{
-		{"new_pvc",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, testPvc.Name)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testPvc.Name)
-					},
-				},
-				{
-					verb:     reactorVerbs.Create,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewCreateAction(pvcResource, testNamespace, testPvc)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Nil error indicates Create success
-						return true, testPvc, nil
-					},
-				},
-			},
-			false,
-		},
-		{
-			"pvc_exists",
-			[]reactor{
-				{
-					verb:     reactorVerbs.Get,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, testPvc.Name)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Return nil object and error to indicate non existent object
-						return true, testPvc, nil
-					},
-				},
-				{
-					verb:     reactorVerbs.Update,
-					resource: pvcResource.Resource,
-					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewUpdateAction(pvcResource, testNamespace, testPvc)
-						// Check that the method is called with the expected action
-						assert.Equal(t, expAction, action)
-						// Nil error indicates Create success
-						return true, testPvc, nil
-					},
-				},
-			},
-			false,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Create test controller
-			c := createTestK8sController(cs, tc.reactors)
-
-			ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
-			defer cancel()
-
-			// Run test
-			err := c.ApplyPersistentVolumeClaim(ctx, testNamespace, &pvcConf)
-			// Validate no error
-			assert.Equal(t, tc.hasErr, err != nil)
-		})
-	}
-}
-
-func TestDeletePVC(t *testing.T) {
-	pvcResource := schema.GroupVersionResource{
-		Group:    "",
-		Version:  "v1",
-		Resource: "persistentvolumeclaims",
-	}
-	testNamespace := "namespace"
+	statefulSetName := "test-svc-turing-fluentd-logger-0"
+	listOptions := metav1.ListOptions{LabelSelector: "app=" + statefulSetName}
 
 	cacheVolumeSize := "2Gi"
 	volSize, _ := resource.ParseQuantity(cacheVolumeSize) // drop error since this volume size is a constant
@@ -1707,10 +1623,10 @@ func TestDeletePVC(t *testing.T) {
 			"not_exists; ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Return nil object and error to indicate non existent object
@@ -1725,10 +1641,10 @@ func TestDeletePVC(t *testing.T) {
 			"exists; ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						return true, nil, nil
@@ -1751,10 +1667,10 @@ func TestDeletePVC(t *testing.T) {
 			"not_exists; do not ignore pvc not found",
 			[]reactor{
 				{
-					verb:     reactorVerbs.Get,
+					verb:     reactorVerbs.List,
 					resource: pvcResource.Resource,
 					rFunc: func(action k8stesting.Action) (bool, runtime.Object, error) {
-						expAction := k8stesting.NewGetAction(pvcResource, testNamespace, pvcConf.Name)
+						expAction := k8stesting.NewListAction(pvcResource, groupVersionKind, testNamespace, listOptions)
 						// Check that the method is called with the expected action
 						assert.Equal(t, expAction, action)
 						// Return nil object and error to indicate non existent object
@@ -1776,7 +1692,7 @@ func TestDeletePVC(t *testing.T) {
 			defer cancel()
 
 			// Run test
-			err := c.DeletePersistentVolumeClaim(ctx, pvcConf.Name, testNamespace, tc.ignoreNotFound)
+			err := c.DeletePVCs(ctx, listOptions, testNamespace, tc.ignoreNotFound)
 			// Validate no error
 			assert.Equal(t, tc.hasErr, err != nil)
 		})

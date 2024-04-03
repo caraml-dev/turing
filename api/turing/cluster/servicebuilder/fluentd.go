@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	fluentdReplicaCount  = 1
-	fluentdCPURequest    = "2"
-	fluentdMemRequest    = "2Gi"
+	FluentdReplicaCount  = 2
+	fluentdCPURequest    = "1"
+	fluentdMemRequest    = "1Gi"
 	fluentdPort          = 24224
 	cacheVolumeMountPath = "/cache/"
 	cacheVolumeSize      = "2Gi"
@@ -40,7 +40,8 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
 		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + secretKeyNameRouter},
 		{Name: "FLUENTD_BUFFER_LIMIT", Value: "10g"},
-		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS", Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds)},
+		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS",
+			Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds * FluentdReplicaCount)},
 		{Name: "FLUENTD_TAG", Value: fluentdConfig.Tag},
 		{Name: "FLUENTD_GCP_PROJECT", Value: tableSplit[0]},
 		{Name: "FLUENTD_BQ_DATASET", Value: tableSplit[1]},
@@ -77,7 +78,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 			Volumes:               volumes,
 			VolumeMounts:          volumeMounts,
 		},
-		Replicas: fluentdReplicaCount,
+		Replicas: FluentdReplicaCount,
 		Ports: []cluster.Port{
 			{
 				Name:     "tcp-input",
@@ -125,17 +126,8 @@ func buildFluentdVolumes(
 		MountPath: secretMountPath,
 	})
 
-	volumes = append(volumes, corev1.Volume{
-		Name: ComponentTypes.CacheVolume,
-		VolumeSource: corev1.VolumeSource{
-			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-				ClaimName: cacheVolumePVCName,
-			},
-		},
-	})
-
 	volumeMounts = append(volumeMounts, corev1.VolumeMount{
-		Name:      ComponentTypes.CacheVolume,
+		Name:      cacheVolumePVCName,
 		MountPath: cacheVolumeMountPath,
 	})
 
