@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -122,7 +121,7 @@ func newImageBuilder(
 
 func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	imageName := ib.nameGenerator.generateDockerImageName(request.ProjectName, request.ResourceName)
-	imageExists, err := ib.checkIfImageExists(imageName, strconv.Itoa(int(request.ResourceID)))
+	imageExists, err := ib.checkIfImageExists(imageName, request.VersionID)
 	imageRef := fmt.Sprintf("%s:%s", imageName, request.VersionID)
 	if err != nil {
 		log.Errorf("Unable to check existing image ref: %v", err)
