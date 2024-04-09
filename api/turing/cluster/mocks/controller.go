@@ -64,9 +64,9 @@ func (_m *Controller) ApplyIstioVirtualService(ctx context.Context, routerEndpoi
 	return r0
 }
 
-// ApplyPodDisruptionBudget provides a mock function with given fields: ctx, namespace, pdb
-func (_m *Controller) ApplyPodDisruptionBudget(ctx context.Context, namespace string, pdb cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error) {
-	ret := _m.Called(ctx, namespace, pdb)
+// ApplyPodDisruptionBudget provides a mock function with given fields: ctx, pdb
+func (_m *Controller) ApplyPodDisruptionBudget(ctx context.Context, pdb cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error) {
+	ret := _m.Called(ctx, pdb)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ApplyPodDisruptionBudget")
@@ -74,19 +74,19 @@ func (_m *Controller) ApplyPodDisruptionBudget(ctx context.Context, namespace st
 
 	var r0 *v1.PodDisruptionBudget
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error)); ok {
-		return rf(ctx, namespace, pdb)
+	if rf, ok := ret.Get(0).(func(context.Context, cluster.PodDisruptionBudget) (*v1.PodDisruptionBudget, error)); ok {
+		return rf(ctx, pdb)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, cluster.PodDisruptionBudget) *v1.PodDisruptionBudget); ok {
-		r0 = rf(ctx, namespace, pdb)
+	if rf, ok := ret.Get(0).(func(context.Context, cluster.PodDisruptionBudget) *v1.PodDisruptionBudget); ok {
+		r0 = rf(ctx, pdb)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.PodDisruptionBudget)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, cluster.PodDisruptionBudget) error); ok {
-		r1 = rf(ctx, namespace, pdb)
+	if rf, ok := ret.Get(1).(func(context.Context, cluster.PodDisruptionBudget) error); ok {
+		r1 = rf(ctx, pdb)
 	} else {
 		r1 = ret.Error(1)
 	}

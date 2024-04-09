@@ -107,8 +107,7 @@ type Controller interface {
 	DeleteSparkApplication(ctx context.Context, namespace, appName string) error
 
 	// PodDisruptionBudget
-	ApplyPodDisruptionBudget(ctx context.Context, namespace string,
-		pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
+	ApplyPodDisruptionBudget(ctx context.Context, pdb PodDisruptionBudget) (*apipolicyv1.PodDisruptionBudget, error)
 	DeletePodDisruptionBudget(ctx context.Context, namespace, pdbName string) error
 }
 
@@ -680,7 +679,6 @@ func (c *controller) DeleteSparkApplication(ctx context.Context, namespace, appN
 
 func (c *controller) ApplyPodDisruptionBudget(
 	ctx context.Context,
-	_ string,
 	pdb PodDisruptionBudget,
 ) (*apipolicyv1.PodDisruptionBudget, error) {
 	pdbSpec, err := pdb.BuildPDBSpec()

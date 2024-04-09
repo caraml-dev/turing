@@ -221,7 +221,7 @@ func TestDeployEndpoint(t *testing.T) {
 	controller.On("ApplyConfigMap", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	controller.On("CreateSecret", mock.Anything, mock.Anything).Return(nil)
 	controller.On("ApplyIstioVirtualService", mock.Anything, mock.Anything).Return(nil)
-	controller.On("ApplyPodDisruptionBudget", mock.Anything, mock.Anything, mock.Anything).
+	controller.On("ApplyPodDisruptionBudget", mock.Anything, mock.Anything).
 		Return(&policyv1.PodDisruptionBudget{}, nil)
 
 	// Create mock service builder
@@ -361,7 +361,7 @@ func TestDeployEndpoint(t *testing.T) {
 		},
 		Endpoint: "test-svc-router.models.example.com",
 	})
-	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
+	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, cluster.PodDisruptionBudget{
 		Name:                   "test-svc-turing-router-1-pdb",
 		Namespace:              testNamespace,
 		MinAvailablePercentage: &defaultMinAvailablePercentage,
@@ -371,7 +371,7 @@ func TestDeployEndpoint(t *testing.T) {
 			},
 		},
 	})
-	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, testNamespace, cluster.PodDisruptionBudget{
+	controller.AssertCalled(t, "ApplyPodDisruptionBudget", mock.Anything, cluster.PodDisruptionBudget{
 		Name:                   "test-svc-turing-ensembler-1-pdb",
 		Namespace:              testNamespace,
 		MinAvailablePercentage: &defaultMinAvailablePercentage,
