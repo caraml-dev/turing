@@ -26,7 +26,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
-	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/service"
 	svcmocks "github.com/caraml-dev/turing/api/turing/service/mocks"
 )
@@ -121,10 +120,6 @@ func TestNewAppContext(t *testing.T) {
 					},
 				},
 			},
-		},
-		AuthConfig: &config.AuthorizationConfig{
-			Enabled: true,
-			URL:     "test-auth-url",
 		},
 		DbConfig: &config.DatabaseConfig{
 			Host:     "turing-db-host",
@@ -225,29 +220,32 @@ func TestNewAppContext(t *testing.T) {
 			ArtifactServiceType: "nop",
 		},
 	}
-	// Create test auth enforcer
-	testAuthorizer := &middleware.Authorizer{}
 	// Create mock MLP Service
+	mockEnvironmentID1 := int32(1)
+	mockGcpProject1 := "gcp-project"
+	mockEnvironmentID2 := int32(2)
+	mockGcpProject2 := "gcp-project-2"
+
 	mlpSvc := &svcmocks.MLPService{}
 	mlpSvc.On("GetEnvironments").Return([]merlin.Environment{
 		{
-			Id:         1,
+			Id:         &mockEnvironmentID1,
 			Name:       "N1",
 			Cluster:    "C1",
-			GcpProject: "gcp-project",
+			GcpProject: &mockGcpProject1,
 		},
 		{
-			Id:         2,
+			Id:         &mockEnvironmentID2,
 			Name:       "N2",
 			Cluster:    "C2",
-			GcpProject: "gcp-project-2",
+			GcpProject: &mockGcpProject2,
 		},
 	}, nil)
 
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(service.NewExperimentsService,
-		func(experimentConfig map[string]config.EngineConfig) (service.ExperimentsService, error) {
+		func(_ map[string]config.EngineConfig) (service.ExperimentsService, error) {
 			return nil, nil
 		},
 	)
@@ -289,7 +287,7 @@ func TestNewAppContext(t *testing.T) {
 		},
 	)
 	monkey.Patch(service.NewGitlabOpsAlertService,
-		func(db *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
+		func(_ *gorm.DB, config config.AlertConfig) (service.AlertService, error) {
 			assert.Equal(t, *testCfg.AlertConfig, config)
 			return nil, nil
 		},
@@ -302,7 +300,7 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Validate
-	appCtx, err := NewAppContext(nil, testCfg, testAuthorizer)
+	appCtx, err := NewAppContext(nil, testCfg)
 	assert.NoError(t, err)
 
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
@@ -355,7 +353,6 @@ func TestNewAppContext(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, &AppContext{
-		Authorizer: testAuthorizer,
 		DeploymentService: service.NewDeploymentService(
 			testCfg,
 			map[string]cluster.Controller{

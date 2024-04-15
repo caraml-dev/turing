@@ -14,7 +14,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/internal"
 )
 
-func versionAPI(w http.ResponseWriter, r *http.Request) {
+func versionAPI(w http.ResponseWriter, _ *http.Request) {
 	dec := json.NewEncoder(w)
 	dec.SetIndent("", "  ")
 	if err := dec.Encode(internal.VersionInfo); err != nil {

@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gavv/httpexpect/v2"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo/v2"
+	"github.com/onsi/gomega"
 
 	"github.com/caraml-dev/turing/api/e2e/test/api"
 	"github.com/caraml-dev/turing/api/e2e/test/cluster"
@@ -27,9 +27,9 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			want, got *httpexpect.Object
 		)
 
-		BeforeAll(func() {
-			apiE = config.NewHTTPExpect(GinkgoT(), cfg.APIBasePath)
-			routerE = config.NewHTTPExpect(GinkgoT(), routerCtx.Endpoint)
+		ginkgo.BeforeAll(func() {
+			apiE = config.NewHTTPExpect(ginkgo.GinkgoT(), cfg.APIBasePath)
+			routerE = config.NewHTTPExpect(ginkgo.GinkgoT(), routerCtx.Endpoint)
 		})
 
 		AssertPredictResponse := func() {
@@ -42,13 +42,13 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			AssertResponsePayload(want, got)
 		}
 
-		Describe("1.1. Calling router endpoints to fetch predictions", func() {
-			Context("Turing Router API", func() {
-				Context("POST /v1/predict", func() {
-					When("valid request", func() {
-						It("responds with expected payload", func() {
+		ginkgo.Describe("1.1. Calling router endpoints to fetch predictions", func() {
+			ginkgo.Context("Turing Router API", func() {
+				ginkgo.Context("POST /v1/predict", func() {
+					ginkgo.When("valid request", func() {
+						ginkgo.It("responds with expected payload", func() {
 							want = httpexpect.NewValue(
-								GinkgoT(),
+								ginkgo.GinkgoT(),
 								JSONPayload("testdata/responses/router_proprietary_exp_predict.json"),
 							).Object()
 
@@ -57,9 +57,9 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					})
 				})
 
-				Context("POST /v1/batch_predict", func() {
-					When("valid request", func() {
-						It("responds with an array, that contains individual predictions", func() {
+				ginkgo.Context("POST /v1/batch_predict", func() {
+					ginkgo.When("valid request", func() {
+						ginkgo.It("responds with an array, that contains individual predictions", func() {
 							routerE.POST("/v1/batch_predict").
 								WithHeaders(defaultPredictHeaders).
 								WithJSON(json.RawMessage(`[{"client": {"id": 4}}, {"client": {"id": 7}}]`)).
@@ -72,12 +72,12 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			})
 		})
 
-		Describe("1.2. Accessing router logs via Turing API", func() {
-			Context("Turing API", func() {
-				Context("GET /projects/:projectId/routers/:routerId/logs?component_type=:type", func() {
+		ginkgo.Describe("1.2. Accessing router logs via Turing API", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("GET /projects/:projectId/routers/:routerId/logs?component_type=:type", func() {
 					for _, componentType := range []string{"router", "ensembler", "enricher"} {
-						When(fmt.Sprintf("API is called to fetch %s's logs", componentType), func() {
-							It(fmt.Sprintf("responds with %s's log entries", componentType), func() {
+						ginkgo.When(fmt.Sprintf("API is called to fetch %s's logs", componentType), func() {
+							ginkgo.It(fmt.Sprintf("responds with %s's log entries", componentType), func() {
 								apiE.GET("/projects/{projectId}/routers/{routerId}/logs").
 									WithPath("projectId", routerCtx.ProjectID).
 									WithPath("routerId", routerCtx.ID).
@@ -91,11 +91,11 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			})
 		})
 
-		Describe("1.3. Updating router with a new version, that can't be deployed", func() {
-			Context("Turing API", func() {
-				Context("PUT /projects/:projectId/routers/:routerId", func() {
-					When("request valid", func() {
-						It("creates a new router's version", func() {
+		ginkgo.Describe("1.3. Updating router with a new version, that can't be deployed", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("PUT /projects/:projectId/routers/:routerId", func() {
+					ginkgo.When("request valid", func() {
+						ginkgo.It("creates a new router's version", func() {
 							apiE.PUT("/projects/{projectId}/routers/{routerId}").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
@@ -106,21 +106,21 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					})
 				})
 
-				Context("GET /projects/:projectId/routers/:routerId/versions/:version", func() {
-					When("new router version can't be deployed", func() {
-						It("fails after a timeout", func() {
-							Eventually(func(g Gomega) {
+				ginkgo.Context("GET /projects/:projectId/routers/:routerId/versions/:version", func() {
+					ginkgo.When("new router version can't be deployed", func() {
+						ginkgo.It("fails after a timeout", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								version = api.GetRouterVersion(apiE, routerCtx.ProjectID, routerCtx.ID, 2)
 
-								g.Expect(version.Value("status").Raw()).ShouldNot(Equal(api.Status.Pending))
-							}, defaultDeploymentIntervals...).Should(Succeed())
+								g.Expect(version.Value("status").Raw()).ShouldNot(gomega.Equal(api.Status.Pending))
+							}, defaultDeploymentIntervals...).Should(gomega.Succeed())
 
 							version.
 								HasValue("status", api.Status.Failed).
 								HasValue("error", "Requested CPU is more than max permissible")
 						})
 
-						It("keeps previously deployed version active", func() {
+						ginkgo.It("keeps previously deployed version active", func() {
 							router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 							router.Path("$.config.version").IsEqual(1)
 						})
@@ -128,13 +128,13 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 				})
 			})
 
-			Context("Turing Router API", func() {
-				Context("POST /v1/predict", func() {
-					When("valid request", func() {
-						It("responds with expected payload", func() {
-							Consistently(func(Gomega) {
+			ginkgo.Context("Turing Router API", func() {
+				ginkgo.Context("POST /v1/predict", func() {
+					ginkgo.When("valid request", func() {
+						ginkgo.It("responds with expected payload", func() {
+							gomega.Consistently(func(gomega.Gomega) {
 								AssertPredictResponse()
-							}, arbitraryUpdateIntervals...).Should(Succeed())
+							}, arbitraryUpdateIntervals...).Should(gomega.Succeed())
 						})
 					})
 				})
@@ -142,106 +142,106 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 
 		})
 
-		Describe("1.4. Undeploying router", func() {
-			Context("Turing API", func() {
-				When("router is deployed", func() {
-					Context("POST /projects/:projectId/routers/:routerId/undeploy", func() {
-						It("accepts request and starts undeploying the router", func() {
+		ginkgo.Describe("1.4. Undeploying router", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.When("router is deployed", func() {
+					ginkgo.Context("POST /projects/:projectId/routers/:routerId/undeploy", func() {
+						ginkgo.It("accepts request and starts undeploying the router", func() {
 							apiE.POST("/projects/{projectId}/routers/{routerId}/undeploy").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
 								Expect().Status(http.StatusOK)
 						})
 
-						It("eventually undeploys the router", func() {
-							Eventually(func(g Gomega) {
+						ginkgo.It("eventually undeploys the router", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 
-								g.Expect(router.Raw()).To(And(
-									Not(HaveKey("endpoint")),
-									HaveKeyWithValue("status", api.Status.Undeployed),
-									HaveKeyWithValue("config", And(
-										HaveKeyWithValue("version", BeNumerically("==", 1)),
-										HaveKeyWithValue("status", api.Status.Undeployed))),
+								g.Expect(router.Raw()).To(gomega.And(
+									gomega.Not(gomega.HaveKey("endpoint")),
+									gomega.HaveKeyWithValue("status", api.Status.Undeployed),
+									gomega.HaveKeyWithValue("config", gomega.And(
+										gomega.HaveKeyWithValue("version", gomega.BeNumerically("==", 1)),
+										gomega.HaveKeyWithValue("status", api.Status.Undeployed))),
 								))
-							}, defaultDeletionIntervals...).Should(Succeed())
+							}, defaultDeletionIntervals...).Should(gomega.Succeed())
 						})
 					})
 				})
 			})
 		})
 
-		Describe("1.5. Deploying a version with invalid configuration", func() {
-			Context("Turing API", func() {
-				Context("POST /projects/:projectId/routers/:routerId/versions/:version/deploy", func() {
-					When("version exists", func() {
-						It("attempts to deploy this version", func() {
+		ginkgo.Describe("1.5. Deploying a version with invalid configuration", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("POST /projects/:projectId/routers/:routerId/versions/:version/deploy", func() {
+					ginkgo.When("version exists", func() {
+						ginkgo.It("attempts to deploy this version", func() {
 							apiE.POST("/projects/{projectId}/routers/{routerId}/versions/{version}/deploy").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
 								WithPath("version", version.Value("version").Raw()).
 								Expect().Status(http.StatusAccepted)
 
-							Eventually(func(g Gomega) {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
-								g.Expect(router.Value("status").Raw()).To(Equal(api.Status.Undeployed))
-							}, arbitraryUpdateIntervals...).Should(Succeed())
+								g.Expect(router.Value("status").Raw()).To(gomega.Equal(api.Status.Undeployed))
+							}, arbitraryUpdateIntervals...).Should(gomega.Succeed())
 						})
 
-						It("fails after a timeout", func() {
+						ginkgo.It("fails after a timeout", func() {
 							versionID := version.Value("version").Raw()
-							Eventually(func(g Gomega) {
+							gomega.Eventually(func(g gomega.Gomega) {
 								version = api.GetRouterVersion(apiE, routerCtx.ProjectID, routerCtx.ID, versionID)
 
-								g.Expect(version.Value("status").Raw()).ShouldNot(Equal(api.Status.Pending))
-							}, defaultDeploymentIntervals...).Should(Succeed())
+								g.Expect(version.Value("status").Raw()).ShouldNot(gomega.Equal(api.Status.Pending))
+							}, defaultDeploymentIntervals...).Should(gomega.Succeed())
 
 							version.
 								HasValue("status", api.Status.Failed).
 								HasValue("error", "Requested CPU is more than max permissible")
 						})
 
-						It("keeps previous valid version as router's current version", func() {
-							Eventually(func(g Gomega) {
+						ginkgo.It("keeps previous valid version as router's current version", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 
-								g.Expect(router.Raw()).To(And(
-									Not(HaveKey("endpoint")),
-									HaveKeyWithValue("status", api.Status.Undeployed),
-									HaveKeyWithValue("config", And(
-										HaveKeyWithValue("version", BeNumerically("==", 1)),
-										HaveKeyWithValue("status", api.Status.Undeployed))),
+								g.Expect(router.Raw()).To(gomega.And(
+									gomega.Not(gomega.HaveKey("endpoint")),
+									gomega.HaveKeyWithValue("status", api.Status.Undeployed),
+									gomega.HaveKeyWithValue("config", gomega.And(
+										gomega.HaveKeyWithValue("version", gomega.BeNumerically("==", 1)),
+										gomega.HaveKeyWithValue("status", api.Status.Undeployed))),
 								))
-							}, arbitraryUpdateIntervals...).Should(Succeed())
+							}, arbitraryUpdateIntervals...).Should(gomega.Succeed())
 						})
 					})
 				})
 			})
 		})
 
-		Describe("1.6. Redeploying a router with existing valid configuration", func() {
-			Context("Turing API", func() {
-				Context("POST /projects/:projectId/routers/:routerId/deploy", func() {
-					When("router is not deployed", func() {
-						It("attempts to deploy the router", func() {
+		ginkgo.Describe("1.6. Redeploying a router with existing valid configuration", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("POST /projects/:projectId/routers/:routerId/deploy", func() {
+					ginkgo.When("router is not deployed", func() {
+						ginkgo.It("attempts to deploy the router", func() {
 							apiE.POST("/projects/{projectId}/routers/{routerId}/deploy").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
 								Expect().Status(http.StatusAccepted)
 
-							Eventually(func(g Gomega) {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 
-								g.Expect(router.Value("status").Raw()).To(Equal(api.Status.Pending))
-							}, arbitraryUpdateIntervals...).Should(Succeed())
+								g.Expect(router.Value("status").Raw()).To(gomega.Equal(api.Status.Pending))
+							}, arbitraryUpdateIntervals...).Should(gomega.Succeed())
 						})
 
-						It("successfully deploys the router", func() {
-							Eventually(func(g Gomega) {
+						ginkgo.It("successfully deploys the router", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 
-								g.Expect(router.Value("status").Raw()).ShouldNot(Equal(api.Status.Pending))
-							}, defaultDeploymentIntervals...).Should(Succeed())
+								g.Expect(router.Value("status").Raw()).ShouldNot(gomega.Equal(api.Status.Pending))
+							}, defaultDeploymentIntervals...).Should(gomega.Succeed())
 
 							router.
 								HasValue("status", api.Status.Deployed).
@@ -252,11 +252,11 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			})
 		})
 
-		Describe("1.7. Updating router with a new valid configuration", func() {
-			Context("Turing API", func() {
-				Context("PUT /projects/:projectId/routers/:routerId", func() {
-					When("request valid", func() {
-						It("creates a new router's version", func() {
+		ginkgo.Describe("1.7. Updating router with a new valid configuration", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("PUT /projects/:projectId/routers/:routerId", func() {
+					ginkgo.When("request valid", func() {
+						ginkgo.It("creates a new router's version", func() {
 							apiE.PUT("/projects/{projectId}/routers/{routerId}").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
@@ -268,39 +268,39 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					})
 				})
 
-				It("successfully deploys a new version", func() {
-					Eventually(func(g Gomega) {
+				ginkgo.It("successfully deploys a new version", func() {
+					gomega.Eventually(func(g gomega.Gomega) {
 						version = api.GetRouterVersion(apiE, routerCtx.ProjectID, routerCtx.ID, 3)
 
-						g.Expect(version.Value("status").Raw()).ShouldNot(Equal(api.Status.Pending))
-					}, defaultDeploymentIntervals...).Should(Succeed())
+						g.Expect(version.Value("status").Raw()).ShouldNot(gomega.Equal(api.Status.Pending))
+					}, defaultDeploymentIntervals...).Should(gomega.Succeed())
 
 					version.
 						HasValue("status", api.Status.Deployed).
 						NotContainsKey("error")
 				})
 
-				It("marks previous version as undeployed", func() {
-					Eventually(func(g Gomega) {
+				ginkgo.It("marks previous version as undeployed", func() {
+					gomega.Eventually(func(g gomega.Gomega) {
 						v := api.GetRouterVersion(apiE, routerCtx.ProjectID, routerCtx.ID, 1)
 
-						g.Expect(v.Value("status").Raw()).Should(Equal(api.Status.Undeployed))
-					}, arbitraryUpdateIntervals...).Should(Succeed())
+						g.Expect(v.Value("status").Raw()).Should(gomega.Equal(api.Status.Undeployed))
+					}, arbitraryUpdateIntervals...).Should(gomega.Succeed())
 				})
 
-				It("updates router's configuration to the new version", func() {
+				ginkgo.It("updates router's configuration to the new version", func() {
 					api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID).
 						HasValue("status", api.Status.Deployed).
 						Path("$.config.version").IsEqual(3)
 				})
 			})
 
-			Context("Turing Router API", func() {
-				Context("POST /v1/predict", func() {
-					When("when the new version of router is deployed", func() {
-						It("responds with expected payload", func() {
+			ginkgo.Context("Turing Router API", func() {
+				ginkgo.Context("POST /v1/predict", func() {
+					ginkgo.When("when the new version of router is deployed", func() {
+						ginkgo.It("responds with expected payload", func() {
 							want = httpexpect.NewValue(
-								GinkgoT(),
+								ginkgo.GinkgoT(),
 								json.RawMessage(`{"version": "treatment-a"}`),
 							).Object()
 							AssertPredictResponse()
@@ -310,11 +310,11 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 			})
 		})
 
-		Describe("1.8. Deleting router", func() {
-			Context("Turing API", func() {
-				Context("DELETE /projects/:projectId/routers/:routerId", func() {
-					When("router is deployed", func() {
-						It("responds with bad request status", func() {
+		ginkgo.Describe("1.8. Deleting router", func() {
+			ginkgo.Context("Turing API", func() {
+				ginkgo.Context("DELETE /projects/:projectId/routers/:routerId", func() {
+					ginkgo.When("router is deployed", func() {
+						ginkgo.It("responds with bad request status", func() {
 							apiE.DELETE("/projects/{projectId}/routers/{routerId}").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
@@ -328,34 +328,34 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					})
 				})
 
-				Context("POST /projects/:projectId/routers/:routerId/undeploy", func() {
-					When("router is deployed", func() {
-						It("accepts request for undeploying router", func() {
+				ginkgo.Context("POST /projects/:projectId/routers/:routerId/undeploy", func() {
+					ginkgo.When("router is deployed", func() {
+						ginkgo.It("accepts request for undeploying router", func() {
 							apiE.POST("/projects/{projectId}/routers/{routerId}/undeploy").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
 								Expect().Status(http.StatusOK)
 						})
 
-						It("undeploys the router", func() {
-							Eventually(func(g Gomega) {
+						ginkgo.It("undeploys the router", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								router = api.GetRouter(apiE, routerCtx.ProjectID, routerCtx.ID)
 
-								g.Expect(router.Raw()).To(And(
-									Not(HaveKey("endpoint")),
-									HaveKeyWithValue("status", api.Status.Undeployed),
-									HaveKeyWithValue("config", And(
-										HaveKeyWithValue("version", BeNumerically("==", 3)),
-										HaveKeyWithValue("status", api.Status.Undeployed))),
+								g.Expect(router.Raw()).To(gomega.And(
+									gomega.Not(gomega.HaveKey("endpoint")),
+									gomega.HaveKeyWithValue("status", api.Status.Undeployed),
+									gomega.HaveKeyWithValue("config", gomega.And(
+										gomega.HaveKeyWithValue("version", gomega.BeNumerically("==", 3)),
+										gomega.HaveKeyWithValue("status", api.Status.Undeployed))),
 								))
-							}, defaultDeletionIntervals...).Should(Succeed())
+							}, defaultDeletionIntervals...).Should(gomega.Succeed())
 						})
 					})
 				})
 
-				Context("DELETE /projects/:projectId/routers/:routerId", func() {
-					When("router is not deployed", func() {
-						It("successfully deletes router from the db", func() {
+				ginkgo.Context("DELETE /projects/:projectId/routers/:routerId", func() {
+					ginkgo.When("router is not deployed", func() {
+						ginkgo.It("successfully deletes router from the db", func() {
 							apiE.DELETE("/projects/{projectId}/routers/{routerId}").
 								WithPath("projectId", routerCtx.ProjectID).
 								WithPath("routerId", routerCtx.ID).
@@ -375,41 +375,41 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 				})
 			})
 
-			Context("Turing Router API", func() {
-				Context("POST /v1/predict", func() {
-					When("when the router is deleted", func() {
-						It("responds with NotFound status code", func() {
-							Eventually(func(g Gomega) {
+			ginkgo.Context("Turing Router API", func() {
+				ginkgo.Context("POST /v1/predict", func() {
+					ginkgo.When("when the router is deleted", func() {
+						ginkgo.It("responds with NotFound status code", func() {
+							gomega.Eventually(func(g gomega.Gomega) {
 								response := routerE.POST("/v1/predict").
 									WithHeaders(defaultPredictHeaders).
 									WithJSON(json.RawMessage(`{}`)).
 									Expect()
 
-								g.Expect(response.Raw().StatusCode).To(Equal(http.StatusNotFound))
-							}, defaultDeletionIntervals...).Should(Succeed())
+								g.Expect(response.Raw().StatusCode).To(gomega.Equal(http.StatusNotFound))
+							}, defaultDeletionIntervals...).Should(gomega.Succeed())
 						})
 					})
 				})
 			})
 
-			Context("K8s API", func() {
-				When("the router is deleted", func() {
-					It("should remove all its k8s resources from the cluster", func() {
+			ginkgo.Context("K8s API", func() {
+				ginkgo.When("the router is deleted", func() {
+					ginkgo.It("should remove all its k8s resources from the cluster", func() {
 						routerName := router.Value("name").String().Raw()
-						Eventually(func(g Gomega) {
+						gomega.Eventually(func(g gomega.Gomega) {
 							k8sResources, err := cluster.ListRouterResources(cfg.Project.Name, routerName)
 
-							g.Expect(err).ShouldNot(HaveOccurred())
-							g.Expect(k8sResources).Should(And(
-								HaveField("KnativeServices", BeEmpty()),
-								HaveField("K8sServices", BeEmpty()),
-								HaveField("IstioServices", BeEmpty()),
-								HaveField("K8sDeployments", BeEmpty()),
-								HaveField("ConfigMaps", BeEmpty()),
-								HaveField("Secrets", BeEmpty()),
-								HaveField("PVCs", BeEmpty()),
+							g.Expect(err).ShouldNot(gomega.HaveOccurred())
+							g.Expect(k8sResources).Should(gomega.And(
+								gomega.HaveField("KnativeServices", gomega.BeEmpty()),
+								gomega.HaveField("K8sServices", gomega.BeEmpty()),
+								gomega.HaveField("IstioServices", gomega.BeEmpty()),
+								gomega.HaveField("K8sDeployments", gomega.BeEmpty()),
+								gomega.HaveField("ConfigMaps", gomega.BeEmpty()),
+								gomega.HaveField("Secrets", gomega.BeEmpty()),
+								gomega.HaveField("PVCs", gomega.BeEmpty()),
 							))
-						}, defaultDeletionIntervals...).Should(Succeed())
+						}, defaultDeletionIntervals...).Should(gomega.Succeed())
 					})
 				})
 			})

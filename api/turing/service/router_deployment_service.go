@@ -843,7 +843,7 @@ func deployPodDisruptionBudgets(ctx context.Context,
 		eventsCh.Write(models.NewInfoEvent(
 			models.EventStageDeployingServices, "deploying pdb %s", pdb.Name))
 
-		_, err := controller.ApplyPodDisruptionBudget(ctx, pdb.Namespace, *pdb)
+		_, err := controller.ApplyPodDisruptionBudget(ctx, *pdb)
 		if err != nil {
 			err = errors.Wrapf(err, "Failed to deploy pdb %s", pdb.Name)
 			eventsCh.Write(models.NewErrorEvent(

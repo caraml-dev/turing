@@ -68,7 +68,7 @@ func TestNewKafkaLogger(t *testing.T) {
 
 	// Patch the newKafkaProducer method to return the mock producer
 	mockProducer := &mockKafkaProducer{}
-	monkey.Patch(newKafkaProducer, func(cfg *config.KafkaConfig) (kafkaProducer, error) {
+	monkey.Patch(newKafkaProducer, func(_ *config.KafkaConfig) (kafkaProducer, error) {
 		return mockProducer, nil
 	})
 	defer monkey.Unpatch(newKafkaProducer)

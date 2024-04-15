@@ -29,7 +29,7 @@ func (pvc *PersistentVolumeClaim) BuildPersistentVolumeClaim() *corev1.Persisten
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: accessModes,
-			Resources: corev1.ResourceRequirements{
+			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
 					"storage": pvc.Size,
 				},

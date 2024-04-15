@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caraml-dev/mlp/api/pkg/authz/enforcer"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/gorilla/mux"
@@ -16,7 +15,6 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/database"
 	"github.com/caraml-dev/turing/api/turing/log"
-	"github.com/caraml-dev/turing/api/turing/middleware"
 )
 
 type configFlags []string
@@ -76,31 +74,8 @@ func Run() {
 	}
 	defer newrelic.Shutdown(5 * time.Second)
 
-	// Init Authorizer
-	var authorizer *middleware.Authorizer
-	apiPathPrefix := "/v1"
-	if cfg.AuthConfig.Enabled {
-		// Use product mlp as the policies are shared across the mlp products.
-		enforcerCfg := enforcer.NewEnforcerBuilder().URL(cfg.AuthConfig.URL).Product("mlp")
-		if cfg.AuthConfig.Caching.Enabled {
-			enforcerCfg = enforcerCfg.WithCaching(
-				cfg.AuthConfig.Caching.KeyExpirySeconds,
-				cfg.AuthConfig.Caching.CacheCleanUpIntervalSeconds,
-			)
-		}
-		authEnforcer, err := enforcerCfg.Build()
-
-		if err != nil {
-			log.Panicf("Failed initializing authorization enforcer %v", err)
-		}
-		authorizer, err = middleware.NewAuthorizer(authEnforcer, apiPathPrefix)
-		if err != nil {
-			log.Panicf("Failed initializing Authorizer %v", err)
-		}
-	}
-
 	// Init app context
-	appCtx, err := api.NewAppContext(db, cfg, authorizer)
+	appCtx, err := api.NewAppContext(db, cfg)
 	if err != nil {
 		log.Panicf("Failed initializing application context: %v", err)
 	}
@@ -133,7 +108,7 @@ func Run() {
 	}
 
 	// API Handler
-	err = AddAPIRoutesHandler(r, apiPathPrefix, appCtx, cfg)
+	err = AddAPIRoutesHandler(r, "/v1", appCtx, cfg)
 	if err != nil {
 		log.Panicf("Failed to configure API routes: %v", err)
 	}
