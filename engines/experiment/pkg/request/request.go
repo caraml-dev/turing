@@ -60,7 +60,7 @@ func GetValueFromHTTPRequest(
 	case PayloadFieldSource:
 		return getValueFromJSONPayload(bodyBytes, field)
 	case HeaderFieldSource:
-		value := reqHeader.Get(field)
+		value := strings.Join(reqHeader.Values(field), ",")
 		if value == "" {
 			// key not found in header
 			return "", fmt.Errorf("Field %s not found in the request header", field)
@@ -115,7 +115,7 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	value, typez, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
 
 	switch typez {
-	case jsonparser.String, jsonparser.Number, jsonparser.Boolean:
+	case jsonparser.String, jsonparser.Number, jsonparser.Boolean, jsonparser.Array:
 		// See: https://github.com/buger/jsonparser/blob/master/bytes_unsafe.go#L31
 		return *(*string)(unsafe.Pointer(&value)), nil
 	case jsonparser.Null:

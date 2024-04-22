@@ -62,6 +62,18 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			body:     []byte(`{"is_premium_customer": true}`),
 			expected: "true",
 		},
+		"success | array string": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": ["123","321"]}`),
+			expected: `["123","321"]`,
+		},
+		"success | array int": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": [123,321]}`),
+			expected: `[123,321]`,
+		},
 		"success | payload null field": {
 			field:    "session_id",
 			fieldSrc: request.PayloadFieldSource,
