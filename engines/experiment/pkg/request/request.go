@@ -115,7 +115,7 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	value, typez, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
 
 	switch typez {
-	case jsonparser.String, jsonparser.Number, jsonparser.Boolean, jsonparser.Array:
+	case jsonparser.String, jsonparser.Number, jsonparser.Boolean, jsonparser.Array, jsonparser.Object:
 		// See: https://github.com/buger/jsonparser/blob/master/bytes_unsafe.go#L31
 		return *(*string)(unsafe.Pointer(&value)), nil
 	case jsonparser.Null:
