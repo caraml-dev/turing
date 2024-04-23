@@ -85,6 +85,12 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			body:     []byte(`{"customers": [123,321]}`),
 			expected: `[123,321]`,
 		},
+		"success | object": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": {"a":"b"}}`),
+			expected: `{"a":"b"}`,
+		},
 		"success | payload null field": {
 			field:    "session_id",
 			fieldSrc: request.PayloadFieldSource,
