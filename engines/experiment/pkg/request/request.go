@@ -120,9 +120,10 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 		return *(*string)(unsafe.Pointer(&value)), nil
 	case jsonparser.Null:
 		return "", nil
-	// Default non exist
-	default:
+	case jsonparser.NotExist:
 		return "", errors.Errorf("Field %s not found in the request payload: Key path not found", key)
+	default:
+		return "", errors.Errorf("Field %s can not be parsed as string value, unsupported type: %s", key, dataType.String())
 	}
 }
 

@@ -96,6 +96,12 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			body:     []byte(`{"customer": {"id": "test_customer"}}`),
 			err:      "Field customer_id not found in the request payload: Key path not found",
 		},
+		"failure | payload unsupported type": {
+			field:    "customer",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customer": !!!`),
+			err:      "Field customer can not be parsed as string value, unsupported type: unknown",
+		},
 		"failure | unknown source": {
 			field:    "CustomerID",
 			fieldSrc: request.FieldSource("unknown"),
