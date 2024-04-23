@@ -44,6 +44,17 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			}(),
 			expected: "123",
 		},
+		"success | header multiple value": {
+			field:    "CustomerID",
+			fieldSrc: request.HeaderFieldSource,
+			header: func() http.Header {
+				header := http.Header{}
+				header.Set("CustomerID", "123")
+				header.Add("CustomerID", "321")
+				return header
+			}(),
+			expected: "123,321",
+		},
 		"success | nested payload": {
 			field:    "customer.id",
 			fieldSrc: request.PayloadFieldSource,
