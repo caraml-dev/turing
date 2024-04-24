@@ -60,7 +60,7 @@ func GetValueFromHTTPRequest(
 	case PayloadFieldSource:
 		return getValueFromJSONPayload(bodyBytes, field)
 	case HeaderFieldSource:
-		value := reqHeader.Get(field)
+		value := strings.Join(reqHeader.Values(field), ",")
 		if value == "" {
 			// key not found in header
 			return "", fmt.Errorf("Field %s not found in the request header", field)
@@ -112,10 +112,10 @@ func GetValueFromUPIRequest(
 
 func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	// Retrieve value using JSON path
-	value, typez, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
+	value, dataType, _, _ := jsonparser.Get(body, strings.Split(key, ".")...)
 
-	switch typez {
-	case jsonparser.String, jsonparser.Number, jsonparser.Boolean:
+	switch dataType {
+	case jsonparser.String, jsonparser.Number, jsonparser.Boolean, jsonparser.Array, jsonparser.Object:
 		// See: https://github.com/buger/jsonparser/blob/master/bytes_unsafe.go#L31
 		return *(*string)(unsafe.Pointer(&value)), nil
 	case jsonparser.Null:
@@ -123,8 +123,7 @@ func getValueFromJSONPayload(body []byte, key string) (string, error) {
 	case jsonparser.NotExist:
 		return "", errors.Errorf("Field %s not found in the request payload: Key path not found", key)
 	default:
-		return "", errors.Errorf(
-			"Field %s can not be parsed as string value, unsupported type: %s", key, typez.String())
+		return "", errors.Errorf("Field %s can not be parsed as string value, unsupported type: %s", key, dataType.String())
 	}
 }
 
