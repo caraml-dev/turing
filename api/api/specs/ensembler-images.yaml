@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Endpoints and schemas of Turing ensembler images
+  version: 0.0.1
+
+.tags: &tags
+  - "Ensembler Images"
+
+.id: &id
+  type: "integer"
+  format: "int32"
+
+paths:
+  "/projects/{project_id}/ensemblers/{ensembler_id}/images":
+    get:
+      tags: *tags
+      operationId: "ListEnsemblerImages"
+      summary: Returns a list of ensembler images that belong to the ensembler
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            <<: *id
+          required: true
+        - in: path
+          name: ensembler_id
+          schema:
+            <<: *id
+          required: true
+      responses:
+        "200":
+          description: A JSON object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnsemblersPaginatedResults"
+    post:
+      tags: *tags
+      operationId: "CreateEnsembler"
+      summary: Saves a user-defined ensembler into the project
+      parameters:
+        - in: path
+          name: project_id
+          schema:
+            <<: *id
+          required: true
+      requestBody:
+        description: A JSON object containing information about the ensembler
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ensembler"
+      responses:
+        "201":
+          description: A JSON representation of a successfully saved ensembler
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ensembler"
+
+components:
+  schemas:
+    EnsemblerId:
+      $ref: "./common.yaml#/components/schemas/IdObject"
+
+    EnsemblerImage:
+      type: object

@@ -18,6 +18,7 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
@@ -70,35 +71,45 @@ type BuildImageRequest struct {
 	BaseImageRefTag string
 }
 
+type EnsemblerImage struct {
+	ProjectID           models.ID                  `json:"project_id"`
+	EnsemblerID         models.ID                  `json:"ensembler_id"`
+	EnsemblerRunnerType models.EnsemblerRunnerType `json:"runner_type"`
+	ImageRef            string                     `json:"image_ref"`
+	Exists              bool                       `json:"exists"`
+}
+
 // ImageBuilder defines the operations on building and publishing OCI images.
 type ImageBuilder interface {
 	// Build OCI image based on a Dockerfile
 	BuildImage(request BuildImageRequest) (string, error)
+	GetEnsemblerImage(project *mlp.Project, ensembler *models.PyFuncEnsembler) (EnsemblerImage, error)
 	GetImageBuildingJobStatus(
 		projectName string,
-		modelName string,
-		modelID models.ID,
+		ensemblerName string,
+		ensemblerID models.ID,
 		versionID string,
 	) (JobStatus, error)
 	DeleteImageBuildingJob(
 		projectName string,
-		modelName string,
-		modelID models.ID,
+		ensemblerName string,
+		ensemblerID models.ID,
 		versionID string,
 	) error
 }
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderName(projectName string, modelName string, modelID models.ID, versionID string) string
+	generateBuilderName(projectName string, ensemblerName string, ensemblerID models.ID, versionID string) string
 	// generateDockerImageName generate image name based on project and model
-	generateDockerImageName(projectName string, modelName string) string
+	generateDockerImageName(projectName string, ensemblerName string) string
 }
 
 type imageBuilder struct {
 	clusterController   cluster.Controller
 	imageBuildingConfig config.ImageBuildingConfig
 	nameGenerator       nameGenerator
+	runnerType          models.EnsemblerRunnerType
 }
 
 // NewImageBuilder creates a new ImageBuilder
@@ -106,6 +117,7 @@ func newImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
+	runnerType models.EnsemblerRunnerType,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
@@ -116,6 +128,7 @@ func newImageBuilder(
 		clusterController:   clusterController,
 		imageBuildingConfig: imageBuildingConfig,
 		nameGenerator:       nameGenerator,
+		runnerType:          runnerType,
 	}, nil
 }
 
@@ -427,14 +440,14 @@ func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) e
 
 func (ib *imageBuilder) GetImageBuildingJobStatus(
 	projectName string,
-	modelName string,
-	modelID models.ID,
+	ensemblerName string,
+	ensemblerID models.ID,
 	versionID string,
 ) (JobStatus, error) {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
-		modelName,
-		modelID,
+		ensemblerName,
+		ensemblerID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -463,14 +476,14 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 
 func (ib *imageBuilder) DeleteImageBuildingJob(
 	projectName string,
-	modelName string,
-	modelID models.ID,
+	ensemblerName string,
+	ensemblerID models.ID,
 	versionID string,
 ) error {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
-		modelName,
-		modelID,
+		ensemblerName,
+		ensemblerID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -485,4 +498,23 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 	// Delete job
 	err = ib.clusterController.DeleteJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 	return err
+}
+
+func (ib *imageBuilder) GetEnsemblerImage(project *mlp.Project, ensembler *models.PyFuncEnsembler) (EnsemblerImage, error) {
+	imageName := ib.nameGenerator.generateDockerImageName(project.Name, ensembler.Name)
+	imageExists, err := ib.checkIfImageExists(imageName, ensembler.RunID)
+	if err != nil {
+		return EnsemblerImage{}, err
+	}
+
+	imageRef := fmt.Sprintf("%s:%s", imageName, ensembler.RunID)
+
+	image := EnsemblerImage{
+		ProjectID:           models.ID(project.ID),
+		EnsemblerID:         models.ID(ensembler.GetID()),
+		EnsemblerRunnerType: ib.runnerType,
+		ImageRef:            imageRef,
+		Exists:              imageExists,
+	}
+	return image, nil
 }

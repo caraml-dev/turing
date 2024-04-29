@@ -79,6 +79,13 @@ type ExperimentMapping struct {
 	Route      string `json:"route" validate:"required"`      // Route ID to select for the experiment treatment
 }
 
+type EnsemblerRunnerType string
+
+const (
+	EnsemblerRunnerTypeJob     EnsemblerRunnerType = "job"
+	EnsemblerRunnerTypeService EnsemblerRunnerType = "service"
+)
+
 // Value implements sql.driver.Valuer interface so database tools like go-orm knows how to serialize the struct object
 // for storage in the database
 func (c EnsemblerStandardConfig) Value() (driver.Value, error) {

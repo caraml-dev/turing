@@ -37,6 +37,7 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	controllers := []api.Controller{
 		api.AlertsController{BaseController: baseController},
 		api.EnsemblersController{BaseController: baseController},
+		api.EnsemblerImagesController{BaseController: baseController},
 		api.ExperimentsController{BaseController: baseController},
 		api.PodLogController{BaseController: baseController},
 		api.ProjectsController{BaseController: baseController},
