@@ -50,6 +50,11 @@ paths:
           schema:
             <<: *id
           required: true
+        - in: path
+          name: ensembler_id
+          schema:
+            <<: *id
+          required: true
       requestBody:
         description: A JSON object containing information about the ensembler
         required: true
