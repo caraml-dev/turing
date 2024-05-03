@@ -512,7 +512,11 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 		status.Message = err.Error()
 	}
 
-	pods, err := ib.clusterController.ListPods(context.Background(), ib.imageBuildingConfig.BuildNamespace, fmt.Sprintf("job-name=%s", kanikoJobName))
+	pods, err := ib.clusterController.ListPods(
+		context.Background(),
+		ib.imageBuildingConfig.BuildNamespace,
+		fmt.Sprintf("job-name=%s", kanikoJobName),
+	)
 	if err != nil && !kerrors.IsNotFound(err) {
 		status.Message = err.Error()
 		return
@@ -520,7 +524,8 @@ func (ib *imageBuilder) GetImageBuildingJobStatus(
 
 	for _, pod := range pods.Items {
 		if len(pod.Status.ContainerStatuses) > 0 {
-			podContainerTable, podLastTerminationMessage, podLastTerminationReason = utils.ParsePodContainerStatuses(pod.Status.ContainerStatuses)
+			podContainerTable, podLastTerminationMessage,
+				podLastTerminationReason = utils.ParsePodContainerStatuses(pod.Status.ContainerStatuses)
 			status.Message = podLastTerminationReason
 			break
 		}
@@ -555,7 +560,10 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 	return err
 }
 
-func (ib *imageBuilder) GetEnsemblerImage(project *mlp.Project, ensembler *models.PyFuncEnsembler) (EnsemblerImage, error) {
+func (ib *imageBuilder) GetEnsemblerImage(
+	project *mlp.Project,
+	ensembler *models.PyFuncEnsembler,
+) (EnsemblerImage, error) {
 	imageName := ib.nameGenerator.generateDockerImageName(project.Name, ensembler.Name)
 	imageExists, err := ib.checkIfImageExists(imageName, ensembler.RunID)
 	if err != nil {

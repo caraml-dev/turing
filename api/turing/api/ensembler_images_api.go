@@ -53,7 +53,7 @@ func (c EnsemblerImagesController) ListImages(
 }
 
 func (c EnsemblerImagesController) BuildImage(
-	r *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {

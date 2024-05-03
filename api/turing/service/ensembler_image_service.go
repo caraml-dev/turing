@@ -10,8 +10,16 @@ import (
 )
 
 type EnsemblerImagesService interface {
-	ListImages(project *mlp.Project, ensembler *models.PyFuncEnsembler, runnerType models.EnsemblerRunnerType) ([]imagebuilder.EnsemblerImage, error)
-	BuildImage(project *mlp.Project, ensembler *models.PyFuncEnsembler, runnerType models.EnsemblerRunnerType) error
+	ListImages(
+		project *mlp.Project,
+		ensembler *models.PyFuncEnsembler,
+		runnerType models.EnsemblerRunnerType,
+	) ([]imagebuilder.EnsemblerImage, error)
+	BuildImage(
+		project *mlp.Project,
+		ensembler *models.PyFuncEnsembler,
+		runnerType models.EnsemblerRunnerType,
+	) error
 }
 
 type EnsemblerImagesListOptions struct {
@@ -25,14 +33,20 @@ type ensemblerImagesService struct {
 	ensemblerServiceImageBuilder imagebuilder.ImageBuilder
 }
 
-func NewEnsemblerImagesService(ensemblerJobImageBuilder, ensemblerServiceImageBuilder imagebuilder.ImageBuilder) EnsemblerImagesService {
+func NewEnsemblerImagesService(ensemblerJobImageBuilder imagebuilder.ImageBuilder,
+	ensemblerServiceImageBuilder imagebuilder.ImageBuilder,
+) EnsemblerImagesService {
 	return &ensemblerImagesService{
 		ensemblerJobImageBuilder:     ensemblerJobImageBuilder,
 		ensemblerServiceImageBuilder: ensemblerServiceImageBuilder,
 	}
 }
 
-func (s *ensemblerImagesService) ListImages(project *mlp.Project, ensembler *models.PyFuncEnsembler, runnerType models.EnsemblerRunnerType) ([]imagebuilder.EnsemblerImage, error) {
+func (s *ensemblerImagesService) ListImages(
+	project *mlp.Project,
+	ensembler *models.PyFuncEnsembler,
+	runnerType models.EnsemblerRunnerType,
+) ([]imagebuilder.EnsemblerImage, error) {
 	builders := []imagebuilder.ImageBuilder{}
 
 	if runnerType == models.EnsemblerRunnerTypeJob {
@@ -55,7 +69,11 @@ func (s *ensemblerImagesService) ListImages(project *mlp.Project, ensembler *mod
 	return images, nil
 }
 
-func (s *ensemblerImagesService) BuildImage(project *mlp.Project, ensembler *models.PyFuncEnsembler, runnerType models.EnsemblerRunnerType) error {
+func (s *ensemblerImagesService) BuildImage(
+	project *mlp.Project,
+	ensembler *models.PyFuncEnsembler,
+	runnerType models.EnsemblerRunnerType,
+) error {
 	ib, err := s.getImageBuilder(runnerType)
 	if err != nil {
 		return err
@@ -86,7 +104,9 @@ func (s *ensemblerImagesService) BuildImage(project *mlp.Project, ensembler *mod
 	return nil
 }
 
-func (s *ensemblerImagesService) getImageBuilder(runnerType models.EnsemblerRunnerType) (imagebuilder.ImageBuilder, error) {
+func (s *ensemblerImagesService) getImageBuilder(
+	runnerType models.EnsemblerRunnerType,
+) (imagebuilder.ImageBuilder, error) {
 	switch runnerType {
 	case models.EnsemblerRunnerTypeJob:
 		return s.ensemblerJobImageBuilder, nil
