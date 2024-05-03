@@ -206,14 +206,14 @@ func (r *ensemblingJobRunner) processBuildingImage(
 	ensemblingJob *models.EnsemblingJob,
 	mlpProject *mlp.Project,
 ) {
-	status, err := r.imageBuilder.GetImageBuildingJobStatus(
+	status := r.imageBuilder.GetImageBuildingJobStatus(
 		mlpProject.Name,
 		*ensemblingJob.InfraConfig.EnsemblerName,
 		ensemblingJob.EnsemblerID,
 		*ensemblingJob.InfraConfig.RunId,
 	)
 
-	if status == imagebuilder.JobStatusActive {
+	if status.IsActive() {
 		// Do nothing
 		return
 	}
@@ -228,7 +228,7 @@ func (r *ensemblingJobRunner) processBuildingImage(
 	ensemblingJob.RetryCount++
 	saveErr := r.ensemblingJobService.Save(ensemblingJob)
 	if saveErr != nil {
-		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, err)
+		log.Errorf("Unable to save ensemblingJob %d: %v", ensemblingJob.ID, saveErr)
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	apibatchv1 "k8s.io/api/batch/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -18,9 +19,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
-var (
-	timeout, _ = time.ParseDuration("10s")
-)
+var timeout, _ = time.ParseDuration("10s")
 
 const (
 	projectName                          = "test-project"
@@ -63,7 +62,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			},
 		},
 	}
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		name                string
 		expected            string
 		projectName         string
@@ -339,7 +338,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			},
 		},
 	}
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		name                       string
 		expectedImage              string
 		expectedImageBuildingError string
@@ -628,7 +627,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 }
 
 func TestParseResources(t *testing.T) {
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		name                   string
 		expected               bool
 		resourceRequestsLimits config.ResourceRequestsLimits
@@ -756,8 +755,10 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusActive,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateActive,
+			},
 		},
 		"success | succeeded": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -773,8 +774,10 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusSucceeded,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateSucceeded,
+			},
 		},
 		"success | Failed": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -782,16 +785,79 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				ctlr := &clustermock.Controller{}
 				ctlr.On("GetJob", mock.Anything, mock.Anything, mock.Anything).Return(
 					&apibatchv1.Job{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "batch-test-project-mymodel-1-abc12",
+							Namespace: imageBuildingConfig.BuildNamespace,
+						},
 						Status: apibatchv1.JobStatus{
 							Failed: 1,
+							Conditions: []apibatchv1.JobCondition{
+								{
+									LastProbeTime: metav1.Date(2024, 4, 29, 0o0, 0o0, 0o0, 0, time.UTC),
+									Type:          apibatchv1.JobFailed,
+									Reason:        "BackoffLimitExceeded",
+									Message:       "Job has reached the specified backoff limit",
+								},
+							},
+						},
+					},
+					nil,
+				)
+				ctlr.On("ListPods", mock.Anything, mock.Anything, mock.Anything).Return(
+					&v1.PodList{
+						Items: []v1.Pod{
+							{
+								ObjectMeta: metav1.ObjectMeta{
+									Name:      "batch-test-project-mymodel-1-abc12-123",
+									Namespace: imageBuildingConfig.BuildNamespace,
+									Labels: map[string]string{
+										"job-name": "batch-test-project-mymodel-1-abc12",
+									},
+								},
+								Status: v1.PodStatus{
+									Phase: v1.PodFailed,
+									ContainerStatuses: []v1.ContainerStatus{
+										{
+											Name: "kaniko-builder",
+											State: v1.ContainerState{
+												Terminated: &v1.ContainerStateTerminated{
+													ExitCode: 1,
+													Reason:   "Error",
+													Message:  "CondaEnvException: Pip failed",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 					nil,
 				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusFailed,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateFailed,
+				Message: `Error
+
+Job conditions:
+┌───────────────────────────────┬────────┬──────────────────────┬─────────────────────────────────────────────┐
+│ TIMESTAMP                     │ TYPE   │ REASON               │ MESSAGE                                     │
+├───────────────────────────────┼────────┼──────────────────────┼─────────────────────────────────────────────┤
+│ Mon, 29 Apr 2024 00:00:00 UTC │ Failed │ BackoffLimitExceeded │ Job has reached the specified backoff limit │
+└───────────────────────────────┴────────┴──────────────────────┴─────────────────────────────────────────────┘
+
+Pod container status:
+┌────────────────┬────────────┬───────────┬────────┐
+│ CONTAINER NAME │ STATUS     │ EXIT CODE │ REASON │
+├────────────────┼────────────┼───────────┼────────┤
+│ kaniko-builder │ Terminated │ 1         │ Error  │
+└────────────────┴────────────┴───────────┴────────┘
+
+Pod last termination message:
+CondaEnvException: Pip failed`,
+			},
 		},
 		"success | Unknown": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -801,10 +867,18 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 					&apibatchv1.Job{},
 					nil,
 				)
+				ctlr.On("ListPods", mock.Anything, mock.Anything, mock.Anything).Return(
+					&v1.PodList{
+						Items: []v1.Pod{},
+					},
+					nil,
+				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusUnknown,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateUnknown,
+			},
 		},
 		"failure | Unknown": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -816,21 +890,18 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   true,
-			expected: JobStatusUnknown,
+			hasErr: true,
+			expected: JobStatus{
+				State:   JobStateUnknown,
+				Message: "hello",
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
-			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
-
-			if tt.hasErr {
-				assert.NotNil(t, err)
-			} else {
-				assert.Nil(t, err)
-			}
+			status := ib.GetImageBuildingJobStatus(projectName, modelName, models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
 		})
 	}
@@ -881,8 +952,10 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusActive,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateActive,
+			},
 		},
 		"success | succeeded": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -898,8 +971,10 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusSucceeded,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateSucceeded,
+			},
 		},
 		"success | Failed": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -936,10 +1011,18 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 					},
 					nil,
 				)
+				ctlr.On("ListPods", mock.Anything, mock.Anything, mock.Anything).Return(
+					&v1.PodList{
+						Items: []v1.Pod{},
+					},
+					nil,
+				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusFailed,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateFailed,
+			},
 		},
 		"success | Unknown": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -972,10 +1055,18 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 					&apibatchv1.Job{},
 					nil,
 				)
+				ctlr.On("ListPods", mock.Anything, mock.Anything, mock.Anything).Return(
+					&v1.PodList{
+						Items: []v1.Pod{},
+					},
+					nil,
+				)
 				return ctlr
 			},
-			hasErr:   false,
-			expected: JobStatusUnknown,
+			hasErr: false,
+			expected: JobStatus{
+				State: JobStateUnknown,
+			},
 		},
 		"failure | Unknown": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -1010,21 +1101,18 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				)
 				return ctlr
 			},
-			hasErr:   true,
-			expected: JobStatusUnknown,
+			hasErr: true,
+			expected: JobStatus{
+				State:   JobStateUnknown,
+				Message: "hello",
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerServiceImageBuilder(clusterController, tt.imageBuildingConfig)
-			status, err := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
-
-			if tt.hasErr {
-				assert.NotNil(t, err)
-			} else {
-				assert.Nil(t, err)
-			}
+			status := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
 		})
 	}

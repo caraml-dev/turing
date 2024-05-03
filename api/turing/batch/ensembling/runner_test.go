@@ -27,7 +27,7 @@ func TestRun(t *testing.T) {
 		svc.On("FindByID", mock.Anything, mock.Anything).Return(&models.PyFuncEnsembler{}, nil)
 		return svc
 	}
-	var tests = map[string]struct {
+	tests := map[string]struct {
 		ensemblingController func() EnsemblingController
 		imageBuilder         func() imagebuilder.ImageBuilder
 		ensemblingJobService func() service.EnsemblingJobService
@@ -130,7 +130,9 @@ func TestRun(t *testing.T) {
 					mock.Anything,
 					mock.Anything,
 					mock.Anything,
-				).Return(imagebuilder.JobStatusFailed, nil)
+				).Return(imagebuilder.JobStatus{
+					State: imagebuilder.JobStateFailed,
+				}, nil)
 				return ib
 			},
 			ensemblingJobService: func() service.EnsemblingJobService {
