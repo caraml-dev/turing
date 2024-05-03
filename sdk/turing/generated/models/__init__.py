@@ -17,6 +17,7 @@ from turing.generated.model.big_query_dataset_config import BigQueryDatasetConfi
 from turing.generated.model.big_query_sink import BigQuerySink
 from turing.generated.model.big_query_sink_all_of import BigQuerySinkAllOf
 from turing.generated.model.big_query_sink_config import BigQuerySinkConfig
+from turing.generated.model.build_ensembler_image_request import BuildEnsemblerImageRequest
 from turing.generated.model.dataset import Dataset
 from turing.generated.model.default_traffic_rule import DefaultTrafficRule
 from turing.generated.model.enricher import Enricher
@@ -25,6 +26,9 @@ from turing.generated.model.ensembler_config import EnsemblerConfig
 from turing.generated.model.ensembler_config_kind import EnsemblerConfigKind
 from turing.generated.model.ensembler_docker_config import EnsemblerDockerConfig
 from turing.generated.model.ensembler_id import EnsemblerId
+from turing.generated.model.ensembler_image import EnsemblerImage
+from turing.generated.model.ensembler_image_runner_type import EnsemblerImageRunnerType
+from turing.generated.model.ensembler_images import EnsemblerImages
 from turing.generated.model.ensembler_infra_config import EnsemblerInfraConfig
 from turing.generated.model.ensembler_job_status import EnsemblerJobStatus
 from turing.generated.model.ensembler_pyfunc_config import EnsemblerPyfuncConfig
@@ -55,6 +59,8 @@ from turing.generated.model.generic_dataset import GenericDataset
 from turing.generated.model.generic_ensembler import GenericEnsembler
 from turing.generated.model.generic_sink import GenericSink
 from turing.generated.model.id_object import IdObject
+from turing.generated.model.image_building_job_state import ImageBuildingJobState
+from turing.generated.model.image_building_job_status import ImageBuildingJobStatus
 from turing.generated.model.job_id import JobId
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label

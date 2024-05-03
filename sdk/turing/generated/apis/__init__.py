@@ -15,6 +15,7 @@
 
 # Import APIs into API package:
 from turing.generated.api.ensembler_api import EnsemblerApi
+from turing.generated.api.ensembler_images_api import EnsemblerImagesApi
 from turing.generated.api.ensembling_job_api import EnsemblingJobApi
 from turing.generated.api.project_api import ProjectApi
 from turing.generated.api.router_api import RouterApi
