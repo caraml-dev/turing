@@ -1,4 +1,5 @@
 black==22.6.0
-pytest
+# The next release 8.2.0 of pytest breaks the unit tests
+pytest<=8.1.2
 pytest-cov
 pylint

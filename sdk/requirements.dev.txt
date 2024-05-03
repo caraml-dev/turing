@@ -2,7 +2,8 @@ black==22.6.0
 setuptools>=21.0.0
 wheel
 twine
-pytest
+# The next release 8.0.0 of pytest breaks the unit tests
+pytest<=7.4.4
 pytest-cov
 urllib3-mock>=0.3.3
 caraml-upi-protos
