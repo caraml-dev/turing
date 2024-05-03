@@ -211,6 +211,9 @@ class RouterConfig:
             self._experiment_engine = experiment_engine
         elif isinstance(experiment_engine, dict):
             self._experiment_engine = ExperimentConfig(**experiment_engine)
+            if self._experiment_engine.config.get("client") is not None \
+                    and self._experiment_engine.config["client"].get("passkey") != "":
+                self._experiment_engine.config["client"]["passkey"] = None
         else:
             self._experiment_engine = experiment_engine
 
