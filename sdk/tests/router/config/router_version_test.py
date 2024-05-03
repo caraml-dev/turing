@@ -52,8 +52,9 @@ def test_create_version(
 
     # Assert the response against an experiment engine object that has its passkey removed
     expected_experiment_engine = generic_router_version.experiment_engine
-    if expected_experiment_engine.config.get("client") is not None \
-            and expected_experiment_engine.config["client"].get("passkey") != "":
+    if expected_experiment_engine.config is not None and \
+            expected_experiment_engine.config.get("client") is not None and \
+            expected_experiment_engine.config["client"].get("passkey") != "":
         expected_experiment_engine.config["client"]["passkey"] = None
     assert (
         actual_response.experiment_engine.to_open_api()
