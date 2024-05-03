@@ -33,8 +33,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EnsemblersPaginatedResults"
-    post:
+                $ref: "#/components/schemas/EnsemblerImages"
+        "400":
+          description: Invalid request body
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Unable to list ensembler images
+    put:
       tags: *tags
       operationId: "CreateEnsembler"
       summary: Saves a user-defined ensembler into the project
@@ -50,19 +56,70 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Ensembler"
+              $ref: "#/components/schemas/BuildEnsemblerImageRequest"
       responses:
-        "201":
-          description: A JSON representation of a successfully saved ensembler
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Ensembler"
+        "202":
+          description: Accepted
+        "400":
+          description: Invalid request body
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Unable to build ensembler image
 
 components:
   schemas:
     EnsemblerId:
       $ref: "./common.yaml#/components/schemas/IdObject"
 
+    EnsemblerImages:
+      type: array
+      items:
+        $ref: "#/components/schemas/EnsemblerImage"
+
     EnsemblerImage:
       type: object
+      properties:
+        project_id:
+          type: integer
+          format: int32
+        ensembler_id:
+          type: integer
+          format: int32
+        runner_type:
+          "$ref": "#/components/schemas/EnsemblerImageRunnerType"
+        image_ref:
+          type: string
+        exists:
+          type: boolean
+        image_building_job_status:
+          "$ref": "#/components/schemas/ImageBuildingJobStatus"
+
+    EnsemblerImageRunnerType:
+      enum:
+        - job
+        - service
+      type: string
+
+    ImageBuildingJobStatus:
+      type: object
+      properties:
+        state:
+          "$ref": "#/components/schemas/ImageBuildingJobState"
+        message:
+          type: string
+    ImageBuildingJobState:
+      type: string
+      enum:
+        - active
+        - succeeded
+        - failed
+        - unknown
+
+    BuildEnsemblerImageRequest:
+      type: object
+      properties:
+        runner_type:
+          "$ref": "#/components/schemas/EnsemblerImageRunnerType"
+      required:
+        - runner_type

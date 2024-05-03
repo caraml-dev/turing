@@ -101,7 +101,7 @@ func (c EnsemblerImagesController) Routes() []Route {
 			handler: c.ListImages,
 		},
 		{
-			method:  http.MethodPost,
+			method:  http.MethodPut,
 			path:    "/projects/{project_id}/ensemblers/{ensembler_id}/images",
 			body:    request.BuildEnsemblerImageRequest{},
 			handler: c.BuildImage,
