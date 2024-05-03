@@ -206,6 +206,16 @@ func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
 		// Divide value by (1024^2) to convert to Mi
 		return fmt.Sprintf("%.0f", float64(targetResource.Value())/math.Pow(1024, 2)), nil
 
+	} else if cfg.AutoscalingMetric == "concurrency" {
+		rawTarget, err := strconv.ParseFloat(cfg.AutoscalingTarget, 64)
+		if err != nil {
+			return "", err
+		}
+		targetValue := fmt.Sprintf("%.2f", rawTarget)
+		if targetValue == "0.00" {
+			return "", fmt.Errorf("concurrency target %v should be at least 0.01", cfg.AutoscalingTarget)
+		}
+		return targetValue, nil
 	}
 	// For all other metrics, we can use the supplied value as is.
 	return cfg.AutoscalingTarget, nil
