@@ -1,4 +1,5 @@
 from turing.ensembler import Ensembler, EnsemblerType, PyFuncEnsembler
+from turing.ensembler_image import EnsemblerImage
 from turing.project import Project
 from turing.router.router import Router
 from turing.session import TuringSession

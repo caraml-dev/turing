@@ -22,6 +22,7 @@ from turing.generated.model_utils import (  # noqa: F401
     validate_and_convert_types
 )
 from turing.generated.model.build_ensembler_image_request import BuildEnsemblerImageRequest
+from turing.generated.model.ensembler_image_runner_type import EnsemblerImageRunnerType
 from turing.generated.model.ensembler_images import EnsemblerImages
 
 
@@ -37,22 +38,24 @@ class EnsemblerImagesApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-        def __create_ensembler(
+        def __create_ensembler_image(
             self,
             project_id,
+            ensembler_id,
             build_ensembler_image_request,
             **kwargs
         ):
-            """Saves a user-defined ensembler into the project  # noqa: E501
+            """Creates a new ensembler image  # noqa: E501
 
             This method makes a synchronous HTTP request by default. To make an
             asynchronous HTTP request, please pass async_req=True
 
-            >>> thread = api.create_ensembler(project_id, build_ensembler_image_request, async_req=True)
+            >>> thread = api.create_ensembler_image(project_id, ensembler_id, build_ensembler_image_request, async_req=True)
             >>> result = thread.get()
 
             Args:
                 project_id (int):
+                ensembler_id (int):
                 build_ensembler_image_request (BuildEnsemblerImageRequest): A JSON object containing information about the ensembler
 
             Keyword Args:
@@ -102,26 +105,30 @@ class EnsemblerImagesApi(object):
             kwargs['_host_index'] = kwargs.get('_host_index')
             kwargs['project_id'] = \
                 project_id
+            kwargs['ensembler_id'] = \
+                ensembler_id
             kwargs['build_ensembler_image_request'] = \
                 build_ensembler_image_request
             return self.call_with_http_info(**kwargs)
 
-        self.create_ensembler = _Endpoint(
+        self.create_ensembler_image = _Endpoint(
             settings={
                 'response_type': None,
                 'auth': [],
                 'endpoint_path': '/projects/{project_id}/ensemblers/{ensembler_id}/images',
-                'operation_id': 'create_ensembler',
+                'operation_id': 'create_ensembler_image',
                 'http_method': 'PUT',
                 'servers': None,
             },
             params_map={
                 'all': [
                     'project_id',
+                    'ensembler_id',
                     'build_ensembler_image_request',
                 ],
                 'required': [
                     'project_id',
+                    'ensembler_id',
                     'build_ensembler_image_request',
                 ],
                 'nullable': [
@@ -139,14 +146,18 @@ class EnsemblerImagesApi(object):
                 'openapi_types': {
                     'project_id':
                         (int,),
+                    'ensembler_id':
+                        (int,),
                     'build_ensembler_image_request':
                         (BuildEnsemblerImageRequest,),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
+                    'ensembler_id': 'ensembler_id',
                 },
                 'location_map': {
                     'project_id': 'path',
+                    'ensembler_id': 'path',
                     'build_ensembler_image_request': 'body',
                 },
                 'collection_format_map': {
@@ -159,7 +170,7 @@ class EnsemblerImagesApi(object):
                 ]
             },
             api_client=api_client,
-            callable=__create_ensembler
+            callable=__create_ensembler_image
         )
 
         def __list_ensembler_images(
@@ -181,6 +192,7 @@ class EnsemblerImagesApi(object):
                 ensembler_id (int):
 
             Keyword Args:
+                runner_type (EnsemblerImageRunnerType): [optional]
                 _return_http_data_only (bool): response data without head status
                     code and headers. Default is True.
                 _preload_content (bool): if False, the urllib3.HTTPResponse object
@@ -244,6 +256,7 @@ class EnsemblerImagesApi(object):
                 'all': [
                     'project_id',
                     'ensembler_id',
+                    'runner_type',
                 ],
                 'required': [
                     'project_id',
@@ -266,14 +279,18 @@ class EnsemblerImagesApi(object):
                         (int,),
                     'ensembler_id':
                         (int,),
+                    'runner_type':
+                        (EnsemblerImageRunnerType,),
                 },
                 'attribute_map': {
                     'project_id': 'project_id',
                     'ensembler_id': 'ensembler_id',
+                    'runner_type': 'runner_type',
                 },
                 'location_map': {
                     'project_id': 'path',
                     'ensembler_id': 'path',
+                    'runner_type': 'query',
                 },
                 'collection_format_map': {
                 }

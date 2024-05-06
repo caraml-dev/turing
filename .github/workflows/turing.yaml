@@ -276,6 +276,13 @@ jobs:
           working-directory: api
           args: --timeout 3m --verbose
 
+      - uses: codecov/codecov-action@v4
+        with:
+          flags: api-test
+          name: api-test
+          token: ${{ secrets.CODECOV_TOKEN }}
+          working-directory: api
+
   test-engines-router:
     runs-on: ubuntu-latest
     defaults:

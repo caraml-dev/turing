@@ -30,7 +30,7 @@ build: version
 
 .PHONY: test
 test:
-	@python -m pytest --cov=turing tests/
+	@python -m pytest --cov=turing --cov-report xml --cov-report= tests/
 
 e2e-sdk:
 	@python -m pytest -s -v e2e

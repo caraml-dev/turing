@@ -49,6 +49,7 @@ class EnsemblerImageRunnerType(ModelSimple):
 
     allowed_values = {
         ('value',): {
+            'None': None,
             'JOB': "job",
             'SERVICE': "service",
         },
@@ -59,7 +60,7 @@ class EnsemblerImageRunnerType(ModelSimple):
 
     additional_properties_type = None
 
-    _nullable = False
+    _nullable = True
 
     @cached_property
     def openapi_types():

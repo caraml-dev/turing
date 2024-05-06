@@ -27,6 +27,11 @@ paths:
           schema:
             <<: *id
           required: true
+        - in: query
+          name: runner_type
+          schema:
+            "$ref": "#/components/schemas/EnsemblerImageRunnerType"
+          required: false
       responses:
         "200":
           description: A JSON object
@@ -42,8 +47,8 @@ paths:
           description: Unable to list ensembler images
     put:
       tags: *tags
-      operationId: "CreateEnsembler"
-      summary: Saves a user-defined ensembler into the project
+      operationId: "CreateEnsemblerImage"
+      summary: Creates a new ensembler image
       parameters:
         - in: path
           name: project_id
@@ -101,10 +106,11 @@ components:
           "$ref": "#/components/schemas/ImageBuildingJobStatus"
 
     EnsemblerImageRunnerType:
+      type: string
+      nullable: true
       enum:
         - job
         - service
-      type: string
 
     ImageBuildingJobStatus:
       type: object

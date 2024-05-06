@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
-    
+
     defaults:
       run:
         working-directory: ./sdk
@@ -52,6 +52,12 @@ jobs:
 
       - name: Run unit tests
         run: make test
+
+      - uses: codecov/codecov-action@v4
+        with:
+          flags: sdk-test-${{ matrix.python-version }}
+          name: sdk-test-${{ matrix.python-version }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   release-rules:
     runs-on: ubuntu-latest

@@ -1,33 +1,34 @@
 import json
-from datetime import datetime, timedelta
-import pytest
 import random
-from sys import version_info
 import uuid
+from datetime import datetime, timedelta
+from sys import version_info
+
+import pytest
 
 import tests
-from turing.ensembler import PyFuncEnsembler
-import turing.generated.models
 import turing.batch.config
-import turing.batch.config.source
 import turing.batch.config.sink
-from turing.router.config.route import Route
-from turing.router.config.router_config import RouterConfig, Protocol
+import turing.batch.config.source
+import turing.generated.models
+from tests.fixtures.gcs import mock_gcs
+from tests.fixtures.mlflow import mock_mlflow
+from turing.ensembler import PyFuncEnsembler
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
-from turing.router.config.traffic_rule import DefaultTrafficRule
-from turing.router.config.resource_request import ResourceRequest
-from turing.router.config.log_config import LogConfig, ResultLoggerType
+from turing.router.config.common.env_var import EnvVar
 from turing.router.config.enricher import Enricher
+from turing.router.config.experiment_config import ExperimentConfig
+from turing.router.config.log_config import LogConfig, ResultLoggerType
+from turing.router.config.resource_request import ResourceRequest
+from turing.router.config.route import Route
+from turing.router.config.router_config import Protocol, RouterConfig
 from turing.router.config.router_ensembler_config import (
+    DockerRouterEnsemblerConfig,
     EnsemblerNopConfig,
     EnsemblerStandardConfig,
-    DockerRouterEnsemblerConfig,
     PyfuncRouterEnsemblerConfig,
 )
-from turing.router.config.common.env_var import EnvVar
-from turing.router.config.experiment_config import ExperimentConfig
-from tests.fixtures.mlflow import mock_mlflow
-from tests.fixtures.gcs import mock_gcs
+from turing.router.config.traffic_rule import DefaultTrafficRule
 
 
 @pytest.fixture

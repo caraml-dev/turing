@@ -199,6 +199,11 @@ paths:
         schema:
           format: int32
           type: integer
+      - in: query
+        name: runner_type
+        required: false
+        schema:
+          $ref: '#/components/schemas/EnsemblerImageRunnerType'
       responses:
         "200":
           content:
@@ -216,10 +221,16 @@ paths:
       tags:
       - Ensembler Images
     put:
-      operationId: CreateEnsembler
+      operationId: CreateEnsemblerImage
       parameters:
       - in: path
         name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: path
+        name: ensembler_id
         required: true
         schema:
           format: int32
@@ -240,7 +251,7 @@ paths:
           description: Ensembler not found
         "500":
           description: Unable to build ensembler image
-      summary: Saves a user-defined ensembler into the project
+      summary: Creates a new ensembler image
       tags:
       - Ensembler Images
   /projects/{project_id}/jobs:
@@ -1533,6 +1544,7 @@ components:
       enum:
       - job
       - service
+      nullable: true
       type: string
     ImageBuildingJobStatus:
       example:
