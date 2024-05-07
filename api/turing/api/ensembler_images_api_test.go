@@ -19,9 +19,6 @@ import (
 func TestEnsemblerImagesController_ListImages(t *testing.T) {
 	projectID := models.ID(1)
 
-	type fields struct {
-		BaseController BaseController
-	}
 	type args struct {
 		in0  *http.Request
 		vars RequestVars
