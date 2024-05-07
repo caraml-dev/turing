@@ -44,6 +44,17 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			}(),
 			expected: "123",
 		},
+		"success | header multiple value": {
+			field:    "CustomerID",
+			fieldSrc: request.HeaderFieldSource,
+			header: func() http.Header {
+				header := http.Header{}
+				header.Set("CustomerID", "123")
+				header.Add("CustomerID", "321")
+				return header
+			}(),
+			expected: "123,321",
+		},
 		"success | nested payload": {
 			field:    "customer.id",
 			fieldSrc: request.PayloadFieldSource,
@@ -61,6 +72,24 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 			fieldSrc: request.PayloadFieldSource,
 			body:     []byte(`{"is_premium_customer": true}`),
 			expected: "true",
+		},
+		"success | array string": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": ["123","321"]}`),
+			expected: `["123","321"]`,
+		},
+		"success | array int": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": [123,321]}`),
+			expected: `[123,321]`,
+		},
+		"success | object": {
+			field:    "customers",
+			fieldSrc: request.PayloadFieldSource,
+			body:     []byte(`{"customers": {"a":"b"}}`),
+			expected: `{"a":"b"}`,
 		},
 		"success | payload null field": {
 			field:    "session_id",
@@ -87,8 +116,8 @@ func TestGetValueFromHTTPRequest(t *testing.T) {
 		"failure | payload unsupported type": {
 			field:    "customer",
 			fieldSrc: request.PayloadFieldSource,
-			body:     []byte(`{"customer": {"id": 42, "email": "test@test.com"}`),
-			err:      "Field customer can not be parsed as string value, unsupported type: object",
+			body:     []byte(`{"customer": !!!`),
+			err:      "Field customer can not be parsed as string value, unsupported type: unknown",
 		},
 		"failure | unknown source": {
 			field:    "CustomerID",

@@ -211,6 +211,16 @@ class RouterConfig:
             self._experiment_engine = experiment_engine
         elif isinstance(experiment_engine, dict):
             self._experiment_engine = ExperimentConfig(**experiment_engine)
+            # This block sets the passkey (encrypted when retrieved from the Turing API server) to None to prevent users
+            # from sending a router config with an already encrypted passkey back to API server when updating a router.
+            #
+            # When the passkey value is not set, the Turing API server is able to automatically retrieve the correct
+            # passkey from the existing router version (assuming it has been configured with the same standard
+            # experiment engine and the same client username).
+            if self._experiment_engine.config is not None and \
+                    self._experiment_engine.config.get("client") is not None and \
+                    self._experiment_engine.config["client"].get("passkey") != "":
+                self._experiment_engine.config["client"]["passkey"] = None
         else:
             self._experiment_engine = experiment_engine
 

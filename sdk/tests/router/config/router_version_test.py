@@ -49,9 +49,16 @@ def test_create_version(
         assert actual_response.rules[i].to_open_api() == generic_router_version.rules[i]
 
     assert actual_response.default_route_id == generic_router_version.default_route_id
+
+    # Assert the response against an experiment engine object that has its passkey removed
+    expected_experiment_engine = generic_router_version.experiment_engine
+    if expected_experiment_engine.config is not None and \
+            expected_experiment_engine.config.get("client") is not None and \
+            expected_experiment_engine.config["client"].get("passkey") != "":
+        expected_experiment_engine.config["client"]["passkey"] = None
     assert (
         actual_response.experiment_engine.to_open_api()
-        == generic_router_version.experiment_engine
+        == expected_experiment_engine
     )
     assert (
         actual_response.resource_request.to_open_api()
