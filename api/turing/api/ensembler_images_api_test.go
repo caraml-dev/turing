@@ -292,7 +292,7 @@ func TestEnsemblerImagesController_ListImages(t *testing.T) {
 					Message     string `json:"error"`
 				}{
 					Description: "failed to list ensembler images",
-					Message:     "failed to parse query string: Key: 'EnsemblerImagesListOptions.ProjectID' Error:Field validation for 'ProjectID' failed on the 'required' tag",
+					Message:     "failed to parse query string: Key: 'EnsemblerImagesListOptions.ProjectID' Error:Field validation for 'ProjectID' failed on the 'required' tag", // nolint: lll
 				},
 			},
 		},
@@ -636,7 +636,7 @@ func TestEnsemblerImagesController_BuildImage(t *testing.T) {
 					Message     string `json:"error"`
 				}{
 					Description: "failed to build ensembler image",
-					Message:     "failed to parse query string: Key: 'EnsemblerImagesPathOptions.ProjectID' Error:Field validation for 'ProjectID' failed on the 'required' tag",
+					Message:     "failed to parse query string: Key: 'EnsemblerImagesPathOptions.ProjectID' Error:Field validation for 'ProjectID' failed on the 'required' tag", // nolint: lll
 				},
 			},
 		},
