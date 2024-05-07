@@ -88,6 +88,7 @@ type EnsemblerImage struct {
 	EnsemblerRunnerType models.EnsemblerRunnerType `json:"runner_type"`
 	ImageRef            string                     `json:"image_ref"`
 	Exists              bool                       `json:"exists"`
+	JobStatus           JobStatus                  `json:"image_building_job_status"`
 }
 
 // ImageBuilder defines the operations on building and publishing OCI images.

@@ -63,6 +63,10 @@ func (s *ensemblerImagesService) ListImages(
 		if err != nil {
 			return nil, err
 		}
+
+		jobStatus := builder.GetImageBuildingJobStatus(project.Name, ensembler.Name, ensembler.ID, ensembler.RunID)
+		image.JobStatus = jobStatus
+
 		images = append(images, image)
 	}
 

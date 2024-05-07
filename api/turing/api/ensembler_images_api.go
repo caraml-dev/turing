@@ -41,7 +41,7 @@ func (c EnsemblerImagesController) ListImages(
 
 	pyFuncEnsembler, isPyfunc := ensembler.(*models.PyFuncEnsembler)
 	if !isPyfunc {
-		return InternalServerError("unable to list ensembler image", "ensembler is not a PyFuncEnsembler")
+		return InternalServerError("unable to list ensembler images", "ensembler is not a PyFuncEnsembler")
 	}
 
 	images, err := c.EnsemblerImagesService.ListImages(project, pyFuncEnsembler, options.EnsemblerRunnerType)
@@ -59,7 +59,7 @@ func (c EnsemblerImagesController) BuildImage(
 ) *Response {
 	options := EnsemblerImagesPathOptions{}
 	if err := c.ParseVars(&options, vars); err != nil {
-		return BadRequest("failed to fetch ensembler",
+		return BadRequest("failed to build ensembler image",
 			fmt.Sprintf("failed to parse query string: %s", err))
 	}
 
@@ -67,6 +67,7 @@ func (c EnsemblerImagesController) BuildImage(
 	if err != nil {
 		return InternalServerError("unable to get MLP project for the router", err.Error())
 	}
+	log.Infof("project: %v", project)
 
 	ensembler, err := c.EnsemblersService.FindByID(
 		*options.EnsemblerID,
