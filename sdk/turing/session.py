@@ -1,28 +1,40 @@
 import os
-import mlflow
+from time import sleep
 from typing import List, Optional
+
+import mlflow
+import pyprind
 
 import turing.generated.models
 from turing.ensembler import EnsemblerType
 from turing.generated import ApiClient, Configuration
-from turing.generated.apis import EnsemblerApi, EnsemblingJobApi, ProjectApi, RouterApi
+from turing.generated.apis import (
+    EnsemblerApi,
+    EnsemblerImagesApi,
+    EnsemblingJobApi,
+    ProjectApi,
+    RouterApi,
+)
+from turing.generated.model.ensembler_image_runner_type import EnsemblerImageRunnerType
 from turing.generated.models import (
-    Project,
     Ensembler,
-    EnsemblingJob,
+    EnsemblerId,
+    EnsemblerImage,
+    EnsemblerImages,
     EnsemblerJobStatus,
     EnsemblersPaginatedResults,
+    EnsemblingJob,
     EnsemblingJobPaginatedResults,
     JobId,
-    RouterId,
-    RouterIdObject,
-    RouterIdAndVersion,
+    Project,
     Router,
-    RouterDetails,
     RouterConfig,
+    RouterDetails,
+    RouterId,
+    RouterIdAndVersion,
+    RouterIdObject,
     RouterVersion,
     RouterVersionConfig,
-    EnsemblerId,
     RouterVersionStatus,
 )
 
@@ -59,7 +71,7 @@ class TuringSession:
                 get_default_id_token_credentials,
             )
             from google.auth.transport.requests import Request
-            from google.auth.transport.urllib3 import urllib3, AuthorizedHttp
+            from google.auth.transport.urllib3 import AuthorizedHttp, urllib3
 
             credentials = get_default_id_token_credentials(target_audience="sdk.caraml")
             # Refresh credentials, in case it's coming from Compute Engine.
@@ -182,6 +194,88 @@ class TuringSession:
         return EnsemblerApi(self._api_client).delete_ensembler(
             project_id=self.active_project.id, ensembler_id=ensembler_id
         )
+
+    @require_active_project
+    def list_ensembler_images(
+        self,
+        ensembler: Ensembler,
+        runner_type: EnsemblerImageRunnerType = None,
+    ) -> EnsemblerImages:
+        """
+        List ensembler images
+        """
+        return EnsemblerImagesApi(self._api_client).list_ensembler_images(
+            project_id=self.active_project.id,
+            ensembler_id=ensembler.id,
+            runner_type=runner_type,
+        )
+
+    @require_active_project
+    def create_ensembler_image(
+        self,
+        ensembler: Ensembler,
+        runner_type: EnsemblerImageRunnerType = None,
+    ) -> EnsemblerImage:
+        """
+        Create ensembler image
+        """
+        build_ensembler_image_request = (
+            turing.generated.models.BuildEnsemblerImageRequest(
+                runner_type=runner_type,
+            )
+        )
+
+        EnsemblerImagesApi(self._api_client).create_ensembler_image(
+            project_id=self.active_project.id,
+            ensembler_id=ensembler.id,
+            build_ensembler_image_request=build_ensembler_image_request,
+        )
+
+        bar = pyprind.ProgBar(
+            100,
+            track_time=True,
+            title=f"Building Docker image for ensembler {runner_type} of {ensembler.name}",
+        )
+        bar.update()
+        sleep(10)
+
+        while bar.active:
+            images = self.list_ensembler_images(ensembler, runner_type)
+
+            if len(images.value) != 1:
+                break
+
+            image = images.value[0]
+
+            if image.exists:
+                break
+
+            if (
+                image.image_building_job_status is not None
+                and image.image_building_job_status.state.value != "active"
+            ):
+                break
+
+            bar.update()
+            sleep(10)
+        bar.stop()
+
+        if image.exists:
+            print(
+                f"Succefully built Docker image for ensembler {runner_type} of {ensembler.name}."
+                f"\nDocker image ref: {image.image_ref}"
+            )
+        else:
+            print(
+                f"Failed to build Docker image for model {runner_type} of {ensembler.name}"
+            )
+            if (
+                image.image_building_job_status is not None
+                and image.image_building_job_status.message != ""
+            ):
+                print(f"{image.image_building_job_status.message}")
+
+        return image
 
     @require_active_project
     def list_ensembling_jobs(

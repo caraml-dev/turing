@@ -183,6 +183,77 @@ paths:
       summary: Updates existing Ensembler with the data provided in the payload
       tags:
       - Ensembler
+  /projects/{project_id}/ensemblers/{ensembler_id}/images:
+    get:
+      operationId: ListEnsemblerImages
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: path
+        name: ensembler_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: query
+        name: runner_type
+        required: false
+        schema:
+          $ref: '#/components/schemas/EnsemblerImageRunnerType'
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnsemblerImages'
+          description: A JSON object
+        "400":
+          description: Invalid request body
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Unable to list ensembler images
+      summary: Returns a list of ensembler images that belong to the ensembler
+      tags:
+      - Ensembler Images
+    put:
+      operationId: CreateEnsemblerImage
+      parameters:
+      - in: path
+        name: project_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      - in: path
+        name: ensembler_id
+        required: true
+        schema:
+          format: int32
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildEnsemblerImageRequest'
+        description: A JSON object containing information about the ensembler
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Invalid request body
+        "404":
+          description: Ensembler not found
+        "500":
+          description: Unable to build ensembler image
+      summary: Creates a new ensembler image
+      tags:
+      - Ensembler Images
   /projects/{project_id}/jobs:
     get:
       operationId: ListEnsemblingJobs
@@ -1441,6 +1512,64 @@ components:
     Id:
       format: int32
       type: integer
+    EnsemblerImages:
+      items:
+        $ref: '#/components/schemas/EnsemblerImage'
+      type: array
+    EnsemblerImage:
+      example:
+        image_ref: image_ref
+        project_id: 0
+        image_building_job_status:
+          message: message
+        exists: true
+        ensembler_id: 6
+      properties:
+        project_id:
+          format: int32
+          type: integer
+        ensembler_id:
+          format: int32
+          type: integer
+        runner_type:
+          $ref: '#/components/schemas/EnsemblerImageRunnerType'
+        image_ref:
+          type: string
+        exists:
+          type: boolean
+        image_building_job_status:
+          $ref: '#/components/schemas/ImageBuildingJobStatus'
+      type: object
+    EnsemblerImageRunnerType:
+      enum:
+      - job
+      - service
+      nullable: true
+      type: string
+    ImageBuildingJobStatus:
+      example:
+        message: message
+      properties:
+        state:
+          $ref: '#/components/schemas/ImageBuildingJobState'
+        message:
+          type: string
+      type: object
+    ImageBuildingJobState:
+      enum:
+      - active
+      - succeeded
+      - failed
+      - unknown
+      type: string
+    BuildEnsemblerImageRequest:
+      example: {}
+      properties:
+        runner_type:
+          $ref: '#/components/schemas/EnsemblerImageRunnerType'
+      required:
+      - runner_type
+      type: object
     EnsemblingJobPaginatedResults:
       allOf:
       - $ref: '#/components/schemas/EnsemblersPaginatedResults_allOf'

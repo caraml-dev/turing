@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,6 +19,8 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 
+	"github.com/caraml-dev/merlin/utils"
+	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
@@ -38,8 +41,17 @@ const (
 	kanikoSecretMountpath       = "/secret"
 )
 
-// JobStatus is the current state of the image building job.
-type JobStatus int
+// JobStatus is the current status of the image building job.
+type JobStatus struct {
+	State   JobState `json:"state"`
+	Message string   `json:"message,omitempty"`
+}
+
+func (js JobStatus) IsActive() bool {
+	return js.State == JobStateActive
+}
+
+type JobState int
 
 const (
 	// jobDeletionTimeoutInSeconds is the maximum time to wait for a job to be deleted from a cluster
@@ -48,14 +60,14 @@ const (
 	jobDeletionTickDurationInMilliseconds = 100
 	// jobCompletionTickDurationInSeconds is the interval at which the API server checks if a job has completed
 	jobCompletionTickDurationInSeconds = 5
-	// JobStatusActive is the status of the image building job is active
-	JobStatusActive = JobStatus(iota)
-	// JobStatusFailed is when the image building job has failed
-	JobStatusFailed
-	// JobStatusSucceeded is when the image building job has succeeded
-	JobStatusSucceeded
-	// JobStatusUnknown is when the image building job status is unknown
-	JobStatusUnknown
+	// JobStateActive is the status of the image building job is active
+	JobStateActive = JobState(iota)
+	// JobStateFailed is when the image building job has failed
+	JobStateFailed
+	// JobStateSucceeded is when the image building job has succeeded
+	JobStateSucceeded
+	// JobStateUnknown is when the image building job status is unknown
+	JobStateUnknown
 )
 
 // BuildImageRequest contains the information needed to build the OCI image
@@ -70,35 +82,46 @@ type BuildImageRequest struct {
 	BaseImageRefTag string
 }
 
+type EnsemblerImage struct {
+	ProjectID           models.ID                  `json:"project_id"`
+	EnsemblerID         models.ID                  `json:"ensembler_id"`
+	EnsemblerRunnerType models.EnsemblerRunnerType `json:"runner_type"`
+	ImageRef            string                     `json:"image_ref"`
+	Exists              bool                       `json:"exists"`
+	JobStatus           JobStatus                  `json:"image_building_job_status"`
+}
+
 // ImageBuilder defines the operations on building and publishing OCI images.
 type ImageBuilder interface {
 	// Build OCI image based on a Dockerfile
 	BuildImage(request BuildImageRequest) (string, error)
+	GetEnsemblerImage(project *mlp.Project, ensembler *models.PyFuncEnsembler) (EnsemblerImage, error)
 	GetImageBuildingJobStatus(
 		projectName string,
-		modelName string,
-		modelID models.ID,
+		ensemblerName string,
+		ensemblerID models.ID,
 		versionID string,
-	) (JobStatus, error)
+	) JobStatus
 	DeleteImageBuildingJob(
 		projectName string,
-		modelName string,
-		modelID models.ID,
+		ensemblerName string,
+		ensemblerID models.ID,
 		versionID string,
 	) error
 }
 
 type nameGenerator interface {
 	// generateBuilderJobName generate kaniko job name that will be used to build a docker image
-	generateBuilderName(projectName string, modelName string, modelID models.ID, versionID string) string
+	generateBuilderName(projectName string, ensemblerName string, ensemblerID models.ID, versionID string) string
 	// generateDockerImageName generate image name based on project and model
-	generateDockerImageName(projectName string, modelName string) string
+	generateDockerImageName(projectName string, ensemblerName string) string
 }
 
 type imageBuilder struct {
 	clusterController   cluster.Controller
 	imageBuildingConfig config.ImageBuildingConfig
 	nameGenerator       nameGenerator
+	runnerType          models.EnsemblerRunnerType
 }
 
 // NewImageBuilder creates a new ImageBuilder
@@ -106,6 +129,7 @@ func newImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
+	runnerType models.EnsemblerRunnerType,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
@@ -116,6 +140,7 @@ func newImageBuilder(
 		clusterController:   clusterController,
 		imageBuildingConfig: imageBuildingConfig,
 		nameGenerator:       nameGenerator,
+		runnerType:          runnerType,
 	}, nil
 }
 
@@ -427,50 +452,99 @@ func checkParseResources(resourceRequestsLimits config.ResourceRequestsLimits) e
 
 func (ib *imageBuilder) GetImageBuildingJobStatus(
 	projectName string,
-	modelName string,
-	modelID models.ID,
+	ensemblerName string,
+	ensemblerID models.ID,
 	versionID string,
-) (JobStatus, error) {
+) (status JobStatus) {
+	status.State = JobStateUnknown
+
+	jobConditionTable := ""
+	podContainerTable := ""
+	podLastTerminationMessage := ""
+	podLastTerminationReason := ""
+
+	defer func() {
+		if jobConditionTable != "" {
+			status.Message = fmt.Sprintf("%s\n\nJob conditions:\n%s", status.Message, jobConditionTable)
+		}
+
+		if podContainerTable != "" {
+			status.Message = fmt.Sprintf("%s\n\nPod container status:\n%s", status.Message, podContainerTable)
+		}
+
+		if podLastTerminationMessage != "" {
+			status.Message = fmt.Sprintf("%s\n\nPod last termination message:\n%s", status.Message, podLastTerminationMessage)
+		}
+	}()
+
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
-		modelName,
-		modelID,
+		ensemblerName,
+		ensemblerID,
 		versionID,
 	)
+	log.Infof("Checking status of image building job %s", kanikoJobName)
 	job, err := ib.clusterController.GetJob(
 		context.Background(),
 		ib.imageBuildingConfig.BuildNamespace,
 		kanikoJobName,
 	)
-	if err != nil {
-		return JobStatusUnknown, err
+	if err != nil && !kerrors.IsNotFound(err) {
+		status.Message = err.Error()
+		return
 	}
 
 	if job.Status.Active != 0 {
-		return JobStatusActive, nil
+		status.State = JobStateActive
+		return
 	}
 
 	if job.Status.Succeeded != 0 {
-		return JobStatusSucceeded, nil
+		status.State = JobStateSucceeded
+		return
 	}
 
 	if job.Status.Failed != 0 {
-		return JobStatusFailed, nil
+		status.State = JobStateFailed
 	}
 
-	return JobStatusUnknown, nil
+	if len(job.Status.Conditions) > 0 {
+		jobConditionTable, err = parseJobConditions(job.Status.Conditions)
+		status.Message = err.Error()
+	}
+
+	pods, err := ib.clusterController.ListPods(
+		context.Background(),
+		ib.imageBuildingConfig.BuildNamespace,
+		fmt.Sprintf("job-name=%s", kanikoJobName),
+	)
+	if err != nil && !kerrors.IsNotFound(err) {
+		status.Message = err.Error()
+		return
+	}
+
+	for _, pod := range pods.Items {
+		if len(pod.Status.ContainerStatuses) > 0 {
+			podContainerTable, podLastTerminationMessage,
+				podLastTerminationReason = utils.ParsePodContainerStatuses(pod.Status.ContainerStatuses)
+			status.Message = podLastTerminationReason
+			break
+		}
+	}
+
+	return
 }
 
 func (ib *imageBuilder) DeleteImageBuildingJob(
 	projectName string,
-	modelName string,
-	modelID models.ID,
+	ensemblerName string,
+	ensemblerID models.ID,
 	versionID string,
 ) error {
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		projectName,
-		modelName,
-		modelID,
+		ensemblerName,
+		ensemblerID,
 		versionID,
 	)
 	job, err := ib.clusterController.GetJob(
@@ -485,4 +559,51 @@ func (ib *imageBuilder) DeleteImageBuildingJob(
 	// Delete job
 	err = ib.clusterController.DeleteJob(context.Background(), ib.imageBuildingConfig.BuildNamespace, job.Name)
 	return err
+}
+
+func (ib *imageBuilder) GetEnsemblerImage(
+	project *mlp.Project,
+	ensembler *models.PyFuncEnsembler,
+) (EnsemblerImage, error) {
+	imageName := ib.nameGenerator.generateDockerImageName(project.Name, ensembler.Name)
+	imageExists, err := ib.checkIfImageExists(imageName, ensembler.RunID)
+	if err != nil {
+		return EnsemblerImage{}, err
+	}
+
+	imageRef := fmt.Sprintf("%s:%s", imageName, ensembler.RunID)
+
+	image := EnsemblerImage{
+		ProjectID:           models.ID(project.ID),
+		EnsemblerID:         models.ID(ensembler.GetID()),
+		EnsemblerRunnerType: ib.runnerType,
+		ImageRef:            imageRef,
+		Exists:              imageExists,
+	}
+	return image, nil
+}
+
+func parseJobConditions(jobConditions []apibatchv1.JobCondition) (string, error) {
+	var err error
+
+	jobConditionHeaders := []string{"TIMESTAMP", "TYPE", "REASON", "MESSAGE"}
+	jobConditionRows := [][]string{}
+
+	sort.Slice(jobConditions, func(i, j int) bool {
+		return jobConditions[i].LastProbeTime.Before(&jobConditions[j].LastProbeTime)
+	})
+
+	for _, condition := range jobConditions {
+		jobConditionRows = append(jobConditionRows, []string{
+			condition.LastProbeTime.Format(time.RFC1123),
+			string(condition.Type),
+			condition.Reason,
+			condition.Message,
+		})
+
+		err = errors.New(condition.Reason)
+	}
+
+	jobTable := utils.LogTable(jobConditionHeaders, jobConditionRows)
+	return jobTable, err
 }

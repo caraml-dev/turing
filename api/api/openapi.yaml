@@ -20,6 +20,10 @@ paths:
   "/projects/{project_id}/ensemblers/{ensembler_id}":
     $ref: "specs/ensemblers.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}"
 
+  # E N S E M B L E R   I M A G E S
+  "/projects/{project_id}/ensemblers/{ensembler_id}/images":
+    $ref: "specs/ensembler-images.yaml#/paths/~1projects~1{project_id}~1ensemblers~1{ensembler_id}~1images"
+
   # J O B S
   "/projects/{project_id}/jobs":
     $ref: "specs/jobs.yaml#/paths/~1projects~1{project_id}~1jobs"

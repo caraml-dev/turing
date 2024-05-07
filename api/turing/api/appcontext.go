@@ -23,13 +23,14 @@ import (
 // AppContext stores the entities relating to the application's context
 type AppContext struct {
 	// DAO
-	DeploymentService     service.DeploymentService
-	RoutersService        service.RoutersService
-	RouterVersionsService service.RouterVersionsService
-	EventService          service.EventService
-	EnsemblersService     service.EnsemblersService
-	EnsemblingJobService  service.EnsemblingJobService
-	AlertService          service.AlertService
+	DeploymentService      service.DeploymentService
+	RoutersService         service.RoutersService
+	RouterVersionsService  service.RouterVersionsService
+	EventService           service.EventService
+	EnsemblersService      service.EnsemblersService
+	EnsemblerImagesService service.EnsemblerImagesService
+	EnsemblingJobService   service.EnsemblingJobService
+	AlertService           service.AlertService
 
 	// Default configuration for routers
 	RouterDefaults *config.RouterDefaults
@@ -86,6 +87,7 @@ func NewAppContext(
 	// Initialise Batch components
 	// Since there is only the default environment, we will not create multiple batch runners.
 	var batchJobRunners []batchrunner.BatchJobRunner
+	var ensemblingImageBuilder imagebuilder.ImageBuilder
 	var ensemblingJobService service.EnsemblingJobService
 
 	// Init ensemblers service
@@ -117,7 +119,8 @@ func NewAppContext(
 		if !ok {
 			return nil, errors.Wrapf(err, "Failed getting the image building controller")
 		}
-		ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
+
+		ensemblingImageBuilder, err = imagebuilder.NewEnsemblerJobImageBuilder(
 			imageBuildingController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		)
@@ -129,6 +132,7 @@ func NewAppContext(
 		if !ok {
 			return nil, fmt.Errorf("Failed getting the batch ensembling job controller")
 		}
+
 		batchEnsemblingController := batchensembling.NewBatchEnsemblingController(
 			batchClusterController,
 			mlpSvc,
@@ -168,16 +172,17 @@ func NewAppContext(
 	}
 
 	appContext := &AppContext{
-		DeploymentService:     service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
-		RoutersService:        service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EnsemblersService:     ensemblersService,
-		EnsemblingJobService:  ensemblingJobService,
-		RouterVersionsService: service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
-		EventService:          service.NewEventService(db),
-		RouterDefaults:        cfg.RouterDefaults,
-		CryptoService:         cryptoService,
-		MLPService:            mlpSvc,
-		ExperimentsService:    expSvc,
+		DeploymentService:      service.NewDeploymentService(cfg, clusterControllers, ensemblerServiceImageBuilder),
+		RoutersService:         service.NewRoutersService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
+		EnsemblersService:      ensemblersService,
+		EnsemblerImagesService: service.NewEnsemblerImagesService(ensemblingImageBuilder, ensemblerServiceImageBuilder),
+		EnsemblingJobService:   ensemblingJobService,
+		RouterVersionsService:  service.NewRouterVersionsService(db, mlpSvc, cfg.RouterDefaults.MonitoringURLFormat),
+		EventService:           service.NewEventService(db),
+		RouterDefaults:         cfg.RouterDefaults,
+		CryptoService:          cryptoService,
+		MLPService:             mlpSvc,
+		ExperimentsService:     expSvc,
 		PodLogService: service.NewPodLogService(
 			clusterControllers,
 		),

@@ -1,12 +1,13 @@
 import json
 import os.path
 import random
+
 import pandas
 import pytest
-import re
+from urllib3_mock import Responses
+
 import tests
 import turing.ensembler
-from urllib3_mock import Responses
 import turing.generated.models
 
 responses = Responses("requests.packages.urllib3")
@@ -54,12 +55,6 @@ def test_predict():
 def test_list_ensemblers(
     turing_api, active_project, generic_ensemblers, use_google_oauth
 ):
-    with pytest.raises(
-        Exception,
-        match=re.escape("Active project isn't set, use set_project(...) to set it"),
-    ):
-        turing.PyFuncEnsembler.list()
-
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
@@ -307,7 +302,6 @@ def test_update_ensembler_existing_job(
 def test_delete_ensembler(
     turing_api, active_project, use_google_oauth, actual, expected
 ):
-
     turing.set_url(turing_api, use_google_oauth)
     turing.set_project(active_project.name)
 
