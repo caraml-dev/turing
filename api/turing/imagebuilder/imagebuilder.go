@@ -51,7 +51,7 @@ func (js JobStatus) IsActive() bool {
 	return js.State == JobStateActive
 }
 
-type JobState int
+type JobState string
 
 const (
 	// jobDeletionTimeoutInSeconds is the maximum time to wait for a job to be deleted from a cluster
@@ -60,14 +60,17 @@ const (
 	jobDeletionTickDurationInMilliseconds = 100
 	// jobCompletionTickDurationInSeconds is the interval at which the API server checks if a job has completed
 	jobCompletionTickDurationInSeconds = 5
+)
+
+const (
 	// JobStateActive is the status of the image building job is active
-	JobStateActive = JobState(iota)
-	// JobStateFailed is when the image building job has failed
-	JobStateFailed
+	JobStateActive JobState = "active"
 	// JobStateSucceeded is when the image building job has succeeded
-	JobStateSucceeded
+	JobStateSucceeded JobState = "succeeded"
+	// JobStateFailed is when the image building job has failed
+	JobStateFailed JobState = "failed"
 	// JobStateUnknown is when the image building job status is unknown
-	JobStateUnknown
+	JobStateUnknown JobState = "unknown"
 )
 
 // BuildImageRequest contains the information needed to build the OCI image

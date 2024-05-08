@@ -67,7 +67,6 @@ func (c EnsemblerImagesController) BuildImage(
 	if err != nil {
 		return InternalServerError("unable to get MLP project for the router", err.Error())
 	}
-	log.Infof("project: %v", project)
 
 	ensembler, err := c.EnsemblersService.FindByID(
 		*options.EnsemblerID,
@@ -87,7 +86,7 @@ func (c EnsemblerImagesController) BuildImage(
 
 	go func() {
 		if err := c.EnsemblerImagesService.BuildImage(project, pyFuncEnsembler, request.RunnerType); err != nil {
-			log.Errorf("unable to build ensembler image", err.Error())
+			log.Errorf("unable to build ensembler image: %s", err.Error())
 		}
 	}()
 
