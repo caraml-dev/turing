@@ -222,7 +222,8 @@ func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
 		}
 		targetValue := fmt.Sprintf("%.2f", rawTarget)
 		if targetValue == "0.00" {
-			return "", fmt.Errorf("concurrency target %v should be at least 0.01", cfg.AutoscalingTarget)
+			return "", fmt.Errorf("concurrency target %v should be at least 0.01 after rounding to 2 decimal places",
+				cfg.AutoscalingTarget)
 		}
 		return targetValue, nil
 	}
