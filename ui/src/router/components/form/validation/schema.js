@@ -233,7 +233,7 @@ const autoscalingPolicySchema = yup.object().shape({
   target: yup
     .string()
     .required("Valid target should be specified")
-    .matches(/^[0-9]+$/, "Must be a number"),
+    .matches(/(\d+(?:\.\d+)?)/, "Must be a number"),
 });
 
 const enricherSchema = yup.object().shape({

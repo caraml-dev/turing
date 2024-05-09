@@ -24,10 +24,10 @@ export const AutoscalingPolicyPanel = ({
   errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
-  // Parse the integer portion of the value
+  // Parse the float portion of the value
   const onChangeTarget = (value) => {
-    const parsedInt = parseInt(value);
-    onChange("target")(isNaN(parsedInt) ? "" : parsedInt.toString());
+    const parsedFloat = parseFloat(value);
+    onChange("target")(isNaN(value) ? "" : parsedFloat.toString());
   };
   // Update default target if the metric is changing
   const onChangeMetric = (value) => {
