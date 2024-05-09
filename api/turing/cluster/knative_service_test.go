@@ -522,14 +522,14 @@ func TestGetAutoscalingTarget(t *testing.T) {
 		"rps": {
 			cfg: &KnativeService{
 				AutoscalingMetric: "rps",
-				AutoscalingTarget: "100",
+				AutoscalingTarget: "100.1",
 			},
 			expectedTarget: "100",
 		},
 		"cpu": {
 			cfg: &KnativeService{
 				AutoscalingMetric: "cpu",
-				AutoscalingTarget: "80",
+				AutoscalingTarget: "80.2",
 			},
 			expectedTarget: "80",
 		},
