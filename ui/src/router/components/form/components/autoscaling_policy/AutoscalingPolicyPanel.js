@@ -93,8 +93,10 @@ export const AutoscalingPolicyPanel = ({
               onChange={(e) => onChangeTarget(e.target.value)}
               isInvalid={!!errors.target}
               name="memory"
-              min={1}
-              step={1}
+              // The min value is set as 0.005 because it's the smallest value, when rounded to 2 decimal places, gives
+              // 0.01, the smallest value accepted as an autoscaling target (concurrency).
+              min={0.005}
+              step={"any"}
               append={selectedMetric.unit}
             />
           </EuiFormRow>
