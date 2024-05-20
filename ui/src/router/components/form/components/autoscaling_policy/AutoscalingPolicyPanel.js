@@ -24,10 +24,10 @@ export const AutoscalingPolicyPanel = ({
   errors = {},
 }) => {
   const { onChange } = useOnChangeHandler(onChangeHandler);
-  // Parse the integer portion of the value
+  // Parse the float portion of the value
   const onChangeTarget = (value) => {
-    const parsedInt = parseInt(value);
-    onChange("target")(isNaN(parsedInt) ? "" : parsedInt.toString());
+    const parsedFloat = parseFloat(value);
+    onChange("target")(isNaN(value) ? "" : parsedFloat.toString());
   };
   // Update default target if the metric is changing
   const onChangeMetric = (value) => {
@@ -93,8 +93,10 @@ export const AutoscalingPolicyPanel = ({
               onChange={(e) => onChangeTarget(e.target.value)}
               isInvalid={!!errors.target}
               name="memory"
-              min={1}
-              step={1}
+              // The min value is set as 0.005 because it's the smallest value, when rounded to 2 decimal places, gives
+              // 0.01, the smallest value accepted as an autoscaling target (concurrency).
+              min={0.005}
+              step={"any"}
               append={selectedMetric.unit}
             />
           </EuiFormRow>

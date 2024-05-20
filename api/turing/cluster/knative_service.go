@@ -196,7 +196,16 @@ func (cfg *KnativeService) buildSvcSpec(
 }
 
 func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
-	if cfg.AutoscalingMetric == "memory" {
+	switch cfg.AutoscalingMetric {
+	case "cpu", "rps":
+		// Parse the autoscaling target to an integer
+		rawTarget, err := strconv.ParseFloat(cfg.AutoscalingTarget, 64)
+		if err != nil {
+			return "", err
+		}
+		targetValue := fmt.Sprintf("%.0f", rawTarget)
+		return targetValue, nil
+	case "memory":
 		// The value is supplied as a % of requested memory but the Knative API expects the value in Mi.
 		targetPercent, err := strconv.ParseFloat(cfg.AutoscalingTarget, 64)
 		if err != nil {
@@ -205,15 +214,16 @@ func (cfg *KnativeService) getAutoscalingTarget() (string, error) {
 		targetResource := ComputeResource(cfg.BaseService.MemoryRequests, targetPercent/100)
 		// Divide value by (1024^2) to convert to Mi
 		return fmt.Sprintf("%.0f", float64(targetResource.Value())/math.Pow(1024, 2)), nil
-
-	} else if cfg.AutoscalingMetric == "concurrency" {
+	case "concurrency":
+		// Parse the autoscaling target to a value up to 2 decimal places because Knative allows it
 		rawTarget, err := strconv.ParseFloat(cfg.AutoscalingTarget, 64)
 		if err != nil {
 			return "", err
 		}
 		targetValue := fmt.Sprintf("%.2f", rawTarget)
 		if targetValue == "0.00" {
-			return "", fmt.Errorf("concurrency target %v should be at least 0.01", cfg.AutoscalingTarget)
+			return "", fmt.Errorf("concurrency target %v should be at least 0.01 after rounding to 2 decimal places",
+				cfg.AutoscalingTarget)
 		}
 		return targetValue, nil
 	}

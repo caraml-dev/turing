@@ -95,7 +95,7 @@ export class RouterVersion {
         resource_request: this.resource_request,
         autoscaling_policy: {
           ...this.autoscaling_policy,
-          target: parseInt(this.autoscaling_policy.target),
+          target: parseFloat(this.autoscaling_policy.target),
         },
         protocol: this.protocol,
       },
@@ -112,7 +112,7 @@ export class RouterVersion {
             resource_request: this.enricher.resource_request,
             autoscaling_policy: {
               ...this.enricher.autoscaling_policy,
-              target: parseInt(this.enricher.autoscaling_policy.target),
+              target: parseFloat(this.enricher.autoscaling_policy.target),
             },
           }
           : {
@@ -136,7 +136,7 @@ export class RouterVersion {
                     ...this.ensembler.docker_config,
                     autoscaling_policy: {
                       ...this.ensembler.docker_config.autoscaling_policy,
-                      target: parseInt(
+                      target: parseFloat(
                         this.ensembler.docker_config.autoscaling_policy.target
                       ),
                     },
@@ -148,7 +148,7 @@ export class RouterVersion {
                       ...this.ensembler.pyfunc_config,
                       autoscaling_policy: {
                         ...this.ensembler.pyfunc_config.autoscaling_policy,
-                        target: parseInt(
+                        target: parseFloat(
                           this.ensembler.pyfunc_config.autoscaling_policy.target
                         ),
                       },

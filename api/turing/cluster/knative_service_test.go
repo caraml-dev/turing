@@ -512,6 +512,20 @@ func TestGetAutoscalingTarget(t *testing.T) {
 		expectedTarget string
 		expectedErr    string
 	}{
+		"concurrency | target is not a number": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "concurrency",
+				AutoscalingTarget: "10.1.1",
+			},
+			expectedErr: "strconv.ParseFloat: parsing \"10.1.1\": invalid syntax",
+		},
+		"concurrency | target when rounded to 2 decimal places is equals to 0.00": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "concurrency",
+				AutoscalingTarget: "0.004",
+			},
+			expectedErr: "concurrency target 0.004 should be at least 0.01 after rounding to 2 decimal places",
+		},
 		"concurrency": {
 			cfg: &KnativeService{
 				AutoscalingMetric: "concurrency",
@@ -519,17 +533,24 @@ func TestGetAutoscalingTarget(t *testing.T) {
 			},
 			expectedTarget: "10.00",
 		},
+		"rps | target is not a number": {
+			cfg: &KnativeService{
+				AutoscalingMetric: "rps",
+				AutoscalingTarget: "100.1.1",
+			},
+			expectedErr: "strconv.ParseFloat: parsing \"100.1.1\": invalid syntax",
+		},
 		"rps": {
 			cfg: &KnativeService{
 				AutoscalingMetric: "rps",
-				AutoscalingTarget: "100",
+				AutoscalingTarget: "100.1",
 			},
 			expectedTarget: "100",
 		},
 		"cpu": {
 			cfg: &KnativeService{
 				AutoscalingMetric: "cpu",
-				AutoscalingTarget: "80",
+				AutoscalingTarget: "80.2",
 			},
 			expectedTarget: "80",
 		},
@@ -563,7 +584,7 @@ func TestGetAutoscalingTarget(t *testing.T) {
 			},
 			expectedTarget: "1335", // (70/100) * ((2G * 10^9) bytes / 1024^2)Mi
 		},
-		"memory | failure": {
+		"memory | target is not a number": {
 			cfg: &KnativeService{
 				BaseService: &BaseService{
 					MemoryRequests: resource.MustParse("1Gi"),
