@@ -60,6 +60,11 @@ class ResourceRequest(ModelNormal):
                 'pattern': r'^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$',  # noqa: E501
             },
         },
+        ('cpu_limit',): {
+            'regex': {
+                'pattern': r'^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$',  # noqa: E501
+            },
+        },
         ('memory_request',): {
             'regex': {
                 'pattern': r'^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$',  # noqa: E501
@@ -85,6 +90,7 @@ class ResourceRequest(ModelNormal):
             'min_replica': (int,),  # noqa: E501
             'max_replica': (int,),  # noqa: E501
             'cpu_request': (str,),  # noqa: E501
+            'cpu_limit': (str,),  # noqa: E501
             'memory_request': (str,),  # noqa: E501
         }
 
@@ -97,6 +103,7 @@ class ResourceRequest(ModelNormal):
         'min_replica': 'min_replica',  # noqa: E501
         'max_replica': 'max_replica',  # noqa: E501
         'cpu_request': 'cpu_request',  # noqa: E501
+        'cpu_limit': 'cpu_limit',  # noqa: E501
         'memory_request': 'memory_request',  # noqa: E501
     }
 
@@ -149,6 +156,7 @@ class ResourceRequest(ModelNormal):
             min_replica (int): [optional]  # noqa: E501
             max_replica (int): [optional]  # noqa: E501
             cpu_request (str): [optional]  # noqa: E501
+            cpu_limit (str): [optional]  # noqa: E501
             memory_request (str): [optional]  # noqa: E501
         """
 
