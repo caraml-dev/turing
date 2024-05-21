@@ -66,18 +66,12 @@ type ClusterServiceBuilder interface {
 		ver *models.RouterVersion,
 		project *mlp.Project,
 		secretName string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewEnsemblerService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
 		secretName string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewRouterService(
@@ -89,9 +83,6 @@ type ClusterServiceBuilder interface {
 		routerDefaults *config.RouterDefaults,
 		sentryEnabled bool,
 		sentryDSN string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewFluentdService(
@@ -128,6 +119,9 @@ type clusterSvcBuilder struct {
 	MaxMemory                 resource.Quantity
 	MaxAllowedReplica         int
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint
+
+	// Knative service configs
+	knativeServiceConfig *config.KnativeServiceDefaults
 }
 
 // NewClusterServiceBuilder creates a new service builder with the supplied configs for defaults
@@ -136,12 +130,14 @@ func NewClusterServiceBuilder(
 	memoryLimit resource.Quantity,
 	maxAllowedReplica int,
 	topologySpreadConstraints []corev1.TopologySpreadConstraint,
+	knativeServiceConfig *config.KnativeServiceDefaults,
 ) ClusterServiceBuilder {
 	return &clusterSvcBuilder{
 		MaxCPU:                    cpuLimit,
 		MaxMemory:                 memoryLimit,
 		MaxAllowedReplica:         maxAllowedReplica,
 		TopologySpreadConstraints: topologySpreadConstraints,
+		knativeServiceConfig:      knativeServiceConfig,
 	}
 }
 
@@ -151,9 +147,6 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	secretName string,
-	knativeQueueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
@@ -227,9 +220,9 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		AutoscalingMetric:                     string(enricher.AutoscalingPolicy.Metric),
 		AutoscalingTarget:                     enricher.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	})
 }
 
@@ -239,9 +232,6 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	secretName string,
-	knativeQueueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
@@ -316,9 +306,9 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		AutoscalingMetric:                     string(docker.AutoscalingPolicy.Metric),
 		AutoscalingTarget:                     docker.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	})
 }
 

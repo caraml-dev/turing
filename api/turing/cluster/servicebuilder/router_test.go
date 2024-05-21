@@ -20,7 +20,17 @@ import (
 )
 
 func TestNewRouterService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: 1.5,
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	enrEndpoint := "http://test-svc-turing-enricher-1.test-project.svc.cluster.local/echo?delay=10ms"
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
@@ -1025,7 +1035,7 @@ func TestNewRouterService(t *testing.T) {
 				},
 				true,
 				"sentry-dsn",
-				20, 0, 1.5, data.initialScale,
+				data.initialScale,
 			)
 
 			if data.err == "" {
@@ -1040,7 +1050,17 @@ func TestNewRouterService(t *testing.T) {
 
 func TestNewRouterEndpoint(t *testing.T) {
 	// Get router version
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          10,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: 1.5,
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	fileBytes, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_version_success.json"))
 	require.NoError(t, err)

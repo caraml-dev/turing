@@ -104,9 +104,6 @@ func (sb *clusterSvcBuilder) NewRouterService(
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
-	knativeQueueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Create service name
@@ -160,9 +157,9 @@ func (sb *clusterSvcBuilder) NewRouterService(
 		AutoscalingMetric:                     string(routerVersion.AutoscalingPolicy.Metric),
 		AutoscalingTarget:                     routerVersion.AutoscalingPolicy.Target,
 		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	}
 	return sb.validateKnativeService(svc)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	mlp "github.com/caraml-dev/mlp/api/client"
+	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -42,7 +43,17 @@ type testSuiteNewService struct {
 }
 
 func TestNewEnricherService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          10,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: 1.5,
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	testInitialScale := 5
 
@@ -111,7 +122,7 @@ func TestNewEnricherService(t *testing.T) {
 				Team:   "test-team",
 				Labels: []mlp.Label{{Key: "custom-label-key", Value: "value-1"}},
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 0, 1.5, data.initialScale)
+			svc, err := sb.NewEnricherService(routerVersion, project, "secret", data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
@@ -123,7 +134,17 @@ func TestNewEnricherService(t *testing.T) {
 }
 
 func TestNewEnsemblerService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: 1.5,
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	testInitialScale := 5
 
@@ -233,7 +254,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 0, 1.5, data.initialScale)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)

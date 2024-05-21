@@ -33,7 +33,8 @@ import (
 
 // mockClusterServiceBuilder implements the servicebuilder.ClusterServiceBuilder interface
 type mockClusterServiceBuilder struct {
-	rv *models.RouterVersion
+	rv                   *models.RouterVersion
+	knativeServiceConfig *config.KnativeServiceDefaults
 }
 
 func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
@@ -75,9 +76,6 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
 	_ string,
-	queueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
@@ -88,9 +86,9 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 			Name:      fmt.Sprintf("%s-enricher-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 		},
-		QueueProxyResourcePercentage:          queueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	}, nil
 }
 
@@ -98,9 +96,6 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 	rv *models.RouterVersion,
 	project *mlp.Project,
 	_ string,
-	queueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
@@ -111,9 +106,9 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 			Name:      fmt.Sprintf("%s-ensembler-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 		},
-		QueueProxyResourcePercentage:          queueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	}, nil
 }
 
@@ -126,9 +121,6 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 	routerDefaults *config.RouterDefaults,
 	sentryEnabled bool,
 	sentryDSN string,
-	queueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	_ *int,
 ) (*cluster.KnativeService, error) {
 	if rv != msb.rv {
@@ -150,9 +142,9 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				Data: string(expConfig),
 			},
 		},
-		QueueProxyResourcePercentage:          queueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
+		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
+		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
 	}, nil
 }
 
@@ -225,7 +217,14 @@ func TestDeployEndpoint(t *testing.T) {
 		Return(&policyv1.PodDisruptionBudget{}, nil)
 
 	// Create mock service builder
-	svcBuilder := &mockClusterServiceBuilder{routerVersion}
+	svcBuilder := &mockClusterServiceBuilder{
+		rv: routerVersion,
+		knativeServiceConfig: &config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    1.75,
+			UserContainerMemoryLimitRequestFactor: 1.75,
+		},
+	}
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
@@ -238,11 +237,6 @@ func TestDeployEndpoint(t *testing.T) {
 		environmentType:           envType,
 		sentryEnabled:             true,
 		sentryDSN:                 "test:dsn",
-		knativeServiceConfig: &config.KnativeServiceDefaults{
-			QueueProxyResourcePercentage:          20,
-			UserContainerCPULimitRequestFactor:    1.75,
-			UserContainerMemoryLimitRequestFactor: 1.75,
-		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
 		},
@@ -427,7 +421,14 @@ func TestDeleteEndpoint(t *testing.T) {
 	routerVersion := tu.GetRouterVersion(t, filePath)
 
 	// Create mock service builder
-	svcBuilder := &mockClusterServiceBuilder{routerVersion}
+	svcBuilder := &mockClusterServiceBuilder{
+		rv: routerVersion,
+		knativeServiceConfig: &config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    1.75,
+			UserContainerMemoryLimitRequestFactor: 1.75,
+		},
+	}
 
 	// Create test endpoint service with mock controller and service builder
 	ds := &deploymentService{
@@ -437,11 +438,6 @@ func TestDeleteEndpoint(t *testing.T) {
 		},
 		deploymentTimeout:         timeout,
 		deploymentDeletionTimeout: timeout,
-		knativeServiceConfig: &config.KnativeServiceDefaults{
-			QueueProxyResourcePercentage:          20,
-			UserContainerCPULimitRequestFactor:    1.75,
-			UserContainerMemoryLimitRequestFactor: 1.75,
-		},
 		clusterControllers: map[string]cluster.Controller{
 			testEnv: controller,
 		},
@@ -779,6 +775,7 @@ func TestCreatePodDisruptionBudgets(t *testing.T) {
 					resource.MustParse("200Mi"),
 					10,
 					[]corev1.TopologySpreadConstraint{},
+					nil,
 				),
 			}
 			pdbs := ds.createPodDisruptionBudgets(tt.rv, &mlp.Project{Name: "ns"})
