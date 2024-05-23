@@ -138,7 +138,9 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			Namespace:            namespace,
 			Image:                routerVersion.Image,
 			CPURequests:          routerVersion.ResourceRequest.CPURequest,
+			CPULimit:             sb.getCPULimit(routerVersion.ResourceRequest),
 			MemoryRequests:       routerVersion.ResourceRequest.MemoryRequest,
+			MemoryLimit:          sb.getMemoryLimit(routerVersion.ResourceRequest),
 			LivenessHTTPGetPath:  routerLivenessPath,
 			ReadinessHTTPGetPath: routerReadinessPath,
 			Envs:                 envs,
@@ -148,18 +150,16 @@ func (sb *clusterSvcBuilder) NewRouterService(
 			VolumeMounts:         volumeMounts,
 			InitContainers:       initContainers,
 		},
-		IsClusterLocal:                        false,
-		ContainerPort:                         routerPort,
-		Protocol:                              routerVersion.Protocol,
-		MinReplicas:                           routerVersion.ResourceRequest.MinReplica,
-		MaxReplicas:                           routerVersion.ResourceRequest.MaxReplica,
-		InitialScale:                          initialScale,
-		AutoscalingMetric:                     string(routerVersion.AutoscalingPolicy.Metric),
-		AutoscalingTarget:                     routerVersion.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		IsClusterLocal:               false,
+		ContainerPort:                routerPort,
+		Protocol:                     routerVersion.Protocol,
+		MinReplicas:                  routerVersion.ResourceRequest.MinReplica,
+		MaxReplicas:                  routerVersion.ResourceRequest.MaxReplica,
+		InitialScale:                 initialScale,
+		AutoscalingMetric:            string(routerVersion.AutoscalingPolicy.Metric),
+		AutoscalingTarget:            routerVersion.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:    topologySpreadConstraints,
+		QueueProxyResourcePercentage: sb.knativeServiceConfig.QueueProxyResourcePercentage,
 	}
 	return sb.validateKnativeService(svc)
 }
@@ -210,17 +210,20 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	sentryDSN string,
 	ver *models.RouterVersion,
 ) ([]corev1.EnvVar, error) {
+	envs := sb.getEnvVars(ver.ResourceRequest, nil)
+
 	// Add app name, router timeout, jaeger collector
-	envs := []corev1.EnvVar{
-		{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
-		{Name: envAppEnvironment, Value: environmentType},
-		{Name: envRouterTimeout, Value: ver.Timeout},
-		{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
-		{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
-		{Name: envRouterProtocol, Value: string(ver.Protocol)},
-		{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
-		{Name: envSentryDSN, Value: sentryDSN},
-	}
+	envs = append(envs,
+		[]corev1.EnvVar{
+			{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
+			{Name: envAppEnvironment, Value: environmentType},
+			{Name: envRouterTimeout, Value: ver.Timeout},
+			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
+			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
+			{Name: envRouterProtocol, Value: string(ver.Protocol)},
+			{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
+			{Name: envSentryDSN, Value: sentryDSN},
+		}...)
 
 	// Add enricher / ensembler related env vars, if enabled
 	if ver.Enricher != nil {

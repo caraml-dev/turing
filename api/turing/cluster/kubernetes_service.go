@@ -73,7 +73,7 @@ func (cfg *KubernetesService) buildStatefulSet(labels map[string]string) *appsv1
 							Args:            cfg.Command,
 							Ports:           cfg.buildContainerPorts(),
 							Env:             cfg.Envs,
-							Resources:       cfg.buildResourceReqs(defaultCPULimitRequestFactor, defaultMemoryLimitRequestFactor),
+							Resources:       cfg.buildResourceReqs(),
 							VolumeMounts:    cfg.VolumeMounts,
 							LivenessProbe:   cfg.buildContainerProbe(livenessProbeType, int(cfg.ProbePort)),
 							ReadinessProbe:  cfg.buildContainerProbe(readinessProbeType, int(cfg.ProbePort)),

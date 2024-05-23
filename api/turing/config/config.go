@@ -263,8 +263,9 @@ type KubernetesLabelConfigs struct {
 // Knative services
 type KnativeServiceDefaults struct {
 	QueueProxyResourcePercentage          int
-	UserContainerCPULimitRequestFactor    float64 `json:"userContainerLimitCPURequestFactor"`
-	UserContainerMemoryLimitRequestFactor float64 `json:"userContainerLimitMemoryRequestFactor"`
+	UserContainerCPULimitRequestFactor    float64
+	UserContainerMemoryLimitRequestFactor float64
+	DefaultEnvVarsWithoutCPULimits        []corev1.EnvVar
 }
 
 // SinglePageApplicationConfig holds configuration required for serving SPAs

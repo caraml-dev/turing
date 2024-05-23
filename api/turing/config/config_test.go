@@ -283,6 +283,12 @@ func TestLoad(t *testing.T) {
 					QueueProxyResourcePercentage:          20,
 					UserContainerCPULimitRequestFactor:    0,
 					UserContainerMemoryLimitRequestFactor: 1.25,
+					DefaultEnvVarsWithoutCPULimits: []corev1.EnvVar{
+						{
+							Name:  "foo",
+							Value: "bar",
+						},
+					},
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -425,6 +431,12 @@ func TestLoad(t *testing.T) {
 					QueueProxyResourcePercentage:          20,
 					UserContainerCPULimitRequestFactor:    0,
 					UserContainerMemoryLimitRequestFactor: 1.25,
+					DefaultEnvVarsWithoutCPULimits: []corev1.EnvVar{
+						{
+							Name:  "foo",
+							Value: "bar",
+						},
+					},
 				},
 				RouterDefaults: &config.RouterDefaults{
 					LogLevel: "INFO",
@@ -554,6 +566,12 @@ func TestLoad(t *testing.T) {
 					QueueProxyResourcePercentage:          20,
 					UserContainerCPULimitRequestFactor:    0,
 					UserContainerMemoryLimitRequestFactor: 1.25,
+					DefaultEnvVarsWithoutCPULimits: []corev1.EnvVar{
+						{
+							Name:  "foo",
+							Value: "bar",
+						},
+					},
 				},
 				DeployConfig: &config.DeploymentConfig{
 					EnvironmentType:   "dev",

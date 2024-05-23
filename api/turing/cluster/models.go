@@ -35,8 +35,10 @@ type BaseService struct {
 	Image     string `json:"image"`
 
 	// Resources
-	CPURequests    resource.Quantity `json:"cpu_requests"`
-	MemoryRequests resource.Quantity `json:"memory_requests"`
+	CPURequests    resource.Quantity  `json:"cpu_requests"`
+	CPULimit       *resource.Quantity `json:"cpu_limit"`
+	MemoryRequests resource.Quantity  `json:"memory_requests"`
+	MemoryLimit    *resource.Quantity `json:"memory_limit"`
 
 	// Health Checks
 	ProbePort             int32  `json:"probe_port"`
@@ -62,10 +64,7 @@ type BaseService struct {
 	InitContainers []Container `json:"init_containers"`
 }
 
-func (cfg *BaseService) buildResourceReqs(
-	UserContainerCPULimitRequestFactor float64,
-	UserContainerMemoryLimitRequestFactor float64,
-) corev1.ResourceRequirements {
+func (cfg *BaseService) buildResourceReqs() corev1.ResourceRequirements {
 	reqs := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:    cfg.CPURequests,
 		corev1.ResourceMemory: cfg.MemoryRequests,
@@ -73,11 +72,11 @@ func (cfg *BaseService) buildResourceReqs(
 
 	// Set resource limits to request * userContainerCPULimitRequestFactor or UserContainerMemoryLimitRequestFactor
 	limits := map[corev1.ResourceName]resource.Quantity{}
-	if UserContainerCPULimitRequestFactor != 0 {
-		limits[corev1.ResourceCPU] = ComputeResource(cfg.CPURequests, UserContainerCPULimitRequestFactor)
+	if cfg.CPULimit != nil {
+		limits[corev1.ResourceCPU] = *cfg.CPULimit
 	}
-	if UserContainerMemoryLimitRequestFactor != 0 {
-		limits[corev1.ResourceMemory] = ComputeResource(cfg.MemoryRequests, UserContainerMemoryLimitRequestFactor)
+	if cfg.MemoryLimit != nil {
+		limits[corev1.ResourceMemory] = *cfg.MemoryLimit
 	}
 
 	return corev1.ResourceRequirements{

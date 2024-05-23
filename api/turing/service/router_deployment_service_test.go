@@ -86,9 +86,7 @@ func (msb *mockClusterServiceBuilder) NewEnricherService(
 			Name:      fmt.Sprintf("%s-enricher-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 		},
-		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage: msb.knativeServiceConfig.QueueProxyResourcePercentage,
 	}, nil
 }
 
@@ -106,9 +104,7 @@ func (msb *mockClusterServiceBuilder) NewEnsemblerService(
 			Name:      fmt.Sprintf("%s-ensembler-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 		},
-		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage: msb.knativeServiceConfig.QueueProxyResourcePercentage,
 	}, nil
 }
 
@@ -142,9 +138,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 				Data: string(expConfig),
 			},
 		},
-		QueueProxyResourcePercentage:          msb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    msb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: msb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		QueueProxyResourcePercentage: msb.knativeServiceConfig.QueueProxyResourcePercentage,
 	}, nil
 }
 
@@ -298,18 +292,14 @@ func TestDeployEndpoint(t *testing.T) {
 			Name:      fmt.Sprintf("%s-enricher-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
 		},
-		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    1.75,
-		UserContainerMemoryLimitRequestFactor: 1.75,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
 		BaseService: &cluster.BaseService{
 			Name:      fmt.Sprintf("%s-ensembler-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
 		},
-		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    1.75,
-		UserContainerMemoryLimitRequestFactor: 1.75,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "ApplyConfigMap", mock.Anything, testNamespace,
 		&cluster.ConfigMap{Name: fmt.Sprintf("%s-fiber-config-%d", routerVersion.Router.Name, routerVersion.Version)})
@@ -331,9 +321,7 @@ func TestDeployEndpoint(t *testing.T) {
 				),
 			},
 		},
-		QueueProxyResourcePercentage:          20,
-		UserContainerCPULimitRequestFactor:    1.75,
-		UserContainerMemoryLimitRequestFactor: 1.75,
+		QueueProxyResourcePercentage: 20,
 	})
 	controller.AssertCalled(t, "CreateSecret", mock.Anything, &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),

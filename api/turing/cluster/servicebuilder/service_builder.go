@@ -206,23 +206,23 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Namespace:      namespace,
 			Image:          enricher.Image,
 			CPURequests:    enricher.ResourceRequest.CPURequest,
+			CPULimit:       sb.getCPULimit(enricher.ResourceRequest),
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
-			Envs:           enricher.Env.ToKubernetesEnvVars(),
+			MemoryLimit:    sb.getMemoryLimit(enricher.ResourceRequest),
+			Envs:           sb.getEnvVars(enricher.ResourceRequest, &enricher.Env),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                        true,
-		ContainerPort:                         int32(enricher.Port),
-		MinReplicas:                           enricher.ResourceRequest.MinReplica,
-		MaxReplicas:                           enricher.ResourceRequest.MaxReplica,
-		InitialScale:                          initialScale,
-		AutoscalingMetric:                     string(enricher.AutoscalingPolicy.Metric),
-		AutoscalingTarget:                     enricher.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(enricher.Port),
+		MinReplicas:                  enricher.ResourceRequest.MinReplica,
+		MaxReplicas:                  enricher.ResourceRequest.MaxReplica,
+		InitialScale:                 initialScale,
+		AutoscalingMetric:            string(enricher.AutoscalingPolicy.Metric),
+		AutoscalingTarget:            enricher.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:    topologySpreadConstraints,
+		QueueProxyResourcePercentage: sb.knativeServiceConfig.QueueProxyResourcePercentage,
 	})
 }
 
@@ -292,23 +292,23 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Namespace:      namespace,
 			Image:          docker.Image,
 			CPURequests:    docker.ResourceRequest.CPURequest,
+			CPULimit:       sb.getCPULimit(docker.ResourceRequest),
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
-			Envs:           docker.Env.ToKubernetesEnvVars(),
+			MemoryLimit:    sb.getMemoryLimit(docker.ResourceRequest),
+			Envs:           sb.getEnvVars(docker.ResourceRequest, &docker.Env),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                        true,
-		ContainerPort:                         int32(docker.Port),
-		MinReplicas:                           docker.ResourceRequest.MinReplica,
-		MaxReplicas:                           docker.ResourceRequest.MaxReplica,
-		InitialScale:                          initialScale,
-		AutoscalingMetric:                     string(docker.AutoscalingPolicy.Metric),
-		AutoscalingTarget:                     docker.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          sb.knativeServiceConfig.QueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    sb.knativeServiceConfig.UserContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(docker.Port),
+		MinReplicas:                  docker.ResourceRequest.MinReplica,
+		MaxReplicas:                  docker.ResourceRequest.MaxReplica,
+		InitialScale:                 initialScale,
+		AutoscalingMetric:            string(docker.AutoscalingPolicy.Metric),
+		AutoscalingTarget:            docker.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:    topologySpreadConstraints,
+		QueueProxyResourcePercentage: sb.knativeServiceConfig.QueueProxyResourcePercentage,
 	})
 }
 
@@ -402,6 +402,40 @@ func (sb *clusterSvcBuilder) getTopologySpreadConstraints() ([]corev1.TopologySp
 		return nil, fmt.Errorf("Error in type assertion of copied topology spread constraints interface: %s", err)
 	}
 	return topologySpreadConstraints, nil
+}
+
+func (sb *clusterSvcBuilder) getCPULimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
+	if resourceRequest != nil && resourceRequest.CPULimit.IsZero() {
+		if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor != 0 {
+			cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
+				sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
+			return &cpuLimit
+		} else {
+			return nil
+		}
+	}
+	return &resourceRequest.CPULimit
+}
+
+func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
+	if resourceRequest != nil && sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor != 0 {
+		memoryLimit := cluster.ComputeResource(resourceRequest.MemoryRequest,
+			sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor)
+		return &memoryLimit
+	}
+	return nil
+}
+
+func (sb *clusterSvcBuilder) getEnvVars(resourceRequest *models.ResourceRequest,
+	userEnvVars *models.EnvVars) (newEnvVars []corev1.EnvVar) {
+	if resourceRequest != nil && resourceRequest.CPULimit.IsZero() &&
+		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
+		newEnvVars = append(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits...)
+	}
+	if userEnvVars != nil {
+		newEnvVars = append(newEnvVars, userEnvVars.ToKubernetesEnvVars()...)
+	}
+	return
 }
 
 func GetComponentName(routerVersion *models.RouterVersion, componentType string) string {
