@@ -21,6 +21,13 @@ const (
 	fluentdPort          = 24224
 	cacheVolumeMountPath = "/cache/"
 	cacheVolumeSize      = "2Gi"
+
+	// defaultCPULimitRequestFactor is the default multiplication factor applied to the CPU request,
+	// to be set as the limit
+	defaultCPULimitRequestFactor = 1.0
+	// defaultMemoryLimitRequestFactor is the default multiplication factor applied to the memory request,
+	// to be set as the limit
+	defaultMemoryLimitRequestFactor = 2.0
 )
 
 // NewFluentdService builds a fluentd KubernetesService configuration
@@ -61,13 +68,20 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 	// Overriding the security context so that fluentd is able to write logs
 	// to the persistent volume.
 	securityContextID := int64(999)
+
+	cpuRequest := resource.MustParse(fluentdCPURequest)
+	cpuLimit := cluster.ComputeResource(cpuRequest, defaultCPULimitRequestFactor)
+	memoryRequest := resource.MustParse(fluentdMemRequest)
+	memoryLimit := cluster.ComputeResource(memoryRequest, defaultMemoryLimitRequestFactor)
 	return &cluster.KubernetesService{
 		BaseService: &cluster.BaseService{
 			Name:                  name,
 			Namespace:             project.Name,
 			Image:                 fluentdConfig.Image,
 			CPURequests:           resource.MustParse(fluentdCPURequest),
+			CPULimit:              &cpuLimit,
 			MemoryRequests:        resource.MustParse(fluentdMemRequest),
+			MemoryLimit:           &memoryLimit,
 			ProbePort:             9880,
 			LivenessHTTPGetPath:   fluentdHealthCheckPath,
 			ReadinessHTTPGetPath:  fluentdHealthCheckPath,

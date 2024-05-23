@@ -7,15 +7,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const (
-	// defaultCPULimitRequestFactor is the default multiplication factor applied to the CPU request,
-	// to be set as the limit
-	defaultCPULimitRequestFactor = 1.0
-	// defaultMemoryLimitRequestFactor is the default multiplication factor applied to the memory request,
-	// to be set as the limit
-	defaultMemoryLimitRequestFactor = 2.0
-)
-
 // KubernetesService defines the properties for Kubernetes services
 type KubernetesService struct {
 	*BaseService
