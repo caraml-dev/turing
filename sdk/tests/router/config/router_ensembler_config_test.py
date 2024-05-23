@@ -600,7 +600,7 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
                     port=5120,
                     resource_request=turing.generated.models.ResourceRequest(
-                        cpu_request="100m", max_replica=3,
+                        cpu_request="100m", cpu_limit=None, max_replica=3,
                         memory_request="512Mi", min_replica=1,
                     ),
                     service_account="secret-name-for-google-service-account",
@@ -619,8 +619,8 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     env=[turing.generated.models.EnvVar(name="env_name", value="env_val")],
                     project_id=77,
                     resource_request=turing.generated.models.ResourceRequest(
-                        cpu_request="100m", max_replica=3,
-                        memory_request="512Mi",min_replica=1,
+                        cpu_request="100m", cpu_limit=None, max_replica=3,
+                        memory_request="512Mi", min_replica=1,
                     ),
                     timeout="500ms"
                 ),

@@ -90,7 +90,7 @@ class ResourceRequest(ModelNormal):
             'min_replica': (int,),  # noqa: E501
             'max_replica': (int,),  # noqa: E501
             'cpu_request': (str,),  # noqa: E501
-            'cpu_limit': (str,),  # noqa: E501
+            'cpu_limit': (str, none_type,),  # noqa: E501
             'memory_request': (str,),  # noqa: E501
         }
 
@@ -156,7 +156,7 @@ class ResourceRequest(ModelNormal):
             min_replica (int): [optional]  # noqa: E501
             max_replica (int): [optional]  # noqa: E501
             cpu_request (str): [optional]  # noqa: E501
-            cpu_limit (str): [optional]  # noqa: E501
+            cpu_limit (str, none_type): [optional]  # noqa: E501
             memory_request (str): [optional]  # noqa: E501
         """
 
