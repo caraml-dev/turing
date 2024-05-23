@@ -24,6 +24,7 @@ export class PyFuncEnsembler extends Ensembler {
       project_id: project_id,
       resource_request: {
         cpu_request: "500m",
+        cpu_limit: "0",
         memory_request: "512Mi",
         min_replica: 0,
         max_replica: 2,

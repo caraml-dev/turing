@@ -5,7 +5,7 @@ import { autoscalingPolicyOptions } from "../../form/components/autoscaling_poli
 import { ConfigMultiSectionPanel } from "../../../../components/config_multi_section_panel/ConfigMultiSectionPanel"
 
 const ResourcesSection = ({
-  resourceRequest: { cpu_request, memory_request, min_replica, max_replica },
+  resourceRequest: { cpu_request, cpu_limit, memory_request, min_replica, max_replica },
 }) => {
   const items = [
     {
@@ -25,6 +25,13 @@ const ResourcesSection = ({
       description: max_replica,
     },
   ];
+
+  if (cpu_limit !== "0") {
+    items.push({
+      title: "CPU Limit",
+      description: cpu_limit,
+    });
+  }
 
   return (
     <EuiDescriptionList

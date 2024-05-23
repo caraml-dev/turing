@@ -8,9 +8,11 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiAccordion,
 } from "@elastic/eui";
 import { FormLabelWithToolTip } from "../../../../components/form/label_with_tooltip/FormLabelWithToolTip";
 import { useOnChangeHandler } from "../../../../components/form/hooks/useOnChangeHandler";
+import { CPULimitsFormGroup } from "./CPULimitsFormGroup";
 
 export const ResourcesPanel = ({
   resourcesConfig,
@@ -46,6 +48,7 @@ export const ResourcesPanel = ({
                 onChange={(e) => onChange("cpu_request")(e.target.value)}
                 isInvalid={!!errors.cpu_request}
                 name="cpu"
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -67,6 +70,7 @@ export const ResourcesPanel = ({
                 onChange={(e) => onChange("memory_request")(e.target.value)}
                 isInvalid={!!errors.memory_request}
                 name="memory"
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -102,6 +106,17 @@ export const ResourcesPanel = ({
             aria-label="autoscaling"
           />
         </EuiFormRow>
+        <EuiSpacer size="s" />
+        <EuiAccordion
+          id="adv config"
+          buttonContent="Advanced configurations">
+          <EuiSpacer size="s" />
+          <CPULimitsFormGroup
+            resourcesConfig={resourcesConfig}
+            onChange={(e) => onChange("cpu_limit")(e.target.value)}
+            errors={errors.cpu_limit}
+          />
+        </EuiAccordion>
       </EuiForm>
     </Panel>
   );

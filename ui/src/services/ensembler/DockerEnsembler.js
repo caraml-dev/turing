@@ -23,6 +23,7 @@ export class DockerEnsembler extends Ensembler {
       port: 8080,
       resource_request: {
         cpu_request: "500m",
+        cpu_limit: "0",
         memory_request: "512Mi",
         min_replica: 0,
         max_replica: 2,
