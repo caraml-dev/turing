@@ -410,9 +410,8 @@ func (sb *clusterSvcBuilder) getCPULimit(resourceRequest *models.ResourceRequest
 			cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
 				sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
 			return &cpuLimit
-		} else {
-			return nil
 		}
+		return nil
 	}
 	return &resourceRequest.CPULimit
 }
