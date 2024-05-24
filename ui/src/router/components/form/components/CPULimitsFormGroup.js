@@ -10,7 +10,7 @@ export const CPULimitsFormGroup = ({
 }) => {
   return (
     <EuiDescribedFormGroup
-      title={<p>CPU Limits</p>}
+      title={<p>CPU Limit</p>}
       description={
         <Fragment>
           Use this field to override the platform-level default CPU limit.
@@ -21,7 +21,7 @@ export const CPULimitsFormGroup = ({
       <EuiFormRow
         label={
           <FormLabelWithToolTip
-            label="CPU Limits"
+            label="CPU Limit"
             content="Specify the maximum amount of CPU available for this component.
             An empty value or the value 0 corresponds to not setting any CPU limit."
           />
