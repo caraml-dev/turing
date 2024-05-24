@@ -405,15 +405,18 @@ func (sb *clusterSvcBuilder) getTopologySpreadConstraints() ([]corev1.TopologySp
 }
 
 func (sb *clusterSvcBuilder) getCPULimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
-	if resourceRequest != nil && resourceRequest.CPULimit.IsZero() {
-		if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor != 0 {
-			cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
-				sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
-			return &cpuLimit
+	if resourceRequest != nil {
+		if resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero() {
+			if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor != 0 {
+				cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
+					sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
+				return &cpuLimit
+			}
+			return nil
 		}
-		return nil
+		return resourceRequest.CPULimit
 	}
-	return &resourceRequest.CPULimit
+	return nil
 }
 
 func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
@@ -427,7 +430,7 @@ func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequ
 
 func (sb *clusterSvcBuilder) getEnvVars(resourceRequest *models.ResourceRequest,
 	userEnvVars *models.EnvVars) (newEnvVars []corev1.EnvVar) {
-	if resourceRequest != nil && resourceRequest.CPULimit.IsZero() &&
+	if resourceRequest != nil && (resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero()) &&
 		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
 		newEnvVars = append(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits...)
 	}

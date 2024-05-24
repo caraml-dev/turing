@@ -27,7 +27,6 @@ func TestResourceRequestValue(t *testing.T) {
 			"min_replica": 1,
 			"max_replica": 2,
 			"cpu_request": "500m",
-			"cpu_limit":"0",
 			"memory_request": "1Gi"
 		}
 	`, string(byteValue))
