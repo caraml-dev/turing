@@ -22,7 +22,7 @@ export const CPULimitsFormGroup = ({
         label={
           <FormLabelWithToolTip
             label="CPU Limits"
-            content="Specify the maximum amount of CPU available for your model.
+            content="Specify the maximum amount of CPU available for this component.
             An empty value or the value 0 corresponds to not setting any CPU limit."
           />
         }
