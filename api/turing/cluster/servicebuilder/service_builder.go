@@ -432,10 +432,10 @@ func (sb *clusterSvcBuilder) getEnvVars(resourceRequest *models.ResourceRequest,
 	userEnvVars *models.EnvVars) (newEnvVars []corev1.EnvVar) {
 	if resourceRequest != nil && (resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero()) &&
 		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
-		newEnvVars = append(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits...)
+		newEnvVars = mergeEnvVars(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits)
 	}
 	if userEnvVars != nil {
-		newEnvVars = append(newEnvVars, userEnvVars.ToKubernetesEnvVars()...)
+		newEnvVars = mergeEnvVars(newEnvVars, userEnvVars.ToKubernetesEnvVars())
 	}
 	return
 }
@@ -459,4 +459,24 @@ func buildLabels(
 		Labels: project.Labels,
 	}
 	return labeller.BuildLabels(r)
+}
+
+// mergeEnvVars merges multiple sets of environment variables and return the merging result.
+// All the EnvVars passed as arguments will be not mutated.
+// EnvVars to the right have higher precedence.
+func mergeEnvVars(left []corev1.EnvVar, rightEnvVars ...[]corev1.EnvVar) []corev1.EnvVar {
+	for _, right := range rightEnvVars {
+		envIndexMap := make(map[string]int, len(left)+len(right))
+		for index, ev := range left {
+			envIndexMap[ev.Name] = index
+		}
+		for _, add := range right {
+			if index, exist := envIndexMap[add.Name]; exist {
+				left[index].Value = add.Value
+			} else {
+				left = append(left, add)
+			}
+		}
+	}
+	return left
 }
