@@ -22,7 +22,7 @@ export class TuringRouter {
       rules: [],
       resource_request: {
         cpu_request: "500m",
-        cpu_limit: "0",
+        cpu_limit: "",
         memory_request: "512Mi",
         min_replica: 0,
         max_replica: 2,
@@ -41,7 +41,7 @@ export class TuringRouter {
         port: 8080,
         resource_request: {
           cpu_request: "500m",
-          cpu_limit: "0",
+          cpu_limit: "",
           memory_request: "512Mi",
           min_replica: 0,
           max_replica: 2,
@@ -119,10 +119,18 @@ export class TuringRouter {
     if (!obj.config.default_traffic_rule) {
       delete obj.config["default_traffic_rule"];
     }
+    // Router CPU limit
+    if (obj.config.resource_request?.cpu_limit === "") {
+      delete obj.config.resource_request.cpu_limit;
+    }
 
     // Enricher
     if (obj.config.enricher && obj.config.enricher.type === "nop") {
       delete obj.config["enricher"];
+    }
+    // Enricher CPU limit
+    if (obj.config.enricher?.resource_request?.cpu_limit === "") {
+      delete obj.config.enricher.resource_request.cpu_limit;
     }
 
     // Ensembler
@@ -144,6 +152,10 @@ export class TuringRouter {
       if (obj.config.ensembler.type === "pyfunc") {
         // Delete the docker config
         delete obj.config["ensembler"].docker_config;
+      }
+      // Docker/Pyfunc ensembler CPU limit
+      if (obj.config.ensembler.resource_request?.cpu_limit === "") {
+        delete obj.config.ensembler.resource_request.cpu_limit;
       }
     }
 

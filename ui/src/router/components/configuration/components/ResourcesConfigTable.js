@@ -12,6 +12,12 @@ const ResourcesSection = ({
       title: "CPU Request",
       description: cpu_request,
     },
+    ...(cpu_limit !== undefined && cpu_limit !== "0" && cpu_limit !== "") ? [
+      {
+        title: "CPU Limit",
+        description: cpu_limit,
+      }
+    ] : [],
     {
       title: "Memory Request",
       description: memory_request,
@@ -25,13 +31,6 @@ const ResourcesSection = ({
       description: max_replica,
     },
   ];
-
-  if (cpu_limit !== "0") {
-    items.push({
-      title: "CPU Limit",
-      description: cpu_limit,
-    });
-  }
 
   return (
     <EuiDescriptionList
