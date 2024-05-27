@@ -58,6 +58,7 @@ jobs:
           flags: sdk-test-${{ matrix.python-version }}
           name: sdk-test-${{ matrix.python-version }}
           token: ${{ secrets.CODECOV_TOKEN }}
+          codecov_yml_path: ./.github/workflows/codecov-config/codecov.yml
 
   release-rules:
     runs-on: ubuntu-latest

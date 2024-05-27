@@ -282,6 +282,7 @@ jobs:
           name: api-test
           token: ${{ secrets.CODECOV_TOKEN }}
           working-directory: api
+          codecov_yml_path: ../.github/workflows/codecov-config/codecov.yml
 
   test-engines-router:
     runs-on: ubuntu-latest
