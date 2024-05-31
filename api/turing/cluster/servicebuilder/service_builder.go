@@ -405,18 +405,21 @@ func (sb *clusterSvcBuilder) getTopologySpreadConstraints() ([]corev1.TopologySp
 }
 
 func (sb *clusterSvcBuilder) getCPULimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
-	if resourceRequest != nil {
-		if resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero() {
-			if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor != 0 {
-				cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
-					sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
-				return &cpuLimit
-			}
-			return nil
-		}
+	if resourceRequest == nil {
+		return nil
+	}
+
+	if resourceRequest.CPULimit != nil && !resourceRequest.CPULimit.IsZero() {
 		return resourceRequest.CPULimit
 	}
-	return nil
+
+	if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
+		return nil
+	}
+
+	cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
+		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
+	return &cpuLimit
 }
 
 func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
