@@ -64,13 +64,15 @@ type BaseService struct {
 	InitContainers []Container `json:"init_containers"`
 }
 
+// buildResourceReqs sets the necessary resource requests and limits based on the values stored in BaseService. These
+// values are expected to have already been computed (e.g. setting of default values) upstream by the clusterSvcBuilder
+// that creates the BaseService
 func (cfg *BaseService) buildResourceReqs() corev1.ResourceRequirements {
 	reqs := map[corev1.ResourceName]resource.Quantity{
 		corev1.ResourceCPU:    cfg.CPURequests,
 		corev1.ResourceMemory: cfg.MemoryRequests,
 	}
 
-	// Set resource limits to request * userContainerCPULimitRequestFactor or UserContainerMemoryLimitRequestFactor
 	limits := map[corev1.ResourceName]resource.Quantity{}
 	if cfg.CPULimit != nil {
 		limits[corev1.ResourceCPU] = *cfg.CPULimit
