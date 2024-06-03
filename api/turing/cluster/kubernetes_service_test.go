@@ -15,13 +15,17 @@ import (
 
 func TestBuildKubernetesServiceConfig(t *testing.T) {
 	id := int64(999)
+	cpuLimit := resource.MustParse("1")
+	memoryLimit := resource.MustParse("2")
 	svcConf := KubernetesService{
 		BaseService: &BaseService{
 			Name:                 "test-svc-fluentd-logger",
 			Namespace:            "namespace",
 			Image:                "fluentdimage:1.0.0",
 			CPURequests:          resource.MustParse("1"),
+			CPULimit:             &cpuLimit,
 			MemoryRequests:       resource.MustParse("1"),
+			MemoryLimit:          &memoryLimit,
 			ProbePort:            8080,
 			LivenessHTTPGetPath:  "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",
 			ReadinessHTTPGetPath: "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",

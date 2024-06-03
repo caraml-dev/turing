@@ -50,9 +50,7 @@ type KnativeService struct {
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint `json:"topologySpreadConstraints"`
 
 	// Resource properties
-	QueueProxyResourcePercentage          int     `json:"queueProxyResourcePercentage"`
-	UserContainerCPULimitRequestFactor    float64 `json:"userContainerLimitCPURequestFactor"`
-	UserContainerMemoryLimitRequestFactor float64 `json:"userContainerLimitMemoryRequestFactor"`
+	QueueProxyResourcePercentage int `json:"queueProxyResourcePercentage"`
 }
 
 // Creates a new config object compatible with the knative serving API, from
@@ -131,12 +129,6 @@ func (cfg *KnativeService) buildSvcSpec(
 	// Revision name
 	revisionName := getDefaultRevisionName(cfg.Name)
 
-	// Build resource requirements for the user container
-	resourceReqs := cfg.buildResourceReqs(
-		cfg.UserContainerCPULimitRequestFactor,
-		cfg.UserContainerMemoryLimitRequestFactor,
-	)
-
 	// Build container spec
 	var portName string
 	// If protocol is using GRPC, add "h2c" which is required for grpc knative
@@ -151,7 +143,7 @@ func (cfg *KnativeService) buildSvcSpec(
 				ContainerPort: cfg.ContainerPort,
 			},
 		},
-		Resources:    resourceReqs,
+		Resources:    cfg.buildResourceReqs(),
 		VolumeMounts: cfg.VolumeMounts,
 		Env:          cfg.Envs,
 	}

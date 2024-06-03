@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import ClassVar
+from typing import Optional
 
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
@@ -11,11 +11,13 @@ class ResourceRequest:
     max_replica: int
     cpu_request: str
     memory_request: str
+    cpu_limit: Optional[str] = None
 
     _min_replica: int = field(init=False, repr=False)
     _max_replica: int = field(init=False, repr=False)
     _cpu_request: str = field(init=False, repr=False)
     _memory_request: str = field(init=False, repr=False)
+    _cpu_limit: Optional[str] = field(init=False, repr=False, default=None)
 
     @property
     def min_replica(self) -> int:
@@ -46,6 +48,16 @@ class ResourceRequest:
         self._cpu_request = cpu_request
 
     @property
+    def cpu_limit(self) -> str:
+        return self._cpu_limit
+
+    @cpu_limit.setter
+    def cpu_limit(self, cpu_limit):
+        if type(cpu_limit) is property:
+            cpu_limit = ResourceRequest._cpu_limit
+        self._cpu_limit = cpu_limit
+
+    @property
     def memory_request(self) -> str:
         return self._memory_request
 
@@ -66,6 +78,7 @@ class ResourceRequest:
             min_replica=self.min_replica,
             max_replica=self.max_replica,
             cpu_request=self.cpu_request,
+            cpu_limit=self.cpu_limit,
             memory_request=self.memory_request,
         )
 

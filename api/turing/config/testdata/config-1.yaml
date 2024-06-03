@@ -48,6 +48,9 @@ KnativeServiceDefaults:
   QueueProxyResourcePercentage: 20
   UserContainerCPULimitRequestFactor: 0
   UserContainerMemoryLimitRequestFactor: 1.25
+  DefaultEnvVarsWithoutCPULimits:
+    - Name: foo
+      Value: bar
 RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60

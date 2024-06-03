@@ -83,6 +83,11 @@ Configure the resources required for the ensembler. There are 3 required inputs,
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
 
+**CPU Limit**: By default, Turing determines the CPU limits of all deployed components using platform-level configured 
+values. These CPU limits is calculated as a factor of the user-defined CPU request value for each component (e.g. 2x 
+of the CPU request value). However, you can override this platform-level configured value by setting this value 
+explicitly on the UI (as seen above) or via the SDK.
+
 Optionally, modify the autoscaling policy on the ensembler.
 
 ![](../../.gitbook/assets/autoscaling_policy_panel.png)
@@ -124,6 +129,11 @@ registered in your current project. You'll also need to indicate your desired ti
 **Memory**: Total amount of RAM available for your ensembler.
 
 **Min/Max Replicas**: Min/max number of replicas for your ensembler. Scaling of the ensembler based on traffic volume will be automatically done for you.
+
+**CPU Limit**: By default, Turing determines the CPU limits of all deployed components using platform-level configured
+values. These CPU limits is calculated as a factor of the user-defined CPU request value for each component (e.g. 2x
+of the CPU request value). However, you can override this platform-level configured value by setting this value
+explicitly on the UI (as seen above) or via the SDK.
 
 Optionally, modify the autoscaling policy on the ensembler.
 

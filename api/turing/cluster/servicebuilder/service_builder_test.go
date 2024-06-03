@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	mlp "github.com/caraml-dev/mlp/api/client"
+	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -42,7 +43,27 @@ type testSuiteNewService struct {
 }
 
 func TestNewEnricherService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	userContainerCPULimitRequestFactor := 2.0
+	userContainerMemoryLimitRequestFactor := 1.5
+
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          10,
+			UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
+			UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		},
+	)
+
+	cpuRequest := resource.MustParse("400m")
+	cpuLimit := cluster.ComputeResource(cpuRequest, userContainerCPULimitRequestFactor)
+
+	memoryRequest := resource.MustParse("256Mi")
+	memoryLimit := cluster.ComputeResource(memoryRequest, userContainerMemoryLimitRequestFactor)
+
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	testInitialScale := 5
 
@@ -55,8 +76,10 @@ func TestNewEnricherService(t *testing.T) {
 					Name:           "test-svc-turing-enricher-1",
 					Namespace:      "test-project",
 					Image:          "asia.gcr.io/gcp-project-id/echo:1.0.2",
-					CPURequests:    resource.MustParse("400m"),
-					MemoryRequests: resource.MustParse("256Mi"),
+					CPURequests:    cpuRequest,
+					CPULimit:       &cpuLimit,
+					MemoryRequests: memoryRequest,
+					MemoryLimit:    &memoryLimit,
 					Envs: []corev1.EnvVar{
 						{Name: "TEST_ENV", Value: "enricher"},
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/enricher-service-account.json"},
@@ -80,17 +103,15 @@ func TestNewEnricherService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                        true,
-				ContainerPort:                         8080,
-				MinReplicas:                           1,
-				MaxReplicas:                           2,
-				InitialScale:                          &testInitialScale,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          10,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				InitialScale:                 &testInitialScale,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 10,
 			},
 		},
 		"failure": {
@@ -111,7 +132,7 @@ func TestNewEnricherService(t *testing.T) {
 				Team:   "test-team",
 				Labels: []mlp.Label{{Key: "custom-label-key", Value: "value-1"}},
 			}
-			svc, err := sb.NewEnricherService(routerVersion, project, "secret", 10, 0, 1.5, data.initialScale)
+			svc, err := sb.NewEnricherService(routerVersion, project, "secret", data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)
@@ -123,7 +144,27 @@ func TestNewEnricherService(t *testing.T) {
 }
 
 func TestNewEnsemblerService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	userContainerCPULimitRequestFactor := 2.0
+	userContainerMemoryLimitRequestFactor := 1.5
+
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
+			UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		},
+	)
+
+	cpuRequest := resource.MustParse("200m")
+	cpuLimit := cluster.ComputeResource(cpuRequest, userContainerCPULimitRequestFactor)
+
+	memoryRequest := resource.MustParse("1024Mi")
+	memoryLimit := cluster.ComputeResource(memoryRequest, userContainerMemoryLimitRequestFactor)
+
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	testInitialScale := 5
 
@@ -136,8 +177,10 @@ func TestNewEnsemblerService(t *testing.T) {
 					Name:           "test-svc-turing-ensembler-1",
 					Namespace:      "test-project",
 					Image:          "asia.gcr.io/gcp-project-id/echo:1.0.2",
-					CPURequests:    resource.MustParse("200m"),
-					MemoryRequests: resource.MustParse("1024Mi"),
+					CPURequests:    cpuRequest,
+					CPULimit:       &cpuLimit,
+					MemoryRequests: memoryRequest,
+					MemoryLimit:    &memoryLimit,
 					Envs: []corev1.EnvVar{
 						{Name: "TEST_ENV", Value: "ensembler"},
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/ensembler-service-account.json"},
@@ -160,17 +203,15 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                        true,
-				ContainerPort:                         8080,
-				MinReplicas:                           2,
-				MaxReplicas:                           3,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				InitialScale:                          &testInitialScale,
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  2,
+				MaxReplicas:                  3,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				InitialScale:                 &testInitialScale,
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success with ensembler docker type": {
@@ -180,8 +221,10 @@ func TestNewEnsemblerService(t *testing.T) {
 					Name:           "test-svc-turing-ensembler-1",
 					Namespace:      "test-project",
 					Image:          "asia.gcr.io/gcp-project-id/echo:1.0.2",
-					CPURequests:    resource.MustParse("200m"),
-					MemoryRequests: resource.MustParse("1024Mi"),
+					CPURequests:    cpuRequest,
+					CPULimit:       &cpuLimit,
+					MemoryRequests: memoryRequest,
+					MemoryLimit:    &memoryLimit,
 					Envs: []corev1.EnvVar{
 						{Name: "TEST_ENV", Value: "ensembler"},
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS", Value: "/var/secret/ensembler-service-account.json"},
@@ -204,16 +247,14 @@ func TestNewEnsemblerService(t *testing.T) {
 					},
 					VolumeMounts: []corev1.VolumeMount{{Name: secretVolume, MountPath: secretMountPath}},
 				},
-				IsClusterLocal:                        true,
-				ContainerPort:                         8080,
-				MinReplicas:                           2,
-				MaxReplicas:                           3,
-				AutoscalingMetric:                     "cpu",
-				AutoscalingTarget:                     "90",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				IsClusterLocal:               true,
+				ContainerPort:                8080,
+				MinReplicas:                  2,
+				MaxReplicas:                  3,
+				AutoscalingMetric:            "cpu",
+				AutoscalingTarget:            "90",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"failure": {
@@ -233,7 +274,7 @@ func TestNewEnsemblerService(t *testing.T) {
 				Stream: "test-stream",
 				Team:   "test-team",
 			}
-			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", 20, 0, 1.5, data.initialScale)
+			svc, err := sb.NewEnsemblerService(routerVersion, project, "secret", data.initialScale)
 			if data.err == "" {
 				assert.NoError(t, err)
 				assert.Equal(t, data.expected, svc)

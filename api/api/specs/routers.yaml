@@ -949,6 +949,10 @@ components:
         cpu_request:
           type: "string"
           pattern: '^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$'
+        cpu_limit:
+          type: "string"
+          pattern: '^(\d{1,3}(\.\d{1,3})?)$|^(\d{2,5}m)$'
+          nullable: true
         memory_request:
           type: "string"
           pattern: '^\d+(Ei?|Pi?|Ti?|Gi?|Mi?|Ki?)?$'

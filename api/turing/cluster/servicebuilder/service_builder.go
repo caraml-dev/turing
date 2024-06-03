@@ -66,18 +66,12 @@ type ClusterServiceBuilder interface {
 		ver *models.RouterVersion,
 		project *mlp.Project,
 		secretName string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewEnsemblerService(
 		ver *models.RouterVersion,
 		project *mlp.Project,
 		secretName string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewRouterService(
@@ -89,9 +83,6 @@ type ClusterServiceBuilder interface {
 		routerDefaults *config.RouterDefaults,
 		sentryEnabled bool,
 		sentryDSN string,
-		knativeQueueProxyResourcePercentage int,
-		userContainerCPULimitRequestFactor float64,
-		userContainerMemoryLimitRequestFactor float64,
 		initialScale *int,
 	) (*cluster.KnativeService, error)
 	NewFluentdService(
@@ -128,6 +119,9 @@ type clusterSvcBuilder struct {
 	MaxMemory                 resource.Quantity
 	MaxAllowedReplica         int
 	TopologySpreadConstraints []corev1.TopologySpreadConstraint
+
+	// Knative service configs
+	knativeServiceConfig *config.KnativeServiceDefaults
 }
 
 // NewClusterServiceBuilder creates a new service builder with the supplied configs for defaults
@@ -136,12 +130,14 @@ func NewClusterServiceBuilder(
 	memoryLimit resource.Quantity,
 	maxAllowedReplica int,
 	topologySpreadConstraints []corev1.TopologySpreadConstraint,
+	knativeServiceConfig *config.KnativeServiceDefaults,
 ) ClusterServiceBuilder {
 	return &clusterSvcBuilder{
 		MaxCPU:                    cpuLimit,
 		MaxMemory:                 memoryLimit,
 		MaxAllowedReplica:         maxAllowedReplica,
 		TopologySpreadConstraints: topologySpreadConstraints,
+		knativeServiceConfig:      knativeServiceConfig,
 	}
 }
 
@@ -151,9 +147,6 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	secretName string,
-	knativeQueueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the enricher reference
@@ -213,23 +206,23 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Namespace:      namespace,
 			Image:          enricher.Image,
 			CPURequests:    enricher.ResourceRequest.CPURequest,
+			CPULimit:       sb.getCPULimit(enricher.ResourceRequest),
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
-			Envs:           enricher.Env.ToKubernetesEnvVars(),
+			MemoryLimit:    sb.getMemoryLimit(enricher.ResourceRequest),
+			Envs:           sb.getEnvVars(enricher.ResourceRequest, &enricher.Env),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                        true,
-		ContainerPort:                         int32(enricher.Port),
-		MinReplicas:                           enricher.ResourceRequest.MinReplica,
-		MaxReplicas:                           enricher.ResourceRequest.MaxReplica,
-		InitialScale:                          initialScale,
-		AutoscalingMetric:                     string(enricher.AutoscalingPolicy.Metric),
-		AutoscalingTarget:                     enricher.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(enricher.Port),
+		MinReplicas:                  enricher.ResourceRequest.MinReplica,
+		MaxReplicas:                  enricher.ResourceRequest.MaxReplica,
+		InitialScale:                 initialScale,
+		AutoscalingMetric:            string(enricher.AutoscalingPolicy.Metric),
+		AutoscalingTarget:            enricher.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:    topologySpreadConstraints,
+		QueueProxyResourcePercentage: sb.knativeServiceConfig.QueueProxyResourcePercentage,
 	})
 }
 
@@ -239,9 +232,6 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
 	secretName string,
-	knativeQueueProxyResourcePercentage int,
-	userContainerCPULimitRequestFactor float64,
-	userContainerMemoryLimitRequestFactor float64,
 	initialScale *int,
 ) (*cluster.KnativeService, error) {
 	// Get the ensembler reference
@@ -302,23 +292,23 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Namespace:      namespace,
 			Image:          docker.Image,
 			CPURequests:    docker.ResourceRequest.CPURequest,
+			CPULimit:       sb.getCPULimit(docker.ResourceRequest),
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
-			Envs:           docker.Env.ToKubernetesEnvVars(),
+			MemoryLimit:    sb.getMemoryLimit(docker.ResourceRequest),
+			Envs:           sb.getEnvVars(docker.ResourceRequest, &docker.Env),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
 		},
-		IsClusterLocal:                        true,
-		ContainerPort:                         int32(docker.Port),
-		MinReplicas:                           docker.ResourceRequest.MinReplica,
-		MaxReplicas:                           docker.ResourceRequest.MaxReplica,
-		InitialScale:                          initialScale,
-		AutoscalingMetric:                     string(docker.AutoscalingPolicy.Metric),
-		AutoscalingTarget:                     docker.AutoscalingPolicy.Target,
-		TopologySpreadConstraints:             topologySpreadConstraints,
-		QueueProxyResourcePercentage:          knativeQueueProxyResourcePercentage,
-		UserContainerCPULimitRequestFactor:    userContainerCPULimitRequestFactor,
-		UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+		IsClusterLocal:               true,
+		ContainerPort:                int32(docker.Port),
+		MinReplicas:                  docker.ResourceRequest.MinReplica,
+		MaxReplicas:                  docker.ResourceRequest.MaxReplica,
+		InitialScale:                 initialScale,
+		AutoscalingMetric:            string(docker.AutoscalingPolicy.Metric),
+		AutoscalingTarget:            docker.AutoscalingPolicy.Target,
+		TopologySpreadConstraints:    topologySpreadConstraints,
+		QueueProxyResourcePercentage: sb.knativeServiceConfig.QueueProxyResourcePercentage,
 	})
 }
 
@@ -414,6 +404,45 @@ func (sb *clusterSvcBuilder) getTopologySpreadConstraints() ([]corev1.TopologySp
 	return topologySpreadConstraints, nil
 }
 
+func (sb *clusterSvcBuilder) getCPULimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
+	if resourceRequest == nil {
+		return nil
+	}
+
+	if resourceRequest.CPULimit != nil && !resourceRequest.CPULimit.IsZero() {
+		return resourceRequest.CPULimit
+	}
+
+	if sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
+		return nil
+	}
+
+	cpuLimit := cluster.ComputeResource(resourceRequest.CPURequest,
+		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor)
+	return &cpuLimit
+}
+
+func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequest) *resource.Quantity {
+	if resourceRequest != nil && sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor != 0 {
+		memoryLimit := cluster.ComputeResource(resourceRequest.MemoryRequest,
+			sb.knativeServiceConfig.UserContainerMemoryLimitRequestFactor)
+		return &memoryLimit
+	}
+	return nil
+}
+
+func (sb *clusterSvcBuilder) getEnvVars(resourceRequest *models.ResourceRequest,
+	userEnvVars *models.EnvVars) (newEnvVars []corev1.EnvVar) {
+	if resourceRequest != nil && (resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero()) &&
+		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
+		newEnvVars = mergeEnvVars(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits)
+	}
+	if userEnvVars != nil {
+		newEnvVars = mergeEnvVars(newEnvVars, userEnvVars.ToKubernetesEnvVars())
+	}
+	return
+}
+
 func GetComponentName(routerVersion *models.RouterVersion, componentType string) string {
 	return fmt.Sprintf("%s-turing-%s-%d", routerVersion.Router.Name, componentType, routerVersion.Version)
 }
@@ -433,4 +462,24 @@ func buildLabels(
 		Labels: project.Labels,
 	}
 	return labeller.BuildLabels(r)
+}
+
+// mergeEnvVars merges multiple sets of environment variables and return the merging result.
+// All the EnvVars passed as arguments will be not mutated.
+// EnvVars to the right have higher precedence.
+func mergeEnvVars(left []corev1.EnvVar, rightEnvVars ...[]corev1.EnvVar) []corev1.EnvVar {
+	for _, right := range rightEnvVars {
+		envIndexMap := make(map[string]int, len(left)+len(right))
+		for index, ev := range left {
+			envIndexMap[ev.Name] = index
+		}
+		for _, add := range right {
+			if index, exist := envIndexMap[add.Name]; exist {
+				left[index].Value = add.Value
+			} else {
+				left = append(left, add)
+			}
+		}
+	}
+	return left
 }

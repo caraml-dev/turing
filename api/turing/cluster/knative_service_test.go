@@ -17,13 +17,16 @@ import (
 )
 
 func TestBuildKnativeServiceConfig(t *testing.T) {
+	cpuRequest := resource.MustParse("400m")
+	memoryRequest := resource.MustParse("512Mi")
+
 	// Test configuration
-	baseSvc := &BaseService{
+	baseSvc := BaseService{
 		Name:                 "test-svc",
 		Namespace:            "test-namespace",
 		Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
-		CPURequests:          resource.MustParse("400m"),
-		MemoryRequests:       resource.MustParse("512Mi"),
+		CPURequests:          cpuRequest,
+		MemoryRequests:       memoryRequest,
 		ProbePort:            8080,
 		LivenessHTTPGetPath:  "/v1/internal/live",
 		ReadinessHTTPGetPath: "/v1/internal/ready",
@@ -87,6 +90,10 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 	}
 
+	baseSvcWithResourceLimits := baseSvc
+	baseSvcWithResourceLimits.CPULimit = &cpuRequest
+	baseSvcWithResourceLimits.MemoryLimit = &memoryRequest
+
 	// Expected specs
 	var defaultConcurrency, defaultTrafficPercent int64 = 0, 100
 	var defaultLatestRevision = true
@@ -100,13 +107,10 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 	}
 	resources := corev1.ResourceRequirements{
-		Limits: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("600m"),
-			corev1.ResourceMemory: resource.MustParse("768Mi"),
-		},
+		Limits: map[corev1.ResourceName]resource.Quantity{},
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    resource.MustParse("400m"),
-			corev1.ResourceMemory: resource.MustParse("512Mi"),
+			corev1.ResourceCPU:    cpuRequest,
+			corev1.ResourceMemory: memoryRequest,
 		},
 	}
 	envs := []corev1.EnvVar{
@@ -123,47 +127,57 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		{Name: "APP_BQ_TABLE", Value: "turing_log_test"},
 		{Name: "APP_BQ_BATCH_LOAD", Value: "false"},
 	}
-	podSpec := corev1.PodSpec{
-		Containers: []corev1.Container{
+
+	containerSpec := corev1.Container{
+		Name:  "user-container",
+		Image: "asia.gcr.io/gcp-project-id/turing-router:latest",
+		Ports: []corev1.ContainerPort{
 			{
-				Name:  "user-container",
-				Image: "asia.gcr.io/gcp-project-id/turing-router:latest",
-				Ports: []corev1.ContainerPort{
-					{
-						ContainerPort: 8080,
-					},
-				},
-				Resources: resources,
-				LivenessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Port: intstr.FromInt(8080),
-							Path: "/v1/internal/live",
-						},
-					},
-					InitialDelaySeconds: 20,
-					PeriodSeconds:       10,
-					TimeoutSeconds:      5,
-					FailureThreshold:    5,
-				},
-				ReadinessProbe: &corev1.Probe{
-					ProbeHandler: corev1.ProbeHandler{
-						HTTPGet: &corev1.HTTPGetAction{
-							Port: intstr.FromInt(8080),
-							Path: "/v1/internal/ready",
-						},
-					},
-					InitialDelaySeconds: 20,
-					PeriodSeconds:       10,
-					SuccessThreshold:    1,
-					TimeoutSeconds:      5,
-					FailureThreshold:    5,
-				},
-				VolumeMounts: baseSvc.VolumeMounts,
-				Env:          envs,
+				ContainerPort: 8080,
 			},
 		},
-		Volumes: baseSvc.Volumes,
+		Resources: resources,
+		LivenessProbe: &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Port: intstr.FromInt(8080),
+					Path: "/v1/internal/live",
+				},
+			},
+			InitialDelaySeconds: 20,
+			PeriodSeconds:       10,
+			TimeoutSeconds:      5,
+			FailureThreshold:    5,
+		},
+		ReadinessProbe: &corev1.Probe{
+			ProbeHandler: corev1.ProbeHandler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Port: intstr.FromInt(8080),
+					Path: "/v1/internal/ready",
+				},
+			},
+			InitialDelaySeconds: 20,
+			PeriodSeconds:       10,
+			SuccessThreshold:    1,
+			TimeoutSeconds:      5,
+			FailureThreshold:    5,
+		},
+		VolumeMounts: baseSvc.VolumeMounts,
+		Env:          envs,
+	}
+	podSpec := corev1.PodSpec{
+		Containers: []corev1.Container{containerSpec},
+		Volumes:    baseSvc.Volumes,
+	}
+
+	containerSpecWithResourceLimits := containerSpec
+	containerSpecWithResourceLimits.Resources.Limits = map[corev1.ResourceName]resource.Quantity{
+		corev1.ResourceCPU:    cpuRequest,
+		corev1.ResourceMemory: memoryRequest,
+	}
+	podSpecWithResourceLimits := corev1.PodSpec{
+		Containers: []corev1.Container{containerSpecWithResourceLimits},
+		Volumes:    baseSvc.Volumes,
 	}
 
 	tests := map[string]struct {
@@ -172,16 +186,14 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 	}{
 		"basic": {
 			serviceCfg: KnativeService{
-				BaseService:                           baseSvc,
-				ContainerPort:                         8080,
-				MinReplicas:                           1,
-				MaxReplicas:                           2,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				IsClusterLocal:                        true,
-				QueueProxyResourcePercentage:          30,
-				UserContainerCPULimitRequestFactor:    1.5,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				BaseService:                  &baseSvc,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				IsClusterLocal:               true,
+				QueueProxyResourcePercentage: 30,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -220,20 +232,66 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 				},
 			},
 		},
+		"basic with limits": {
+			serviceCfg: KnativeService{
+				BaseService:                  &baseSvcWithResourceLimits,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				IsClusterLocal:               true,
+				QueueProxyResourcePercentage: 30,
+			},
+			expectedSpec: knservingv1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test-svc",
+					Namespace: "test-namespace",
+					Labels: map[string]string{
+						"labelKey":                          "labelVal",
+						"networking.knative.dev/visibility": "cluster-local",
+					},
+				},
+				Spec: knservingv1.ServiceSpec{
+					ConfigurationSpec: knservingv1.ConfigurationSpec{
+						Template: knservingv1.RevisionTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								Name: "test-svc-0",
+								Labels: map[string]string{
+									"labelKey": "labelVal",
+								},
+								Annotations: map[string]string{
+									"autoscaling.knative.dev/minScale":                     "1",
+									"autoscaling.knative.dev/maxScale":                     "2",
+									"autoscaling.knative.dev/metric":                       "concurrency",
+									"autoscaling.knative.dev/target":                       "1.00",
+									"autoscaling.knative.dev/class":                        "kpa.autoscaling.knative.dev",
+									"queue.sidecar.serving.knative.dev/resourcePercentage": "30",
+								},
+							},
+							Spec: knservingv1.RevisionSpec{
+								PodSpec:              podSpecWithResourceLimits,
+								TimeoutSeconds:       &timeout,
+								ContainerConcurrency: &defaultConcurrency,
+							},
+						},
+					},
+					RouteSpec: defaultRouteSpec,
+				},
+			},
+		},
 		// upi has no liveness probe in pod spec and user-container is using h2c
 		"upi": {
 			serviceCfg: KnativeService{
-				BaseService:                           baseSvc,
-				ContainerPort:                         8080,
-				MinReplicas:                           1,
-				MaxReplicas:                           2,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				IsClusterLocal:                        true,
-				QueueProxyResourcePercentage:          30,
-				UserContainerCPULimitRequestFactor:    1.5,
-				UserContainerMemoryLimitRequestFactor: 1.5,
-				Protocol:                              routerConfig.UPI,
+				BaseService:                  &baseSvc,
+				ContainerPort:                8080,
+				MinReplicas:                  1,
+				MaxReplicas:                  2,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				IsClusterLocal:               true,
+				QueueProxyResourcePercentage: 30,
+				Protocol:                     routerConfig.UPI,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -293,15 +351,13 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 		"annotations": {
 			serviceCfg: KnativeService{
-				BaseService:                           baseSvc,
-				ContainerPort:                         8080,
-				MinReplicas:                           5,
-				MaxReplicas:                           6,
-				AutoscalingMetric:                     "memory",
-				AutoscalingTarget:                     "70",
-				IsClusterLocal:                        false,
-				UserContainerCPULimitRequestFactor:    1.5,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				BaseService:       &baseSvc,
+				ContainerPort:     8080,
+				MinReplicas:       5,
+				MaxReplicas:       6,
+				AutoscalingMetric: "memory",
+				AutoscalingTarget: "70",
+				IsClusterLocal:    false,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -340,7 +396,7 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 		},
 		"topology spread constraints": {
 			serviceCfg: KnativeService{
-				BaseService:       baseSvc,
+				BaseService:       &baseSvc,
 				ContainerPort:     8080,
 				MinReplicas:       1,
 				MaxReplicas:       2,
@@ -384,11 +440,9 @@ func TestBuildKnativeServiceConfig(t *testing.T) {
 						},
 					},
 				},
-				IsClusterLocal:                        true,
-				QueueProxyResourcePercentage:          30,
-				UserContainerCPULimitRequestFactor:    1.5,
-				UserContainerMemoryLimitRequestFactor: 1.5,
-				Protocol:                              routerConfig.UPI,
+				IsClusterLocal:               true,
+				QueueProxyResourcePercentage: 30,
+				Protocol:                     routerConfig.UPI,
 			},
 			expectedSpec: knservingv1.Service{
 				ObjectMeta: metav1.ObjectMeta{

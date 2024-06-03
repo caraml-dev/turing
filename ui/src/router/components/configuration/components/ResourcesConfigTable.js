@@ -5,13 +5,19 @@ import { autoscalingPolicyOptions } from "../../form/components/autoscaling_poli
 import { ConfigMultiSectionPanel } from "../../../../components/config_multi_section_panel/ConfigMultiSectionPanel"
 
 const ResourcesSection = ({
-  resourceRequest: { cpu_request, memory_request, min_replica, max_replica },
+  resourceRequest: { cpu_request, cpu_limit, memory_request, min_replica, max_replica },
 }) => {
   const items = [
     {
       title: "CPU Request",
       description: cpu_request,
     },
+    ...(cpu_limit !== undefined && cpu_limit !== "0" && cpu_limit !== "") ? [
+      {
+        title: "CPU Limit",
+        description: cpu_limit,
+      }
+    ] : [],
     {
       title: "Memory Request",
       description: memory_request,

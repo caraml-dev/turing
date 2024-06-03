@@ -19,11 +19,9 @@ import (
 )
 
 func TestNewFluentdService(t *testing.T) {
-	cpuLimit := resource.MustParse("400m")
-	memoryLimit := resource.MustParse("512Mi")
 	sb := clusterSvcBuilder{
-		MaxCPU:    cpuLimit,
-		MaxMemory: memoryLimit,
+		MaxCPU:    resource.MustParse("400m"),
+		MaxMemory: resource.MustParse("512Mi"),
 	}
 
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
@@ -42,6 +40,11 @@ func TestNewFluentdService(t *testing.T) {
 		Team:   "test-team",
 	}
 
+	cpuRequest := resource.MustParse(fluentdCPURequest)
+	cpuLimits := cluster.ComputeResource(cpuRequest, defaultCPULimitRequestFactor)
+	memoryRequest := resource.MustParse(fluentdMemRequest)
+	memoryLimits := cluster.ComputeResource(memoryRequest, defaultMemoryLimitRequestFactor)
+
 	id := int64(999)
 	volSize, _ := resource.ParseQuantity(cacheVolumeSize)
 	expected := &cluster.KubernetesService{
@@ -49,8 +52,10 @@ func TestNewFluentdService(t *testing.T) {
 			Name:                  "test-svc-turing-fluentd-logger-1",
 			Namespace:             project.Name,
 			Image:                 "fluentdimage:1.0.0",
-			CPURequests:           resource.MustParse(fluentdCPURequest),
-			MemoryRequests:        resource.MustParse(fluentdMemRequest),
+			CPURequests:           cpuRequest,
+			CPULimit:              &cpuLimits,
+			MemoryRequests:        memoryRequest,
+			MemoryLimit:           &memoryLimits,
 			LivenessHTTPGetPath:   "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",
 			ReadinessHTTPGetPath:  "/fluentd.pod.healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D",
 			ProbeInitDelaySeconds: 10,

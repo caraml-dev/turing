@@ -20,7 +20,22 @@ import (
 )
 
 func TestNewRouterService(t *testing.T) {
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	userContainerMemoryLimitRequestFactor := 1.5
+	abcDefaultEnvVar := corev1.EnvVar{Name: "ABC", Value: "true"}
+	defDefaultEnvVar := corev1.EnvVar{Name: "DEF", Value: "false"}
+
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          20,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: userContainerMemoryLimitRequestFactor,
+			DefaultEnvVarsWithoutCPULimits:        []corev1.EnvVar{abcDefaultEnvVar, defDefaultEnvVar},
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	enrEndpoint := "http://test-svc-turing-enricher-1.test-project.svc.cluster.local/echo?delay=10ms"
 	ensEndpoint := "http://test-svc-turing-ensembler-1.test-project.svc.cluster.local/echo?delay=20ms"
@@ -69,6 +84,9 @@ func TestNewRouterService(t *testing.T) {
 	cfgmapNoDefaultRoute, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_configmap_no_default_route.yml"))
 	require.NoError(t, err)
 
+	memoryRequest := resource.MustParse("512Mi")
+	memoryLimit := cluster.ComputeResource(memoryRequest, userContainerMemoryLimitRequestFactor)
+
 	testInitialScale := 3
 
 	// Define tests
@@ -83,7 +101,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -99,6 +118,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -162,17 +183,15 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				InitialScale:                          &testInitialScale,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				InitialScale:                 &testInitialScale,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | basic upi": {
@@ -185,7 +204,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -201,6 +221,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -264,17 +286,15 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.UPI,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				InitialScale:                          &testInitialScale,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.UPI,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				InitialScale:                 &testInitialScale,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | all components": {
@@ -286,7 +306,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -302,6 +323,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -373,16 +396,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | standard ensembler with experiment mappings": {
@@ -394,7 +415,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -410,6 +432,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -473,16 +497,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "rps",
-				AutoscalingTarget:                     "100",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "rps",
+				AutoscalingTarget:            "100",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | standard ensembler with route name path": {
@@ -494,7 +516,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -510,6 +533,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -573,16 +598,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "rps",
-				AutoscalingTarget:                     "100",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "rps",
+				AutoscalingTarget:            "100",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | standard ensembler lazy routing": {
@@ -594,7 +617,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -610,6 +634,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -673,16 +699,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "rps",
-				AutoscalingTarget:                     "100",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "rps",
+				AutoscalingTarget:            "100",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | traffic-splitting": {
@@ -694,7 +718,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -710,6 +735,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -773,16 +800,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "concurrency",
-				AutoscalingTarget:                     "1",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "concurrency",
+				AutoscalingTarget:            "1",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | experiment engine": {
@@ -794,7 +819,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "ghcr.io/caraml-dev/turing/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -810,6 +836,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "router-with-exp-engine-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -902,16 +930,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "rps",
-				AutoscalingTarget:                     "100",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "rps",
+				AutoscalingTarget:            "100",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"success | no default route": {
@@ -923,7 +949,8 @@ func TestNewRouterService(t *testing.T) {
 					Namespace:            "test-project",
 					Image:                "asia.gcr.io/gcp-project-id/turing-router:latest",
 					CPURequests:          resource.MustParse("400m"),
-					MemoryRequests:       resource.MustParse("512Mi"),
+					MemoryRequests:       memoryRequest,
+					MemoryLimit:          &memoryLimit,
 					LivenessHTTPGetPath:  "/v1/internal/live",
 					ReadinessHTTPGetPath: "/v1/internal/ready",
 					ConfigMap: &cluster.ConfigMap{
@@ -939,6 +966,8 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 					Envs: []corev1.EnvVar{
+						abcDefaultEnvVar,
+						defDefaultEnvVar,
 						{Name: "APP_NAME", Value: "test-svc-1.test-project"},
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
@@ -979,16 +1008,14 @@ func TestNewRouterService(t *testing.T) {
 						},
 					},
 				},
-				ContainerPort:                         8080,
-				Protocol:                              routerConfig.HTTP,
-				MinReplicas:                           2,
-				MaxReplicas:                           4,
-				AutoscalingMetric:                     "memory",
-				AutoscalingTarget:                     "90",
-				TopologySpreadConstraints:             testTopologySpreadConstraints,
-				QueueProxyResourcePercentage:          20,
-				UserContainerCPULimitRequestFactor:    0,
-				UserContainerMemoryLimitRequestFactor: 1.5,
+				ContainerPort:                8080,
+				Protocol:                     routerConfig.HTTP,
+				MinReplicas:                  2,
+				MaxReplicas:                  4,
+				AutoscalingMetric:            "memory",
+				AutoscalingTarget:            "90",
+				TopologySpreadConstraints:    testTopologySpreadConstraints,
+				QueueProxyResourcePercentage: 20,
 			},
 		},
 		"failure missing bigquery": {
@@ -1025,7 +1052,7 @@ func TestNewRouterService(t *testing.T) {
 				},
 				true,
 				"sentry-dsn",
-				20, 0, 1.5, data.initialScale,
+				data.initialScale,
 			)
 
 			if data.err == "" {
@@ -1040,7 +1067,17 @@ func TestNewRouterService(t *testing.T) {
 
 func TestNewRouterEndpoint(t *testing.T) {
 	// Get router version
-	sb := NewClusterServiceBuilder(resource.MustParse("2"), resource.MustParse("2Gi"), 30, testTopologySpreadConstraints)
+	sb := NewClusterServiceBuilder(
+		resource.MustParse("2"),
+		resource.MustParse("2Gi"),
+		30,
+		testTopologySpreadConstraints,
+		&config.KnativeServiceDefaults{
+			QueueProxyResourcePercentage:          10,
+			UserContainerCPULimitRequestFactor:    0,
+			UserContainerMemoryLimitRequestFactor: 1.5,
+		},
+	)
 	testDataBasePath := filepath.Join("..", "..", "testdata", "cluster", "servicebuilder")
 	fileBytes, err := tu.ReadFile(filepath.Join(testDataBasePath, "router_version_success.json"))
 	require.NoError(t, err)

@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -16,21 +15,7 @@ func CompareObjects(actual interface{}, expected interface{}) error {
 		allowUnexportedOn = reflect.ValueOf(actual).Elem().Interface()
 	}
 	if !cmp.Equal(actual, expected, cmp.AllowUnexported(allowUnexportedOn)) {
-		actualString := fmt.Sprintf("%+v", actual)
-		expectedString := fmt.Sprintf("%+v", expected)
-
-		// Attempt to encode values to JSON, for logging
-		jsonActual, err := json.Marshal(actual)
-		if err == nil {
-			actualString = string(jsonActual)
-		}
-		jsonExpected, err := json.Marshal(expected)
-		if err == nil {
-			expectedString = string(jsonExpected)
-		}
-
-		return fmt.Errorf("Did not get expected configuration.\nEXPECTED:\n%v\nGOT:\n%v",
-			expectedString, actualString)
+		return fmt.Errorf(cmp.Diff(actual, expected, cmp.AllowUnexported(allowUnexportedOn)))
 	}
 	return nil
 }
