@@ -60,6 +60,11 @@ const appConfig = {
     // Default number of tail log entries to be fetched
     defaultTailLines: 1000,
   },
+  imagebuilder: {
+    cluster:  process.env.REACT_APP_IMAGE_BUILDER_CLUSTER,
+    gcp_project: process.env.REACT_APP_IMAGE_BUILDER_GCP_PROJECT,
+    namespace: process.env.REACT_APP_IMAGE_BUILDER_NAMESPACE,
+  },
   // Specifies a set of page templating configurations that will soon be controlled by the mlp-ui package
   // TO-DO: to review if these set of specifications are still needed after the update to mlp-ui
   pageTemplate: {

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ConfigSection } from "../../../components/config_section";
 import { LogEntry } from "../../../services/logs/LogEntry";
 import { get } from "../../../components/form/utils";
-import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
+import { ProjectsContext, replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { PodLogsViewer } from "../../../components/pod_logs_viewer/PodLogsViewer";
-import { EuiPanel } from "@elastic/eui";
 import { useConfig } from "../../../config";
 import { useLogsEmitter } from "../../../components/pod_logs_viewer/hooks/useLogsEmitter";
+import { createStackdriverUrl } from "../../../utils/createStackdriverUrl";
+import EnsemblersContext from "../../../providers/ensemblers/context";
+import EnvironmentsContext from "../../../providers/environments/context";
 
 const components = [
   {
@@ -24,9 +26,19 @@ const components = [
 ];
 
 export const RouterLogsView = ({ router }) => {
-  const {
-    appConfig: { podLogs: configOptions },
-  } = useConfig();
+  const { appConfig } = useConfig();
+
+  const { currentProject } = useContext(ProjectsContext);
+
+  const { ensemblers } = useContext(EnsemblersContext);
+  const ensembler = Object.values(ensemblers)
+      .find((value) => value.id === router?.config?.ensembler?.pyfunc_config?.ensembler_id)
+
+  const environments = useContext(EnvironmentsContext);
+  const environment = Object.values(environments)
+      .find((value) => value.name === router?.environment_name)
+
+  const [stackdriverUrls, setStackdriverUrls] = useState({});
 
   useEffect(() => {
     replaceBreadcrumbs([
@@ -46,7 +58,7 @@ export const RouterLogsView = ({ router }) => {
 
   const [query, setQuery] = useState({
     component_type: "router",
-    tail_lines: configOptions.defaultTailLines,
+    tail_lines: appConfig.podLogs.defaultTailLines,
   });
 
   const { emitter } = useLogsEmitter(
@@ -55,24 +67,73 @@ export const RouterLogsView = ({ router }) => {
     (entries) =>
       !!entries.length ? entries[entries.length - 1].timestamp : undefined,
     (entries) => entries.map((entry) => LogEntry.fromJson(entry).toString()),
-    configOptions
+      appConfig.podLogs,
   );
 
   const availableComponents = components.filter(
     (c) => c.value === "router" || !!get(router, `config.${c.value}`)
   );
 
+  useEffect(
+    () => {
+      let urls = {}
+      if (appConfig.imagebuilder.cluster && appConfig.imagebuilder.gcp_project && appConfig.imagebuilder.namespace &&
+        currentProject) {
+        // set router url
+        urls["router"] = createStackdriverUrl({
+          gcp_project: environment.gcp_project,
+          cluster: environment.cluster,
+          namespace: currentProject.name,
+          pod_name: router.name + "-turing-router-"  + router.config.version,
+          start_time: router.updated_at,
+        }, "router", appConfig.imagebuilder)
+
+        // set enricher url
+        if (router.config.enricher.type === "docker") {
+          urls["enricher"] = createStackdriverUrl({
+            gcp_project: environment.gcp_project,
+            cluster: environment.cluster,
+            namespace: currentProject.name,
+            pod_name: router.name + "-turing-enricher-" + router.config.version,
+            start_time: router.updated_at,
+          }, "enricher", appConfig.imagebuilder)
+        }
+
+        // set ensembler url
+        if (router.config.ensembler.type === "docker" || router.config.ensembler.type === "pyfunc") {
+          urls["ensembler"] = createStackdriverUrl({
+            gcp_project: environment.gcp_project,
+            cluster: environment.cluster,
+            namespace: currentProject.name,
+            pod_name: router.name + "-turing-ensembler-" + router.config.version,
+            start_time: router.updated_at,
+          }, "ensembler", appConfig.imagebuilder)
+        }
+
+        // set image builder url
+        if (router.config.ensembler.type === "pyfunc" && ensembler) {
+          urls["ensembler_image_builder"] = createStackdriverUrl({
+            job_name: "service-" + currentProject.name + "-" + ensembler.name,
+            start_time: ensembler.updated_at,
+          }, "ensembler_image_builder", appConfig.imagebuilder)
+        }
+
+        setStackdriverUrls(urls);
+      }
+    },
+    [currentProject, ensembler, environment, router, appConfig.imagebuilder]
+  );
+
   return (
     <ConfigSection title="Logs">
-      <EuiPanel>
-        <PodLogsViewer
-          components={availableComponents}
-          emitter={emitter}
-          query={query}
-          onQueryChange={setQuery}
-          batchSize={configOptions.batchSize}
-        />
-      </EuiPanel>
+      <PodLogsViewer
+        components={availableComponents}
+        emitter={emitter}
+        query={query}
+        onQueryChange={setQuery}
+        batchSize={appConfig.podLogs.batchSize}
+        stackdriverUrls={stackdriverUrls}
+      />
     </ConfigSection>
   );
 };

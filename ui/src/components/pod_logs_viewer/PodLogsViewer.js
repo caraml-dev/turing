@@ -4,6 +4,9 @@ import {
   EuiFlexItem,
   EuiSearchBar,
   EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiLink
 } from "@elastic/eui";
 import { LazyLog, ScrollFollow } from "react-lazylog";
 import { slugify } from "@caraml-dev/ui-lib";
@@ -17,6 +20,7 @@ export const PodLogsViewer = ({
   query,
   onQueryChange,
   batchSize,
+  stackdriverUrls,
 }) => {
   const filters = useMemo(
     () => [
@@ -110,33 +114,59 @@ export const PodLogsViewer = ({
   };
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      className="euiFlexGroup---logsContainer">
-      <EuiFlexItem grow={false}>
-        <EuiSearchBar {...search} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <ScrollFollow
-          startFollowing={true}
-          render={({ onScroll, follow }) => (
-            <LazyLog
-              key={slugify(searchQuery)}
-              eventSource={emitter}
-              extraLines={1}
-              onScroll={onScroll}
-              follow={follow}
-              caseInsensitive
-              enableSearch
-              selectableLines
+    <>
+      {
+        Object.keys(stackdriverUrls).length !== 0 &&
+        (
+          <>
+            <EuiPanel>
+              <EuiFlexGroup direction="row" alignItems="center">
+                <EuiFlexItem style={{marginTop:0, marginBottom:0}} grow={false}>
+                  <EuiText  style={{ fontSize: '14px', fontWeight:"bold"}}>Stackdriver Logs</EuiText>
+                </EuiFlexItem>
+                {Object.entries(stackdriverUrls).map(([component,url])=> (
+                  <EuiFlexItem style={{marginTop:0, marginBottom:0, paddingLeft:"10px", textTransform: "capitalize"}} key={component} grow={false}>
+                    <EuiText size="xs" >
+                      <EuiLink href={url} target="_blank" external>{component.replace(new RegExp("_", "g"), " ")}</EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiPanel>
+            <EuiSpacer size="s" />
+          </>
+        )
+      }
+      <EuiPanel>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          className="euiFlexGroup---logsContainer">
+          <EuiFlexItem grow={false}>
+            <EuiSearchBar {...search} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <ScrollFollow
+              startFollowing={true}
+              render={({ onScroll, follow }) => (
+                <LazyLog
+                  key={slugify(searchQuery)}
+                  eventSource={emitter}
+                  extraLines={1}
+                  onScroll={onScroll}
+                  follow={follow}
+                  caseInsensitive
+                  enableSearch
+                  selectableLines
+                />
+              )}
             />
-          )}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 };

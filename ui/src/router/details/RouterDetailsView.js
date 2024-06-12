@@ -24,6 +24,7 @@ import { RouterLogsView } from "./logs/RouterLogsView";
 import { VersionComparisonView } from "../versions/comparison/VersionComparisonView";
 import { TuringRouter } from "../../services/router/TuringRouter";
 import { useConfig } from "../../config";
+import { EnsemblersContextProvider } from "../../providers/ensemblers/context";
 
 export const RouterDetailsView = () => {
   const { projectId, routerId, "*": section } = useParams();
@@ -131,7 +132,13 @@ export const RouterDetailsView = () => {
               {/* ALERTS */}
               <Route path="alerts/*" element={<RouterAlertsView router={router} />} />
               {/* LOGS */}
-              <Route path="logs" element={<RouterLogsView router={router} />} />
+              <Route path="logs" element={
+                <EnsemblersContextProvider
+                  projectId={router.project_id}
+                  ensemblerType={"pyfunc"}>
+                  <RouterLogsView router={router} />
+                </EnsemblersContextProvider>
+              } />
             </Routes>
           </EuiPageTemplate.Section>
         </Fragment>
