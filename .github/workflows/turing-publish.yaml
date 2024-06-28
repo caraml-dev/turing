@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.ghcr_token }}
 
       - name: Download Docker image tar
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: turing-router.${{ inputs.router_version }}.tar
 
@@ -65,12 +65,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Docker image tar
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: turing-api.${{ inputs.api_version }}.tar
 
       - name: Download Turing UI Dist
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: turing-ui-dist
           path: ui/build

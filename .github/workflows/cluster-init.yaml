@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download Cluster Init Docker tar archieve
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: cluster-init.${{ env.CLUSTER_INIT_VERSION }}.tar
       
@@ -142,7 +142,7 @@ jobs:
             password: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Download Cluster Init Docker tar archieve
-          uses: actions/download-artifact@v2
+          uses: actions/download-artifact@v4
           with:
             name: cluster-init.${{ needs.build-cluster-init.outputs.cluster-init-version }}.tar
 

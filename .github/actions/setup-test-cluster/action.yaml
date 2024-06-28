@@ -59,27 +59,27 @@ runs:
   using: composite
   steps:
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ inputs.go-version }}
 
     - name: Download Turing API Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.turing_api_tar_archive_name }}
 
     - name: Download Turing Router Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.turing_router_tar_archive_name }}
 
     - name: Download Experiment Engine Plugin Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.experiment_engine_plugin_archive_name }}
 
     - name: Download Cluster Init Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.cluster_init_tar_archive_name }}
 
