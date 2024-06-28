@@ -54,7 +54,7 @@ jobs:
       api-version: ${{ steps.build-image.outputs.api-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -92,7 +92,7 @@ jobs:
       router-version: ${{ steps.build-image.outputs.router-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -132,7 +132,7 @@ jobs:
       test-experiment-engine-plugin-version: ${{ env.VERSION }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # This is needed due to the issue raised here: https://github.com/golang/go/issues/61455
       - name: Install Go ${{ env.GO_VERSION }}
@@ -167,15 +167,15 @@ jobs:
         working-directory: ui
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: sudo apt-get install --no-install-recommends gcc make libpng-dev
 
-      - name: Set up Node 16.x
-        uses: actions/setup-node@v1
+      - name: Set up Node 20.x
+        uses: actions/setup-node@v4
         with:
-          node-version: "16.x"
+          node-version: "20.x"
 
       - name: Cache Dependencies
         uses: actions/cache@v2
@@ -209,7 +209,7 @@ jobs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -241,10 +241,10 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -295,10 +295,10 @@ jobs:
       - build-router
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -333,10 +333,10 @@ jobs:
       GOPATH: ${{ github.workspace }}/engines/experiment/.go
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -392,7 +392,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
@@ -412,7 +412,7 @@ jobs:
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -516,7 +516,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-rules
         uses: ./.github/actions/release-rules
 
