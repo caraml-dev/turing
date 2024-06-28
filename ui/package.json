@@ -32,6 +32,13 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.6",
+    "@babel/plugin-proposal-export-default-from": "^7.24.6",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-class-properties": "^7.24.6",
+    "@babel/plugin-transform-private-property-in-object": "^7.24.6",
+    "@babel/preset-env": "^7.24.6",
+    "@babel/preset-react": "^7.24.6",
     "@craco/craco": "^7.1.0",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "16.0.0",
