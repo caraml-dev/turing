@@ -77,8 +77,12 @@ export const RouterLogsView = ({ router }) => {
   useEffect(
     () => {
       let urls = {}
-      if (appConfig.imagebuilder.cluster && appConfig.imagebuilder.gcp_project && appConfig.imagebuilder.namespace &&
-        currentProject) {
+      if (
+          appConfig.imagebuilder.cluster &&
+          appConfig.imagebuilder.gcp_project &&
+          appConfig.imagebuilder.namespace &&
+          currentProject
+      ) {
         // set router url
         urls["router"] = createStackdriverUrl({
           gcp_project: environment.gcp_project,
