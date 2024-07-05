@@ -79,7 +79,7 @@ jobs:
             turing-api:${{ steps.build-image.outputs.api-version }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-api.${{ steps.build-image.outputs.api-version }}.tar
           path: turing-api.${{ steps.build-image.outputs.api-version }}.tar
@@ -118,7 +118,7 @@ jobs:
             turing-router:${{ steps.build-image.outputs.router-version }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-router.${{ steps.build-image.outputs.router-version }}.tar
           path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
@@ -154,7 +154,7 @@ jobs:
             plugin-example-engine-plugin:${{ env.VERSION }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-experiment-engine-plugin.${{ env.VERSION }}.tar
           path: test-experiment-engine-plugin.${{ env.VERSION }}.tar
@@ -191,7 +191,7 @@ jobs:
         run: yarn build
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-ui-dist
           path: ui/build/
