@@ -54,7 +54,7 @@ jobs:
       api-version: ${{ steps.build-image.outputs.api-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -64,6 +64,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
+          cache-dependency-path: api/go.sum
 
       - name: Build Docker image
         id: build-image
@@ -92,7 +93,7 @@ jobs:
       router-version: ${{ steps.build-image.outputs.router-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -102,6 +103,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
+          cache-dependency-path: api/go.sum
 
       - name: Build Docker image
         id: build-image
@@ -132,7 +134,7 @@ jobs:
       test-experiment-engine-plugin-version: ${{ env.VERSION }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # This is needed due to the issue raised here: https://github.com/golang/go/issues/61455
       - name: Install Go ${{ env.GO_VERSION }}
@@ -167,23 +169,17 @@ jobs:
         working-directory: ui
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: sudo apt-get install --no-install-recommends gcc make libpng-dev
 
       - name: Set up Node 20.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ui/node_modules
-          key: |
-            ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-modules-
+          cache: yarn
+          cache-dependency-path: ui/yarn.lock
 
       - name: Install
         run: yarn install --network-concurrency 1
@@ -209,7 +205,7 @@ jobs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -241,20 +237,13 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: api/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('api/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: api/go.sum
 
       - name: Setup
         working-directory: api
@@ -295,20 +284,13 @@ jobs:
       - build-router
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: engines/router/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('engines/router/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: engines/router/go.sum
 
       - name: Setup
         run: make setup
@@ -333,20 +315,13 @@ jobs:
       GOPATH: ${{ github.workspace }}/engines/experiment/.go
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: engines/experiment/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('engines/experiment/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: engines/experiment/go.sum
 
       - name: Run test
         working-directory: engines/experiment
@@ -392,7 +367,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
@@ -412,7 +387,7 @@ jobs:
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
@@ -516,7 +491,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-rules
         uses: ./.github/actions/release-rules
 
