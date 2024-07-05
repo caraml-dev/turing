@@ -24,7 +24,6 @@ timestamp>"${query.start_time}"`;
 export const createStackdriverUrl = (query, component, imagebuilder) => {
   const advanceFilter = component === "ensembler_image_builder" ? stackdriverImageBuilderFilter(query, imagebuilder) : stackdriverFilter(query);
 
-  console.log(imagebuilder);
   const url = {
     project: query.gcp_project || imagebuilder.gcp_project,
     minLogLevel: 0,
