@@ -39,6 +39,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: conda
           cache-dependency-path: |
             engines/pyfunc-ensembler-service/env-${{ matrix.python-version }}.yaml
             engines/pyfunc-ensembler-service/requirements.txt
