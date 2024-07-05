@@ -210,7 +210,7 @@ runs:
         kubectl apply -f infra/e2e/turing.mockserver.yaml
 
     - name: Run action await k8 workloads
-      uses: jupyterhub/action-k8s-await-workloads@v1
+      uses: jupyterhub/action-k8s-await-workloads@v3
       id: wait-for-deployment
       with:
         workloads: >-
