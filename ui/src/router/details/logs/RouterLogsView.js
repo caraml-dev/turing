@@ -90,7 +90,7 @@ export const RouterLogsView = ({ router }) => {
           namespace: currentProject.name,
           pod_name: router.name + "-turing-router-"  + router.config.version,
           start_time: router.updated_at,
-        }, "router", appConfig.imagebuilder)
+        }, "router")
 
         // set enricher url
         if (router.config.enricher.type === "docker") {
@@ -100,7 +100,7 @@ export const RouterLogsView = ({ router }) => {
             namespace: currentProject.name,
             pod_name: router.name + "-turing-enricher-" + router.config.version,
             start_time: router.updated_at,
-          }, "enricher", appConfig.imagebuilder)
+          }, "enricher")
         }
 
         // set ensembler url
@@ -111,7 +111,7 @@ export const RouterLogsView = ({ router }) => {
             namespace: currentProject.name,
             pod_name: router.name + "-turing-ensembler-" + router.config.version,
             start_time: router.updated_at,
-          }, "ensembler", appConfig.imagebuilder)
+          }, "ensembler")
         }
 
         // set image builder url
@@ -119,7 +119,7 @@ export const RouterLogsView = ({ router }) => {
           urls["ensembler_image_builder"] = createStackdriverUrl({
             job_name: "service-" + currentProject.name + "-" + ensembler.name,
             start_time: ensembler.updated_at,
-          }, "ensembler_image_builder", appConfig.imagebuilder)
+          }, "ensembler_image_builder")
         }
 
         setStackdriverUrls(urls);

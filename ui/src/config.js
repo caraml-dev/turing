@@ -31,7 +31,7 @@ const authConfig = {
   oauthClientId: process.env.REACT_APP_OAUTH_CLIENT_ID,
 };
 
-const appConfig = {
+export const appConfig = {
   environment: process.env.REACT_APP_ENVIRONMENT,
   homepage: process.env.PUBLIC_URL,
   appIcon: "graphApp",
