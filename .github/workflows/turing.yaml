@@ -391,9 +391,10 @@ jobs:
 
       - name: Setup Python
         if: ${{ matrix.useSDK }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
+          cache-dependency-path: sdk/requirements.txt
 
       - name: Install Python dependencies
         if: ${{ matrix.useSDK }}
