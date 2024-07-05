@@ -17,7 +17,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
       - ".github/workflows/cluster-init.yaml"
 
   # Automatically run CI on branches, that have active PR opened
@@ -32,7 +31,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
 
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
