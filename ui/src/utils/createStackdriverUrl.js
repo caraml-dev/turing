@@ -1,3 +1,5 @@
+// This file in almost an exact copy of this file from Merlin
+// Ref: https://github.com/caraml-dev/merlin/blob/8edef22b29d0bfb2728d62b1f880f1f753f9509e/ui/src/utils/createStackdriverUrl.js
 const stackdriverAPI = "https://console.cloud.google.com/logs/viewer";
 
 const stackdriverFilter = query => {
