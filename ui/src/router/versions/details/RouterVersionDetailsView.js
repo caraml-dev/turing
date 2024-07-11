@@ -4,7 +4,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
   EuiPageTemplate
 } from "@elastic/eui";
@@ -81,7 +81,7 @@ export const RouterVersionDetailsView = () => {
       {!hasInitiallyLoaded ? (
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={true}>
-            <EuiLoadingContent lines={3} />
+            <EuiSkeletonText lines={3} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : error ? (
