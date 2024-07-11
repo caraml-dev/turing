@@ -1,7 +1,7 @@
 import React from "react";
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from "@elastic/eui";
 import classNames from "classnames";
-import useCollapse from "react-collapsed";
+import { useCollapse } from "react-collapsed";
 import useDimensions from "react-use-dimensions";
 import "./ExpandableContainer.scss";
 
