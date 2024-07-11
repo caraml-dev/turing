@@ -5,7 +5,7 @@ import { EuiPageTemplate, EuiPanel, EuiSpacer } from "@elastic/eui";
 import { PageTitle } from "../../components/page/PageTitle";
 import { ListEnsemblersTable } from "./ListEnsemblersTable";
 import { useConfig } from "../../config";
-import { parse, stringify } from "query-string";
+import queryString from "query-string";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export const ListEnsemblersView = () => {
@@ -21,7 +21,7 @@ export const ListEnsemblersView = () => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(
-    () => parse(location.search),
+    () => queryString.parse(location.search),
     [location.search]
   );
 
@@ -37,7 +37,7 @@ export const ListEnsemblersView = () => {
       filter["search"] = searchClause.map((c) => c.value).join(" ");
     }
 
-    navigate(`${location.pathname}?${stringify(filter)}`);
+    navigate(`${location.pathname}?${queryString.stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }, fetchEnsemblerData] = useTuringApi(
