@@ -233,8 +233,6 @@ export const ListEnsemblingJobsTable = ({
         cellProps={cellProps}
         pagination={pagination}
         onChange={onTableChange}
-        hasActions={true}
-        responsive={true}
         tableLayout="auto"
       />
       <DeleteJobModal

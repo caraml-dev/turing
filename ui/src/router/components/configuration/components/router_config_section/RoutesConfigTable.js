@@ -145,7 +145,6 @@ export const RoutesConfigTable = ({ routes, rules = [], defaultRouteId, defaultT
       columns={columns}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isSelectable={false}
       cellProps={getCellProps}
     />
   );

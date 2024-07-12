@@ -26,7 +26,7 @@ const TreatmentMappingConfigTable = ({ items }) => {
   ];
 
   return (
-    <EuiInMemoryTable items={items} columns={columns} isSelectable={false} />
+    <EuiInMemoryTable items={items} columns={columns} />
   );
 };
 

@@ -121,7 +121,6 @@ export const RulesConfigTable = ({ routes, rules = [], defaultTrafficRule }) => 
       items={rulesWithRouteDetails}
       columns={columns}
       itemId="id"
-      isSelectable={false}
       cellProps={getCellProps}
     />
   );
