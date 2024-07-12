@@ -38,6 +38,7 @@ const ResourcesSection = ({
       textStyle="reverse"
       type="responsiveColumn"
       listItems={items}
+      columnWidths={[1, 1]}
     />
   );
 }
@@ -63,6 +64,7 @@ const AutoscalingPolicySection = ({
       textStyle="reverse"
       type="responsiveColumn"
       listItems={items}
+      columnWidths={[1, 1]}
     />
   );
 };

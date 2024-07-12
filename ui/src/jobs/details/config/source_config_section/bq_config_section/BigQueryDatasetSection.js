@@ -63,8 +63,7 @@ const BigQueryDatasetTableConfigGroup = ({ table, features, options }) => {
           textStyle="reverse"
           type="responsiveColumn"
           listItems={items}
-          titleProps={{ style: { width: "160px" } }}
-          descriptionProps={{ style: { width: "calc(100% - 160px)" } }}
+          columnWidths={[1, 5]}
         />
       </EuiFlexItem>
 
