@@ -1110,7 +1110,7 @@ func TestValidateAutoscaling(t *testing.T) {
 				Target: "hundred",
 			},
 			expectedError: strings.Join([]string{"Key: 'RouterConfig.AutoscalingPolicy.Target' ",
-				"Error:Field validation for 'Target' failed on the 'number' tag"}, ""),
+				"Error:Field validation for 'Target' failed on the 'numeric' tag"}, ""),
 		},
 	}
 	for name, tt := range suite {
