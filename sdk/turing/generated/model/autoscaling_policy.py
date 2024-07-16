@@ -61,11 +61,6 @@ class AutoscalingPolicy(ModelNormal):
     }
 
     validations = {
-        ('target',): {
-            'regex': {
-                'pattern': r'^\d+$',  # noqa: E501
-            },
-        },
     }
 
     additional_properties_type = None

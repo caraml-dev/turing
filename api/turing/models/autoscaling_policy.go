@@ -25,7 +25,9 @@ type AutoscalingPolicy struct {
 	// Target is the target value of the metric that should be reached to add a new replica.
 	// It is expected that the autoscaling target is an absolute value for concurrency / rps
 	// while it is a % value (of the requested value) for cpu / memory.
-	Target string `json:"target" validate:"required,number"`
+	// The 'numeric' type is used to allow decimals in strings to be set as the target value,
+	// e.g. "8.88". See https://github.com/go-playground/validator/issues/940 for more details.
+	Target string `json:"target" validate:"required,numeric"`
 }
 
 func (a AutoscalingPolicy) Value() (driver.Value, error) {

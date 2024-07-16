@@ -16,7 +16,7 @@ import (
 
 // EnsemblingJobMeta Ensembling job Metadata
 type EnsemblingJobMeta struct {
-	Name        string            `json:"name"`
+	Name string `json:"name"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
@@ -51,7 +51,7 @@ func (o *EnsemblingJobMeta) GetName() string {
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
 func (o *EnsemblingJobMeta) GetNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil  {
 		return nil, false
 	}
 	return &o.Name, true
@@ -64,7 +64,7 @@ func (o *EnsemblingJobMeta) SetName(v string) {
 
 // GetAnnotations returns the Annotations field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *EnsemblingJobMeta) GetAnnotations() map[string]string {
-	if o == nil {
+	if o == nil  {
 		var ret map[string]string
 		return ret
 	}
@@ -141,3 +141,5 @@ func (v *NullableEnsemblingJobMeta) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
