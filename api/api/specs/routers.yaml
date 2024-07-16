@@ -969,7 +969,6 @@ components:
             - "rps"
         target:
           type: "string"
-          pattern: '^\d+$'
 
     BigQueryConfig:
       type: "object"
