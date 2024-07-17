@@ -12,8 +12,6 @@ import { LazyLog, ScrollFollow } from "react-lazylog";
 import { slugify } from "@caraml-dev/ui-lib";
 import isArray from "lodash/isArray";
 
-import "./PodLogsViewer.scss";
-
 export const PodLogsViewer = ({
   components,
   emitter,
@@ -140,8 +138,7 @@ export const PodLogsViewer = ({
       <EuiPanel>
         <EuiFlexGroup
           direction="column"
-          gutterSize="none"
-          className="euiFlexGroup---logsContainer">
+          gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiSearchBar {...search} />
           </EuiFlexItem>
@@ -158,6 +155,7 @@ export const PodLogsViewer = ({
                   extraLines={1}
                   onScroll={onScroll}
                   follow={follow}
+                  height={640}
                   caseInsensitive
                   enableSearch
                   selectableLines
