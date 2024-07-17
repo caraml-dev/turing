@@ -180,7 +180,7 @@ jobs:
           cache-dependency-path: ui/yarn.lock
 
       - name: Install
-        run: yarn install --network-concurrency 1
+        run: NODE_OPTIONS=--openssl-legacy-provider yarn install --network-concurrency 1
 
       - name: Lint code
         run: yarn lint
