@@ -11578,10 +11578,9 @@ react-is@^18.0.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
-react-lazylog@^4.5.3:
+"react-lazylog@git+https://github.com/gojekfarm/react-lazylog#master":
   version "4.5.3"
-  resolved "https://registry.yarnpkg.com/react-lazylog/-/react-lazylog-4.5.3.tgz#289e24995b5599e75943556ac63f5e2c04d0001e"
-  integrity sha512-lyov32A/4BqihgXgtNXTHCajXSXkYHPlIEmV8RbYjHIMxCFSnmtdg4kDCI3vATz7dURtiFTvrw5yonHnrS+NNg==
+  resolved "git+https://github.com/gojekfarm/react-lazylog#e3a7f026983df0dc59d25843fe87ce7e37e24e82"
   dependencies:
     "@mattiasbuelens/web-streams-polyfill" "^0.2.0"
     fetch-readablestream "^0.2.0"
