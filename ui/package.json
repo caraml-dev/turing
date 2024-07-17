@@ -2,8 +2,12 @@
   "name": "turing-ui",
   "version": "0.1.0",
   "private": true,
+  "//": "[@elastic/eui] pinned to 88.2.0 because the EuiAccordion component started breaking after it; see",
+  "//": "https://github.com/caraml-dev/turing/pull/384/files#r1677546784 for more details",
+  "//": "[@sentry/browser] pinned to 7.118.0 because craco/module federation has issues resolving this dependency; see",
+  "//": "https://github.com/caraml-dev/turing/pull/384#discussion_r1666418144 for more details",
   "dependencies": {
-    "@caraml-dev/ui-lib": "^1.13.0-build.2-41cc54b",
+    "@caraml-dev/ui-lib": "^1.13.0-build.3-a234b6b",
     "@elastic/datemath": "^5.0.3",
     "@elastic/eui": "88.2.0",
     "@emotion/css": "^11.11.2",
