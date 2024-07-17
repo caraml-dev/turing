@@ -21,7 +21,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
@@ -46,12 +46,12 @@ jobs:
     needs:
       - release-rules
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}

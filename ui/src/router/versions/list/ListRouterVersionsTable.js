@@ -234,7 +234,6 @@ export const ListRouterVersionsTable = ({
       rowProps={rowProps}
       itemId="version"
       pagination={true}
-      hasActions={true}
       sorting={{ sort: { field: "Version", direction: "desc" } }}
     />
   );

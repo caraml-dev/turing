@@ -56,6 +56,7 @@ export const ResourceRequestConfigTable = ({
           textStyle="reverse"
           type="responsiveColumn"
           listItems={driver_items}
+          columnWidths={[1, 1]}
         />
       </EuiFlexItem>
 
@@ -74,6 +75,7 @@ export const ResourceRequestConfigTable = ({
           textStyle="reverse"
           type="responsiveColumn"
           listItems={executor_items}
+          columnWidths={[1, 1]}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

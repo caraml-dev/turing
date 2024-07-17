@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ListEnsemblingJobsTable } from "./ListEnsemblingJobsTable";
 import { replaceBreadcrumbs } from "@caraml-dev/ui-lib";
 import { useConfig } from "../../config";
-import { parse, stringify } from "query-string";
+import queryString from "query-string";
 
 export const ListEnsemblingJobsView = ({ projectId }) => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
   const [results, setResults] = useState({ items: [], totalItemCount: 0 });
   const [page, setPage] = useState({ index: 0, size: defaultPageSize });
   const filter = useMemo(
-    () => parse(location.search),
+    () => queryString.parse(location.search),
     [location.search]
   );
 
@@ -45,7 +45,7 @@ export const ListEnsemblingJobsView = ({ projectId }) => {
       filter["search"] = searchClause.map((c) => c.value).join(" ");
     }
 
-    navigate(`${location.pathname}?${stringify(filter)}`);
+    navigate(`${location.pathname}?${queryString.stringify(filter)}`);
   };
 
   const [{ data, isLoaded, error }, fetchJobData] = useTuringApi(

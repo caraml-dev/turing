@@ -1,6 +1,6 @@
 import React from "react";
 import { EuiBadge, EuiBadgeGroup, EuiLink } from "@elastic/eui";
-import useCollapse from "react-collapsed";
+import { useCollapse } from "react-collapsed";
 
 import "./CollapsibleBadgeGroup.scss";
 

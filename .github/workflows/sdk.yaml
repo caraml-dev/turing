@@ -32,20 +32,17 @@ jobs:
         working-directory: ./sdk
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: |
-            pip-${{ hashFiles('sdk/requirements.txt') }}-${{ hashFiles('sdk/requirements.dev.txt') }}-${{ matrix.python-version }}
-          restore-keys: pip-
+          cache: pip
+          cache-dependency-path: |
+            sdk/requirements.txt
+            sdk/requirements.dev.txt
+            engines/pyfunc-ensembler-service/requirements.dev.txt
 
       - name: Install dependencies
         run: make setup
@@ -65,7 +62,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
@@ -87,23 +84,20 @@ jobs:
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # fetch full history for a proper version number assignment
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: |
-            pip-${{ hashFiles('sdk/requirements.txt') }}-${{ hashFiles('sdk/requirements.dev.txt') }}
-          restore-keys: pip-
+          cache: pip
+          cache-dependency-path: |
+            sdk/requirements.txt
+            sdk/requirements.dev.txt
+            engines/pyfunc-ensembler-service/requirements.dev.txt
 
       - name: Build
         working-directory: ./sdk

@@ -87,7 +87,6 @@ export const EnvVariablesPanel = ({
         columns={columns}
         rowProps={getRowProps}
         items={items}
-        hasActions={true}
         errors={errors}
         renderErrorHeader={(key) => `Row ${parseInt(key) + 1}`}
       />

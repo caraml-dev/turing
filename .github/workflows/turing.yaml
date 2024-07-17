@@ -17,7 +17,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
       - ".github/workflows/cluster-init.yaml"
 
   # Automatically run CI on branches, that have active PR opened
@@ -32,7 +31,6 @@ on:
       - ".github/workflows/pyfunc-ensembler-job.yaml"
       - ".github/workflows/pyfunc-ensembler-service.yaml"
       - ".github/workflows/sdk.yaml"
-      - ".github/workflows/helm-chart.yaml"
 
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
@@ -54,7 +52,7 @@ jobs:
       api-version: ${{ steps.build-image.outputs.api-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -64,6 +62,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
+          cache-dependency-path: api/go.sum
 
       - name: Build Docker image
         id: build-image
@@ -80,7 +79,7 @@ jobs:
             turing-api:${{ steps.build-image.outputs.api-version }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-api.${{ steps.build-image.outputs.api-version }}.tar
           path: turing-api.${{ steps.build-image.outputs.api-version }}.tar
@@ -92,7 +91,7 @@ jobs:
       router-version: ${{ steps.build-image.outputs.router-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -102,6 +101,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: false
+          cache-dependency-path: api/go.sum
 
       - name: Build Docker image
         id: build-image
@@ -118,7 +118,7 @@ jobs:
             turing-router:${{ steps.build-image.outputs.router-version }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-router.${{ steps.build-image.outputs.router-version }}.tar
           path: turing-router.${{ steps.build-image.outputs.router-version }}.tar
@@ -132,7 +132,7 @@ jobs:
       test-experiment-engine-plugin-version: ${{ env.VERSION }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # This is needed due to the issue raised here: https://github.com/golang/go/issues/61455
       - name: Install Go ${{ env.GO_VERSION }}
@@ -154,7 +154,7 @@ jobs:
             plugin-example-engine-plugin:${{ env.VERSION }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-experiment-engine-plugin.${{ env.VERSION }}.tar
           path: test-experiment-engine-plugin.${{ env.VERSION }}.tar
@@ -167,23 +167,17 @@ jobs:
         working-directory: ui
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: sudo apt-get install --no-install-recommends gcc make libpng-dev
 
-      - name: Set up Node 16.x
-        uses: actions/setup-node@v1
+      - name: Set up Node 20.x
+        uses: actions/setup-node@v4
         with:
-          node-version: "16.x"
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: ui/node_modules
-          key: |
-            ${{ runner.os }}-modules-${{ hashFiles('ui/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-modules-
+          node-version: "20.x"
+          cache: yarn
+          cache-dependency-path: ui/yarn.lock
 
       - name: Install
         run: yarn install --network-concurrency 1
@@ -197,7 +191,7 @@ jobs:
         run: yarn build
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: turing-ui-dist
           path: ui/build/
@@ -209,7 +203,7 @@ jobs:
       cluster-init-version: ${{ steps.build-cluster-init.outputs.cluster-init-version }}
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -241,20 +235,13 @@ jobs:
           - 5432:5432
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: api/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('api/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: api/go.sum
 
       - name: Setup
         working-directory: api
@@ -295,20 +282,13 @@ jobs:
       - build-router
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: engines/router/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('engines/router/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: engines/router/go.sum
 
       - name: Setup
         run: make setup
@@ -333,20 +313,13 @@ jobs:
       GOPATH: ${{ github.workspace }}/engines/experiment/.go
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
-
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        with:
-          path: engines/experiment/.go/pkg/mod/
-          key: |
-            gomod-${{ hashFiles('engines/experiment/go.mod') }}
-          restore-keys: gomod-
+          cache-dependency-path: engines/experiment/go.sum
 
       - name: Run test
         working-directory: engines/experiment
@@ -392,7 +365,7 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Up Test Cluster
         uses: ./.github/actions/setup-test-cluster
@@ -412,15 +385,18 @@ jobs:
           cluster_init_version: ${{ env.CLUSTER_INIT_VERSION }}
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        if: ${{ !matrix.useSDK }}
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: api/go.sum
 
       - name: Setup Python
         if: ${{ matrix.useSDK }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
+          cache-dependency-path: sdk/requirements.txt
 
       - name: Install Python dependencies
         if: ${{ matrix.useSDK }}
@@ -516,7 +492,7 @@ jobs:
     outputs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: release-rules
         uses: ./.github/actions/release-rules
 
@@ -541,7 +517,7 @@ jobs:
       - test-api
       - test-engines-router
       - test-engines-experiment
-    uses: caraml-dev/turing/.github/workflows/turing-publish.yaml@main
+    uses: ./.github/workflows/turing-publish.yaml
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
       router_version: ${{ needs.build-router.outputs.router-version }}

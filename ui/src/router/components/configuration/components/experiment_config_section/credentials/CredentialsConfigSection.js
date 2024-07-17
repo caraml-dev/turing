@@ -41,6 +41,7 @@ export const CredentialsConfigSection = ({
       <EuiDescriptionList
         textStyle="reverse"
         type="responsiveColumn"
+        columnWidths={["70px", "auto"]}
         compressed>
         <EuiDescriptionListTitle>Client</EuiDescriptionListTitle>
         <EuiDescriptionListDescription title={username}>

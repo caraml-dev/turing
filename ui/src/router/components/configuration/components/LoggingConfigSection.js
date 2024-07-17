@@ -33,8 +33,7 @@ const BigQueryConfigTable = ({
       textStyle="reverse"
       type="responsiveColumn"
       listItems={items}
-      titleProps={{ style: { width: "25%" } }}
-      descriptionProps={{ style: { width: "75%" } }}
+      columnWidths={[1, 3]}
     />
   );
 };
@@ -63,8 +62,7 @@ const KafkaConfigTable = ({
       textStyle="reverse"
       type="responsiveColumn"
       listItems={items}
-      titleProps={{ style: { width: "25%" } }}
-      descriptionProps={{ style: { width: "75%" } }}
+      columnWidths={[1, 3]}
     />
   );
 };

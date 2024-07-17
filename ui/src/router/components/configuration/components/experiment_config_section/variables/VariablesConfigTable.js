@@ -7,7 +7,6 @@ import {
   EuiTitle,
 } from "@elastic/eui";
 import orderBy from "lodash/orderBy";
-import "./VariablesConfigTable.scss";
 
 const makeListItems = (source, value) => {
   const fieldValue = !!value ? value : "-";
@@ -45,6 +44,7 @@ export const VariablesConfigTable = ({ variables }) => {
             textStyle="reverse"
             type="responsiveColumn"
             listItems={makeListItems(field_source, field)}
+            columnWidths={[1, 1]}
           />
           {idx < variables.config.length - 1 && (
             <EuiHorizontalRule size="full" margin="xs" />

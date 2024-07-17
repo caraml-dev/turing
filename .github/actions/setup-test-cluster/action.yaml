@@ -59,27 +59,28 @@ runs:
   using: composite
   steps:
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: ${{ inputs.go-version }}
+        cache-dependency-path: api/go.sum
 
     - name: Download Turing API Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.turing_api_tar_archive_name }}
 
     - name: Download Turing Router Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.turing_router_tar_archive_name }}
 
     - name: Download Experiment Engine Plugin Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.experiment_engine_plugin_archive_name }}
 
     - name: Download Cluster Init Docker tar archive
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: ${{ inputs.cluster_init_tar_archive_name }}
 
@@ -209,7 +210,7 @@ runs:
         kubectl apply -f infra/e2e/turing.mockserver.yaml
 
     - name: Run action await k8 workloads
-      uses: jupyterhub/action-k8s-await-workloads@v1
+      uses: jupyterhub/action-k8s-await-workloads@v3
       id: wait-for-deployment
       with:
         workloads: >-
@@ -240,11 +241,3 @@ runs:
           --request POST \
           --data @payload.json \
           http://turing-gateway.127.0.0.1.nip.io/api/v1/projects
-
-    - name: Cache Test Dependencies
-      uses: actions/cache@v2
-      with:
-        path: api/.go/pkg/mod/
-        key: |
-          gomod-${{ hashFiles('api/go.mod') }}
-        restore-keys: gomod-

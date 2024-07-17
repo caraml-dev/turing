@@ -31,7 +31,7 @@ runs:
             cluster-init:${{ steps.build-image.outputs.cluster-init-version }}
 
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
           path: cluster-init.${{ steps.build-image.outputs.cluster-init-version }}.tar
