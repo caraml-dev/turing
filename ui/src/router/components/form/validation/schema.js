@@ -130,7 +130,7 @@ const routeSchema = yup.object().shape({
 });
 
 const validRouteSchema = yup
-  .mixed()
+  .object()
   .test("valid-route", "Valid route is required", function(value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
@@ -138,22 +138,23 @@ const validRouteSchema = yup
   });
 
 const ruleConditionSchema = yup.object().shape({
-  field_source: fieldSourceSchema,
-  field: fieldSchema("field_source"),
+  field_source: fieldSourceSchema(),
+  field: fieldSchema("field_source")(),
   operator: yup
-    .mixed()
+    .string()
     .oneOf(["in"], "One of supported operators should be specified"),
   values: yup
     .array(yup.string())
-    .required("At least one value should be provided"),
+    .min(1, "At least one value should be provided"),
 });
 
-const defaultTrafficRuleSchema = yup.object().shape({
-  routes: yup
-    .array()
-    .of(validRouteSchema)
-    .min(1, "At least one route should be attached to the rule"),
-});
+const defaultTrafficRuleSchema = (_) => yup.object()
+  .shape({
+    routes: yup
+      .array()
+      .of(validRouteSchema)
+      .min(1, "At least one route should be attached to the rule"),
+  });
 
 const trafficRuleSchema = yup.object().shape({
   name: yup
@@ -244,7 +245,7 @@ const autoscalingPolicySchema = yup.object().shape({
 
 const enricherSchema = yup.object().shape({
   type: yup
-    .mixed()
+    .string()
     .required("Valid Enricher type should be selected")
     .oneOf(["nop", "docker"], "Valid Enricher type should be selected"),
 });
@@ -256,7 +257,7 @@ const dockerImageSchema = yup
     "Valid Docker Image value should be provided, e.g. kennethreitz/httpbin:latest"
   );
 
-const dockerDeploymentSchema = (maxAllowedReplica) =>
+const dockerDeploymentSchema = (maxAllowedReplica) => (_) =>
   yup.object().shape({
     image: dockerImageSchema.required("Docker Image is required"),
     endpoint: yup.string().required("Endpoint value is required"),
@@ -271,7 +272,7 @@ const dockerDeploymentSchema = (maxAllowedReplica) =>
     autoscaling_policy: autoscalingPolicySchema,
   });
 
-const pyfuncDeploymentSchema = (maxAllowedReplica) =>
+const pyfuncDeploymentSchema = (maxAllowedReplica) => (_) =>
   yup.object().shape({
     project_id: yup.number().integer().required("Project ID is required"),
     ensembler_id: yup.number().integer().required("Ensembler ID is required"),
@@ -287,7 +288,7 @@ const mappingSchema = yup.object().shape({
   route: yup.string().required("Treatment needs to be mapped back to a route"),
 });
 
-const standardEnsemblerConfigSchema = yup
+const standardEnsemblerConfigSchema = (_) => yup
   .object()
   .shape({
     route_name_path: yup.string().nullable(),
@@ -310,7 +311,7 @@ const standardEnsemblerConfigSchema = yup
     }
   );
 
-const bigQueryConfigSchema = yup.object().shape({
+const bigQueryConfigSchema = (_) => yup.object().shape({
   table: yup
     .string()
     .required("BigQuery table name is required")
@@ -321,7 +322,7 @@ const bigQueryConfigSchema = yup.object().shape({
   service_account_secret: yup.string().required("Service Account is required"),
 });
 
-const kafkaConfigSchema = yup.object().shape({
+const kafkaConfigSchema = (_) => yup.object().shape({
   brokers: yup
     .string()
     .required("Kafka broker(s) is required")
@@ -337,7 +338,7 @@ const kafkaConfigSchema = yup.object().shape({
       "A valid Kafka topic name may only contain letters, numbers, dot, hyphen or underscore"
     ),
   serialization_format: yup
-    .mixed()
+    .string()
     .required("Serialzation format should be selected")
     .oneOf(
       ["json", "protobuf"],
@@ -364,10 +365,9 @@ const schema = (maxAllowedReplica) => [
         .test("unique-rule-names", validateRuleNames),
       routes: yup
         .array(routeSchema)
-        .required()
         .unique("id", "Route Id must be unique")
         .min(1, "At least one route should be configured")
-        .when(["rules"], (rules, schema) => {
+        .when(["rules"], ([rules], schema) => {
           if (rules.length > 0) {
             return schema.test("no-dangling-routes", validateDanglingRoutes);
           }
@@ -391,20 +391,19 @@ const schema = (maxAllowedReplica) => [
     config: yup.object().shape({
       experiment_engine: yup.object().shape({
         type: yup
-          .mixed()
+          .string()
           .required("Valid Experiment Engine should be selected")
-          .when("$experimentEngineOptions", (options, schema) =>
+          .when("$experimentEngineOptions", ([options], schema) =>
             schema.oneOf(options, "Valid Experiment Engine should be selected")
           ),
-        config: yup.mixed().when("type", (engine, schema) =>
+        config: yup.object().when("type", ([engine], schema) =>
           engine === "nop"
             ? schema
-            : yup
-              .mixed()
-              .when("$getEngineProperties", (getEngineProperties) => {
+            : schema
+              .when("$getEngineProperties", ([getEngineProperties], schema) => {
                 const engineProps = getEngineProperties(engine);
                 return engineProps.type === "standard"
-                  ? standardExperimentConfigSchema(engineProps)
+                  ? standardExperimentConfigSchema(engineProps)(schema)
                   : engineProps.custom_experiment_manager_config
                     ?.parsed_experiment_config_schema || schema;
               })
@@ -418,7 +417,7 @@ const schema = (maxAllowedReplica) => [
         switch (value.type) {
           case "docker":
             return enricherSchema.concat(
-              dockerDeploymentSchema(maxAllowedReplica)
+              dockerDeploymentSchema(maxAllowedReplica)()
             );
           default:
             return enricherSchema;
@@ -430,27 +429,27 @@ const schema = (maxAllowedReplica) => [
     config: yup.object().shape({
       ensembler: yup.object().shape({
         type: yup
-          .mixed()
+          .string()
           .required("Valid Ensembler type should be selected")
           .oneOf(
             ["nop", "docker", "standard", "pyfunc"],
             "Valid Ensembler type should be selected"
           ),
-        nop_config: yup.mixed().when("type", {
+        nop_config: yup.object().when("type", {
           is: "nop",
-          then: yup.object().shape({
+          then: (_) => yup.object().shape({
             final_response_route_id: validRouteSchema,
           }),
         }),
-        docker_config: yup.mixed().when("type", {
+        docker_config: yup.object().when("type", {
           is: "docker",
           then: dockerDeploymentSchema(maxAllowedReplica),
         }),
-        standard_config: yup.mixed().when("type", {
+        standard_config: yup.object().when("type", {
           is: "standard",
           then: standardEnsemblerConfigSchema,
         }),
-        pyfunc_config: yup.mixed().when("type", {
+        pyfunc_config: yup.object().when("type", {
           is: "pyfunc",
           then: pyfuncDeploymentSchema(maxAllowedReplica),
         }),
@@ -461,17 +460,17 @@ const schema = (maxAllowedReplica) => [
     config: yup.object().shape({
       log_config: yup.object().shape({
         result_logger_type: yup
-          .mixed()
+          .string()
           .required("Valid Results Logging type should be selected")
           .oneOf(
             ["nop", "bigquery", "kafka"],
             "Valid Results Logging type should be selected"
           ),
-        bigquery_config: yup.mixed().when("result_logger_type", {
+        bigquery_config: yup.object().when("result_logger_type", {
           is: "bigquery",
           then: bigQueryConfigSchema,
         }),
-        kafka_config: yup.mixed().when("result_logger_type", {
+        kafka_config: yup.object().when("result_logger_type", {
           is: "kafka",
           then: kafkaConfigSchema,
         }),

@@ -15,21 +15,17 @@ const experimentSchema = yup.object().shape({
 
 const variableSchema = yup.object().shape({
   required: yup.boolean(),
-  field_source: yup.mixed().when("required", {
+  field_source: yup.string().when("required", {
     is: true,
-    then: fieldSourceSchema.required(
-      "Select the field source for the required variable"
-    ),
+    then: fieldSourceSchema,
   }),
-  field: yup.mixed().when("required", {
+  field: yup.string().when("required", {
     is: true,
-    then: fieldSchema("field_source").required(
-      "Specify the field name for the required variable"
-    ),
+    then: fieldSchema("field_source"),
   }),
 });
 
-const standardExperimentConfigSchema = (engineProps) =>
+const standardExperimentConfigSchema = (engineProps) => (_) =>
   yup.object().shape({
     client: engineProps?.standard_experiment_manager_config
       ?.client_selection_enabled
