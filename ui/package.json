@@ -7,7 +7,7 @@
   "//": "[@sentry/browser] pinned to 7.118.0 because craco/module federation has issues resolving this dependency; see",
   "//": "https://github.com/caraml-dev/turing/pull/384#discussion_r1666418144 for more details",
   "dependencies": {
-    "@caraml-dev/ui-lib": "^1.13.0-build.3-a234b6b",
+    "@caraml-dev/ui-lib": "^1.13.0-build.4-09c363a",
     "@elastic/datemath": "^5.0.3",
     "@elastic/eui": "88.2.0",
     "@emotion/css": "^11.11.2",
