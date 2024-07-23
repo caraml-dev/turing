@@ -148,13 +148,12 @@ const ruleConditionSchema = yup.object().shape({
     .min(1, "At least one value should be provided"),
 });
 
-const defaultTrafficRuleSchema = (_) => yup.object()
-  .shape({
-    routes: yup
-      .array()
-      .of(validRouteSchema)
-      .min(1, "At least one route should be attached to the rule"),
-  });
+const defaultTrafficRuleSchema = (_) => yup.object().shape({
+  routes: yup
+    .array()
+    .of(validRouteSchema)
+    .min(1, "At least one route should be attached to the rule"),
+});
 
 const trafficRuleSchema = yup.object().shape({
   name: yup
@@ -441,6 +440,9 @@ const schema = (maxAllowedReplica) => [
             final_response_route_id: validRouteSchema,
           }),
         }),
+        some_field: yup.string().when("some_other_field", ([some_other_field], schema) =>
+          some_other_field ? yup.string().required("this is needed") : schema
+        ),
         docker_config: yup.object().when("type", {
           is: "docker",
           then: dockerDeploymentSchema(maxAllowedReplica),
