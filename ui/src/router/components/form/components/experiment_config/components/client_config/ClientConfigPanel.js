@@ -74,8 +74,8 @@ export const ClientConfigPanel = ({ client, onChangeHandler, errors = {} }) => {
               content="Select your Client ID from the provided list"
             />
           }
-          isInvalid={!!errors.id}
-          error={errors.id}
+          isInvalid={!!errors.username}
+          error={errors.username}
           display="row">
           <EuiComboBoxSelect
             fullWidth
