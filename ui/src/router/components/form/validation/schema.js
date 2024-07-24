@@ -130,7 +130,7 @@ const routeSchema = yup.object().shape({
 });
 
 const validRouteSchema = yup
-  .object()
+  .string()
   .test("valid-route", "Valid route is required", function(value) {
     const configSchema = this.from.slice(-1).pop();
     const { routes } = configSchema.value.config;
