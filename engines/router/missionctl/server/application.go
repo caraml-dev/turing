@@ -6,6 +6,9 @@ import (
 	"net"
 	"net/http"
 
+	// import pprof
+	_ "net/http/pprof"
+
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/soheilhy/cmux"
@@ -22,8 +25,6 @@ import (
 
 	// Turing router will support these experiment runners: nop
 	_ "github.com/caraml-dev/turing/engines/experiment/plugin/inproc/runner/nop"
-	// TODO: justify this
-	_ "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka/librdkafka"
 )
 
 func Run() {

@@ -1,9 +1,9 @@
 package resultlog
 
 import (
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/metrics"
 

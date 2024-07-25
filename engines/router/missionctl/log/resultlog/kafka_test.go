@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
