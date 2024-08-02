@@ -12,7 +12,7 @@
     "@elastic/eui": "88.2.0",
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.4",
-    "@overgear/yup-ast": "^1.0.3",
+    "@demvsystems/yup-ast": "^1.2.2",
     "@sentry/browser": "^7.118.0",
     "js-yaml": "^4.1.0",
     "mitt": "^3.0.1",
