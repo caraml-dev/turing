@@ -221,7 +221,7 @@ const resourceRequestSchema = (maxAllowedReplica) =>
         maxAllowedReplica,
         "Max Replicas value has exceeded allowed number of replicas: ${max}"
       )
-      .when("min_replica", (minReplica, schema) =>
+      .when("min_replica", ([minReplica], schema) =>
         minReplica === 0
           ? schema.positive("Max Replica should be positive")
           : schema
