@@ -11,6 +11,7 @@ import (
 	sparkclient "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned"
 	sparkoperatorv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/client/clientset/versioned/typed/sparkoperator.k8s.io/v1beta2" //nolint
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
+	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"github.com/pkg/errors"
 	networkingv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/networking/v1beta1"
 	apiappsv1 "k8s.io/api/apps/v1"
@@ -211,7 +212,8 @@ func (c *controller) CreateNamespace(ctx context.Context, name string) error {
 	}
 	ns := apicorev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:   name,
+			Labels: labeller.BuildNamespaceLabels(labeller.KubernetesLabelsRequest{}),
 		},
 	}
 	_, err = c.k8sCoreClient.Namespaces().Create(ctx, &ns, metav1.CreateOptions{})

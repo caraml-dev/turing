@@ -81,6 +81,7 @@ func NewAppContext(
 	// Initialise Labeller
 	labeller.InitKubernetesLabeller(
 		cfg.KubernetesLabelConfigs.LabelPrefix,
+		cfg.KubernetesLabelConfigs.NamespaceLabelPrefix,
 		cfg.KubernetesLabelConfigs.Environment,
 	)
 

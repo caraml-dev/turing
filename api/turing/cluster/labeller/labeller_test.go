@@ -38,10 +38,10 @@ func TestLabeller(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			// Always reset singleton objects.
-			defer InitKubernetesLabeller("", "dev")
+			defer InitKubernetesLabeller("", "", "dev")
 
 			if tt.doInit {
-				InitKubernetesLabeller(tt.prefix, "dev")
+				InitKubernetesLabeller(tt.prefix, "caraml.dev/", "dev")
 			}
 
 			labels := BuildLabels(KubernetesLabelsRequest{})
@@ -121,7 +121,7 @@ func TestBuildLabels(t *testing.T) {
 
 	for _, tt := range tests {
 		// Always reset singleton objects.
-		defer InitKubernetesLabeller("", "dev")
+		defer InitKubernetesLabeller("", "", "dev")
 		t.Run(tt.name, func(t *testing.T) {
 			got := BuildLabels(tt.request)
 			if diff := cmp.Diff(got, tt.expected); diff != "" {

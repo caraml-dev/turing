@@ -3,6 +3,7 @@ package labeller
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 
 	mlp "github.com/caraml-dev/mlp/api/client"
 )
@@ -20,10 +21,13 @@ const (
 	orchestratorLabel = "orchestrator"
 	// AppLabel refers to application of the Kubernetes Object
 	AppLabel = "app"
+	// managedLabel mark the kubernetes object as being managed by specific dev
+	managedLabel = "managed"
 )
 
 var (
 	prefix      string
+	nsPrefix    string
 	environment string
 )
 
@@ -53,8 +57,9 @@ func IsValidLabel(name string) error {
 }
 
 // InitKubernetesLabeller builds a new KubernetesLabeller Singleton
-func InitKubernetesLabeller(p, e string) {
+func InitKubernetesLabeller(p, ns, e string) {
 	prefix = p
+	nsPrefix = ns
 	environment = e
 }
 
@@ -71,6 +76,11 @@ func GetLabelName(name string) string {
 	return fmt.Sprintf("%s%s", prefix, name)
 }
 
+// GetNamespaceLabelName prefixes the label with the specified label and returns the formatted label name
+func GetNamespaceLabelName(name string) string {
+	return fmt.Sprintf("%s%s", nsPrefix, name)
+}
+
 // BuildLabels builds the labels for the Kubernetes object
 // Combines resource labels with project labels
 func BuildLabels(r KubernetesLabelsRequest) map[string]string {
@@ -81,6 +91,21 @@ func BuildLabels(r KubernetesLabelsRequest) map[string]string {
 		GetLabelName(AppLabel):          r.App,
 		GetLabelName(environmentLabel):  environment,
 	}
+	appendFromLabelsRequest(labels, r)
+	return labels
+}
+
+// BuildNamespaceLabels builds the labels for a Kubernetes namespace.
+// Combines resource labels with project labels
+func BuildNamespaceLabels(r KubernetesLabelsRequest) map[string]string {
+	labels := map[string]string{
+		GetNamespaceLabelName(managedLabel): strconv.FormatBool(true),
+	}
+	appendFromLabelsRequest(labels, r)
+	return labels
+}
+
+func appendFromLabelsRequest(labels map[string]string, r KubernetesLabelsRequest) {
 	for _, label := range r.Labels {
 		// skip label that is trying to override reserved key
 		if _, usingReservedKeys := reservedKeys[prefix+label.Key]; usingReservedKeys {
@@ -99,5 +124,4 @@ func BuildLabels(r KubernetesLabelsRequest) map[string]string {
 
 		labels[label.Key] = label.Value
 	}
-	return labels
 }
