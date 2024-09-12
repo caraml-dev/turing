@@ -39,6 +39,7 @@ var reservedKeys = map[string]bool{
 	streamLabel:       true,
 	teamLabel:         true,
 	AppLabel:          true,
+	managedLabel:      true,
 }
 
 // ValidLabel logic reused from
