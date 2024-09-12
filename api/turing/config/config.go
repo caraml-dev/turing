@@ -255,6 +255,8 @@ type KubernetesLabelConfigs struct {
 	//   orchestrator: turing
 	//   app: my-model-app
 	LabelPrefix string
+	// NamespaceLabelPrefix is the prefix used for tagging kubernetes namespace.
+	NamespaceLabelPrefix string
 	// Environment is the value for the environment label
 	Environment string `validate:"required"`
 }

@@ -648,8 +648,8 @@ func TestGetNamespaceByComponent(t *testing.T) {
 }
 
 func TestCreatePodLabelSelector(t *testing.T) {
-	labeller.InitKubernetesLabeller("prefix/", "dev")
-	defer labeller.InitKubernetesLabeller("", "dev")
+	labeller.InitKubernetesLabeller("prefix/", "", "dev")
+	defer labeller.InitKubernetesLabeller("", "", "dev")
 
 	ensemblerName := "name"
 	tests := map[string]struct {

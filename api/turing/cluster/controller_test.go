@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/labeller"
 	"istio.io/client-go/pkg/apis/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
@@ -1224,6 +1225,8 @@ func TestDeleteSparkApplication(t *testing.T) {
 }
 
 func TestCreateNamespace(t *testing.T) {
+	labeller.InitKubernetesLabeller("", "caraml.dev/", "")
+
 	namespace := "test-ns"
 	nsResource := schema.GroupVersionResource{
 		Version:  "v1",
@@ -1268,6 +1271,9 @@ func TestCreateNamespace(t *testing.T) {
 						expectedAction := k8stesting.NewCreateAction(nsResource, "", &corev1.Namespace{
 							ObjectMeta: metav1.ObjectMeta{
 								Name: namespace,
+								Labels: map[string]string{
+									"caraml.dev/managed": "true",
+								},
 							},
 						})
 						assert.Equal(t, expectedAction, action)
