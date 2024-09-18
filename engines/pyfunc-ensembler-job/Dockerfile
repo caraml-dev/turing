@@ -1,5 +1,8 @@
 FROM apache/spark-py:v3.1.3
 
+# Switch to user root so we can add additional jars and configuration files.
+USER root
+
 ENV SPARK_OPERATOR_VERSION=v1beta2-1.3.7-3.1.1
 ENV SPARK_BQ_CONNECTOR_VERSION=0.27.0
 
