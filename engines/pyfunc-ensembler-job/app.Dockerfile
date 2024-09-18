@@ -26,7 +26,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         gsutil -m cp -r ${MODEL_URL} .; \
     elif [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "s3" ]; then \
-        aws s3 cp ${MODEL_URL} ensembler --recursive; \
+        aws s3 cp ${MODEL_URL} artifacts --recursive; \
     else \
         echo "No credentials are used"; \
     fi
