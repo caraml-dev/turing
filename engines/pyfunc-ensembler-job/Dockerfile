@@ -3,6 +3,8 @@ FROM apache/spark-py:v3.1.3
 ENV SPARK_OPERATOR_VERSION=v1beta2-1.3.7-3.1.1
 ENV SPARK_BQ_CONNECTOR_VERSION=0.27.0
 
+RUN apt-get update && apt-get install unzip
+
 # Reset to root to include spark dependencies
 USER 0
 # Setup dependencies for Google Cloud Storage access.
@@ -44,10 +46,12 @@ RUN apt-get update --allow-releaseinfo-change-suite -q && \
 # Install gcloud SDK
 ENV PATH=$PATH:/google-cloud-sdk/bin
 ARG GCLOUD_VERSION=410.0.0
-
 RUN wget -qO- \
     https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${GCLOUD_VERSION}-linux-x86_64.tar.gz | \
     tar xzf - -C /
+
+# Install aws CLI
+RUN wget -q https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip && unzip awscli-exe-linux-x86_64.zip && ./aws/install
 
 COPY ./entrypoint.sh /opt/entrypoint.sh
 
