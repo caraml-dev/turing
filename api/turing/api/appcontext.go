@@ -124,6 +124,7 @@ func NewAppContext(
 		ensemblingImageBuilder, err = imagebuilder.NewEnsemblerJobImageBuilder(
 			imageBuildingController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
+			cfg.MlflowConfig.ArtifactServiceType,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -158,6 +159,7 @@ func NewAppContext(
 	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
 		clusterControllers[cfg.EnsemblerServiceBuilderConfig.ClusterName],
 		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
+		cfg.MlflowConfig.ArtifactServiceType,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")

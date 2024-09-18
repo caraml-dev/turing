@@ -12,12 +12,14 @@ import (
 func NewEnsemblerJobImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
+	artifactServiceType string,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,
 		imageBuildingConfig,
 		&ensemblerJobNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
 		models.EnsemblerRunnerTypeJob,
+		artifactServiceType,
 	)
 }
 
@@ -48,12 +50,14 @@ func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string, 
 func NewEnsemblerServiceImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
+	artifactServiceType string,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,
 		imageBuildingConfig,
 		&ensemblerServiceNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
 		models.EnsemblerRunnerTypeService,
+		artifactServiceType,
 	)
 }
 

@@ -207,6 +207,10 @@ type KanikoConfig struct {
 	ServiceAccount string
 	// ResourceRequestsLimits is the resources required by Kaniko executor.
 	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
+	// Kaniko push registry type
+	PushRegistryType string `validate:"required"`
+	// Kaniko docker credential secret name for pushing to docker registries
+	DockerCredentialSecretName string
 }
 
 // SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
@@ -426,8 +430,8 @@ type MLPConfig struct {
 }
 
 type MlflowConfig struct {
-	TrackingURL         string
-	ArtifactServiceType string
+	TrackingURL         string `validate:"required"`
+	ArtifactServiceType string `validate:"required"`
 }
 
 // OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI
