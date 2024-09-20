@@ -99,5 +99,4 @@ OpenapiConfig:
     ServingPath: /api-docs/
 
 MlflowConfig:
-  TrackingURL: https://caraml.dev/mlflow
   ArtifactServiceType: "nop"

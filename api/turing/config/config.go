@@ -208,7 +208,7 @@ type KanikoConfig struct {
 	// ResourceRequestsLimits is the resources required by Kaniko executor.
 	ResourceRequestsLimits ResourceRequestsLimits `validate:"required"`
 	// Kaniko push registry type
-	PushRegistryType string `validate:"required"`
+	PushRegistryType string `validate:"required,oneof=docker gcr"`
 	// Kaniko docker credential secret name for pushing to docker registries
 	DockerCredentialSecretName string
 }
@@ -430,8 +430,8 @@ type MLPConfig struct {
 }
 
 type MlflowConfig struct {
-	TrackingURL         string `validate:"required"`
-	ArtifactServiceType string `validate:"required"`
+	TrackingURL         string `validate:"required_if=ArtifactServiceType gcs ArtifactServiceType s3"`
+	ArtifactServiceType string `validate:"required,oneof=nop gcs s3"`
 }
 
 // OpenapiConfig contains the settings for the OpenAPI specs used for validation and Swagger UI

@@ -221,7 +221,6 @@ MLPConfig:
   MLPEncryptionKey: secret
 
 MlflowConfig:
-  TrackingURL: https://caraml.dev/mlflow
   ArtifactServiceType: "nop"
 
 # Turing UI configuration to set how the UI assets will be served
