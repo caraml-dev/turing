@@ -60,6 +60,7 @@ BatchEnsemblingConfig:
         Limits:
           CPU: "1"
           Memory: 1Gi
+      PushRegistryType: docker
 
 # PyFunc ensembler service image builder configurations (this is largely similar to the batch ensembler job config)
 EnsemblerServiceBuilderConfig:
@@ -218,6 +219,10 @@ MLPConfig:
   MLPURL: http://api.mlp.example.com
   MerlinURL: http://api.merlin.example.com
   MLPEncryptionKey: secret
+
+MlflowConfig:
+  TrackingURL: https://caraml.dev/mlflow
+  ArtifactServiceType: "nop"
 
 # Turing UI configuration to set how the UI assets will be served
 TuringUIConfig:
