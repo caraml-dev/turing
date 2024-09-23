@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -34,11 +35,12 @@ var (
 )
 
 const (
-	imageBuilderContainerName   = "kaniko-builder"
-	googleApplicationEnvVarName = "GOOGLE_APPLICATION_CREDENTIALS"
-	kanikoSecretName            = "kaniko-secret"
-	kanikoSecretFileName        = "kaniko-secret.json"
-	kanikoSecretMountpath       = "/secret"
+	imageBuilderContainerName        = "kaniko-builder"
+	googleApplicationEnvVarName      = "GOOGLE_APPLICATION_CREDENTIALS"
+	kanikoSecretName                 = "kaniko-secret"
+	kanikoSecretFileName             = "kaniko-secret.json"
+	kanikoSecretMountpath            = "/secret"
+	kanikoDockerCredentialConfigPath = "/kaniko/.docker"
 )
 
 // JobStatus is the current status of the image building job.
@@ -125,6 +127,7 @@ type imageBuilder struct {
 	imageBuildingConfig config.ImageBuildingConfig
 	nameGenerator       nameGenerator
 	runnerType          models.EnsemblerRunnerType
+	artifactServiceType string
 }
 
 // NewImageBuilder creates a new ImageBuilder
@@ -133,6 +136,7 @@ func newImageBuilder(
 	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
 	runnerType models.EnsemblerRunnerType,
+	artifactServiceType string,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
@@ -144,6 +148,7 @@ func newImageBuilder(
 		imageBuildingConfig: imageBuildingConfig,
 		nameGenerator:       nameGenerator,
 		runnerType:          runnerType,
+		artifactServiceType: artifactServiceType,
 	}, nil
 }
 
@@ -288,10 +293,21 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
+		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
 		"--cache=true",
 		"--single-snapshot",
+	}
+
+	if ib.artifactServiceType == "s3" {
+		kanikoArgs = append(
+			kanikoArgs,
+			fmt.Sprintf("--build-arg=%s=%s", "AWS_ACCESS_KEY_ID", os.Getenv("AWS_ACCESS_KEY_ID")),
+			fmt.Sprintf("--build-arg=%s=%s", "AWS_SECRET_ACCESS_KEY", os.Getenv("AWS_SECRET_ACCESS_KEY")),
+			fmt.Sprintf("--build-arg=%s=%s", "AWS_DEFAULT_REGION", os.Getenv("AWS_DEFAULT_REGION")),
+			fmt.Sprintf("--build-arg=%s=%s", "AWS_ENDPOINT_URL", os.Getenv("AWS_ENDPOINT_URL")),
+		)
 	}
 
 	annotations := make(map[string]string)
@@ -307,26 +323,41 @@ func (ib *imageBuilder) createKanikoJob(
 	var volumeMounts []cluster.VolumeMount
 	var envVars []cluster.Env
 
-	// If kaniko service account is not set, use kaniko secret
-	if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
-		kanikoArgs = append(kanikoArgs,
-			fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath))
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" {
+		// If kaniko service account is not set, use kaniko secret
+		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
+			kanikoArgs = append(kanikoArgs,
+				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath))
+			volumes = []cluster.SecretVolume{
+				{
+					Name:       kanikoSecretName,
+					SecretName: kanikoSecretName,
+				},
+			}
+			volumeMounts = []cluster.VolumeMount{
+				{
+					Name:      kanikoSecretName,
+					MountPath: kanikoSecretMountpath,
+				},
+			}
+			envVars = []cluster.Env{
+				{
+					Name:  googleApplicationEnvVarName,
+					Value: kanikoSecretFilePath,
+				},
+			}
+		}
+	} else if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
 		volumes = []cluster.SecretVolume{
 			{
 				Name:       kanikoSecretName,
-				SecretName: kanikoSecretName,
+				SecretName: ib.imageBuildingConfig.KanikoConfig.DockerCredentialSecretName,
 			},
 		}
 		volumeMounts = []cluster.VolumeMount{
 			{
 				Name:      kanikoSecretName,
-				MountPath: kanikoSecretMountpath,
-			},
-		}
-		envVars = []cluster.Env{
-			{
-				Name:  googleApplicationEnvVarName,
-				Value: kanikoSecretFilePath,
+				MountPath: kanikoDockerCredentialConfigPath,
 			},
 		}
 	}

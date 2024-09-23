@@ -843,6 +843,7 @@ func TestConfigValidate(t *testing.T) {
 							Memory: "1Gi",
 						},
 					},
+					PushRegistryType: "docker",
 				},
 			},
 		},
@@ -870,6 +871,7 @@ func TestConfigValidate(t *testing.T) {
 							Memory: "1Gi",
 						},
 					},
+					PushRegistryType: "docker",
 				},
 			},
 		},
@@ -888,6 +890,10 @@ func TestConfigValidate(t *testing.T) {
 			MaxCPU:            config.Quantity(resource.MustParse("2")),
 			MaxMemory:         config.Quantity(resource.MustParse("8Gi")),
 			MaxAllowedReplica: 30,
+		},
+		MlflowConfig: &config.MlflowConfig{
+			TrackingURL:         "http://localhost:8081",
+			ArtifactServiceType: "gcs",
 		},
 		SparkAppConfig: &config.SparkAppConfig{
 			NodeSelector: map[string]string{

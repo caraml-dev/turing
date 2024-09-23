@@ -35,6 +35,7 @@ BatchEnsemblingConfig:
         Limits:
           CPU: "1"
           Memory: 1Gi
+      PushRegistryType: docker
 EnsemblerServiceBuilderConfig:
   ClusterName: k3s
   ImageBuildingConfig:
@@ -98,5 +99,4 @@ OpenapiConfig:
     ServingPath: /api-docs/
 
 MlflowConfig:
-  TrackingURL: ""
   ArtifactServiceType: "nop"
