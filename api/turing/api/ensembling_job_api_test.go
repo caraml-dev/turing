@@ -5,19 +5,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/batch"
-
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/caraml-dev/turing/api/turing/batch"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/webhook"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 )
 
 var (
@@ -195,6 +196,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 		ensemblersService    func() service.EnsemblersService
 		ensemblingJobService func() service.EnsemblingJobService
 		mlpService           func() service.MLPService
+		webhookClient        func() webhook.Client
 		vars                 RequestVars
 		body                 interface{}
 	}{
@@ -232,6 +234,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					models.ID(1),
 				).Return(&mlp.Project{ID: 1}, nil)
 				return mlpService
+			},
+			webhookClient: func() webhook.Client {
+				return webhookMock.NewClient(t)
 			},
 			vars: RequestVars{
 				"project_id": {"1"},
@@ -271,6 +276,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(&mlp.Project{ID: 1}, nil)
 				return mlpService
 			},
+			webhookClient: func() webhook.Client {
+				return webhookMock.NewClient(t)
+			},
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
@@ -302,6 +310,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 					models.ID(1),
 				).Return(&mlp.Project{ID: 1}, nil)
 				return mlpService
+			},
+			webhookClient: func() webhook.Client {
+				return webhookMock.NewClient(t)
 			},
 			vars: RequestVars{
 				"project_id": {"1"},
@@ -335,6 +346,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(&mlp.Project{ID: 1}, nil)
 				return mlpService
 			},
+			webhookClient: func() webhook.Client {
+				return webhookMock.NewClient(t)
+			},
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
@@ -367,6 +381,9 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 				).Return(nil, errors.New("hello"))
 				return mlpService
 			},
+			webhookClient: func() webhook.Client {
+				return webhookMock.NewClient(t)
+			},
 			vars: RequestVars{
 				"project_id": {"1"},
 			},
@@ -378,6 +395,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 			ensemblersService := tt.ensemblersService()
 			ensemblingJobService := tt.ensemblingJobService()
 			mlpService := tt.mlpService()
+			webhookManager := tt.webhookClient()
 
 			validator, _ := validation.NewValidator(nil)
 			ctrl := &EnsemblingJobController{
@@ -388,6 +406,7 @@ func TestEnsemblingJobController_CreateEnsemblingJob(t *testing.T) {
 						MLPService:           mlpService,
 					},
 					validator,
+					webhookManager,
 				),
 			}
 			response := ctrl.Create(nil, tt.vars, tt.body)
@@ -477,12 +496,15 @@ func TestEnsemblingJobController_GetEnsemblingJob(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
 			validator, _ := validation.NewValidator(nil)
+			webhookClient := webhookMock.NewClient(t)
+
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
 					},
 					validator,
+					webhookClient,
 				),
 			}
 			resp := ctrl.GetEnsemblingJob(nil, tt.params, nil)
@@ -722,12 +744,15 @@ func TestEnsemblingJobController_ListEnsemblingJob(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
 			validator, _ := validation.NewValidator(nil)
+			webhookClient := webhookMock.NewClient(t)
+
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
 					},
 					validator,
+					webhookClient,
 				),
 			}
 			resp := ctrl.ListEnsemblingJobs(nil, tt.params, nil)
@@ -807,12 +832,15 @@ func TestEnsemblingJobController_DeleteEnsemblingJob(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			svc := tt.ensemblingJobService()
 			validator, _ := validation.NewValidator(nil)
+			webhookClient := webhookMock.NewClient(t)
+
 			ctrl := &EnsemblingJobController{
 				NewBaseController(
 					&AppContext{
 						EnsemblingJobService: svc,
 					},
 					validator,
+					webhookClient,
 				),
 			}
 			resp := ctrl.DeleteEnsemblingJob(nil, tt.params, nil)

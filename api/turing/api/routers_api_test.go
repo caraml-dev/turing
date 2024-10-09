@@ -2,7 +2,10 @@ package api
 
 import (
 	"errors"
+	"net/http"
 	"testing"
+
+	"github.com/caraml-dev/turing/api/turing/webhook"
 
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
@@ -13,6 +16,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
@@ -235,21 +239,29 @@ func TestCreateRouter(t *testing.T) {
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 
+	// Webhook service
+	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterCreated, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
+		req      *http.Request
 		body     interface{}
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request": {
+			req:      &http.Request{},
 			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | router exists": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
@@ -257,6 +269,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: BadRequest("invalid router name", "router with name router1 already exists in project 2"),
 		},
 		"failure | environment missing": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router2",
 				Environment: "dev-invalid",
@@ -265,6 +278,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: BadRequest("invalid environment", "environment dev-invalid does not exist"),
 		},
 		"failure | router save": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router2",
 				Environment: "dev",
@@ -273,6 +287,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: InternalServerError("unable to create router", "test router save error"),
 		},
 		"failure | build router version": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
@@ -281,6 +296,7 @@ func TestCreateRouter(t *testing.T) {
 			expected: InternalServerError("unable to create router", "router config is empty"),
 		},
 		"success": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
@@ -313,11 +329,12 @@ func TestCreateRouter(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.CreateRouter(nil, data.vars, data.body)
+			response := ctrl.CreateRouter(data.req, data.vars, data.body)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -385,25 +402,34 @@ func TestUpdateRouter(t *testing.T) {
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 
+	// Webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterUpdated, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
+		req      *http.Request
 		body     interface{}
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
@@ -411,6 +437,7 @@ func TestUpdateRouter(t *testing.T) {
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | invalid router config": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name: "router1",
 			},
@@ -421,6 +448,7 @@ func TestUpdateRouter(t *testing.T) {
 			),
 		},
 		"failure | deployment in progress": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router2",
 				Environment: "dev",
@@ -432,6 +460,7 @@ func TestUpdateRouter(t *testing.T) {
 			),
 		},
 		"failure | build router version": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router3",
 				Environment: "dev",
@@ -440,6 +469,7 @@ func TestUpdateRouter(t *testing.T) {
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
 		"success": {
+			req: &http.Request{},
 			body: &request.CreateOrUpdateRouterRequest{
 				Name:        "router4",
 				Environment: "dev",
@@ -472,11 +502,12 @@ func TestUpdateRouter(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.UpdateRouter(nil, data.vars, data.body)
+			response := ctrl.UpdateRouter(data.req, data.vars, data.body)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -560,20 +591,28 @@ func TestDeleteRouter(t *testing.T) {
 		On("ListRouterVersionsWithStatus", models.ID(6), models.RouterVersionStatusPending).
 		Return([]*models.RouterVersion{}, nil)
 
+	// Webhook service
+	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeleted, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
+		req      *http.Request
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing router_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | router deployed": {
+			req:  &http.Request{},
 			vars: RequestVars{"router_id": {"2"}},
 			expected: BadRequest(
 				"invalid delete request",
@@ -581,6 +620,7 @@ func TestDeleteRouter(t *testing.T) {
 			),
 		},
 		"failure | list router versions": {
+			req:  &http.Request{},
 			vars: RequestVars{"router_id": {"3"}},
 			expected: InternalServerError(
 				"unable to retrieve router versions",
@@ -588,6 +628,7 @@ func TestDeleteRouter(t *testing.T) {
 			),
 		},
 		"failure | pending router versions": {
+			req:  &http.Request{},
 			vars: RequestVars{"router_id": {"4"}},
 			expected: BadRequest(
 				"invalid delete request",
@@ -595,10 +636,12 @@ func TestDeleteRouter(t *testing.T) {
 			),
 		},
 		"failure | delete failed": {
+			req:      &http.Request{},
 			vars:     RequestVars{"router_id": {"5"}},
 			expected: InternalServerError("unable to delete router", "test delete router error"),
 		},
 		"success": {
+			req:  &http.Request{},
 			vars: RequestVars{"router_id": {"6"}},
 			expected: &Response{
 				code: 200,
@@ -618,11 +661,12 @@ func TestDeleteRouter(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.DeleteRouter(nil, data.vars, nil)
+			response := ctrl.DeleteRouter(data.req, data.vars, nil)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -717,28 +761,38 @@ func TestDeployRouter(t *testing.T) {
 		Return(nil, errors.New("test router version error"))
 	routerVersionSvc.On("FindByID", models.ID(2)).Return(routerVersion, nil)
 
+	// Webhook service
+	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
+		req      *http.Request
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | router status pending": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: BadRequest(
 				"invalid deploy request",
@@ -746,18 +800,22 @@ func TestDeployRouter(t *testing.T) {
 			),
 		},
 		"failure | router status deployed": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: BadRequest("invalid deploy request", "router is already deployed"),
 		},
 		"failure | no current version": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"4"}},
 			expected: BadRequest("invalid deploy request", "router has no current configuration"),
 		},
 		"failure | router version not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"5"}},
 			expected: NotFound("router version not found", "test router version error"),
 		},
 		"success": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"6"}},
 			expected: &Response{
 				code: 202,
@@ -781,11 +839,12 @@ func TestDeployRouter(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.DeployRouter(nil, data.vars, nil)
+			response := ctrl.DeployRouter(data.req, data.vars, nil)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -854,28 +913,38 @@ func TestUndeployRouter(t *testing.T) {
 		On("DeleteRouterEndpoint", project, environment, &models.RouterVersion{Router: router3}).
 		Return(nil)
 
+	// Webhook service
+	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterUndeployed, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
+		req      *http.Request
 		vars     RequestVars
 		expected *Response
 	}{
 		"failure | bad request (missing project_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{},
 			expected: BadRequest("invalid project id", "key project_id not found in vars"),
 		},
 		"failure | project not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"1"}, "router_id": {"1"}},
 			expected: NotFound("project not found", "test project error"),
 		},
 		"failure | bad request (missing router_id)": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}},
 			expected: BadRequest("invalid router id", "key router_id not found in vars"),
 		},
 		"failure | router not found": {
+			req:      &http.Request{},
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"1"}},
 			expected: NotFound("router not found", "test router error"),
 		},
 		"failure | undeploy error": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"2"}},
 			expected: InternalServerError(
 				"unable to undeploy router",
@@ -883,6 +952,7 @@ func TestUndeployRouter(t *testing.T) {
 			),
 		},
 		"success": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: &Response{
 				code: 200,
@@ -905,11 +975,12 @@ func TestUndeployRouter(t *testing.T) {
 							EventService:          eventSvc,
 							DeploymentService:     deploymentSvc,
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.UndeployRouter(nil, data.vars, nil)
+			response := ctrl.UndeployRouter(data.req, data.vars, nil)
 			assert.Equal(t, data.expected, response)
 		})
 	}
