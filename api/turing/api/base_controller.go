@@ -5,6 +5,8 @@ import (
 	val "github.com/go-playground/validator/v10"
 	"github.com/gorilla/schema"
 
+	"github.com/caraml-dev/turing/api/turing/webhook"
+
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
@@ -16,19 +18,21 @@ type Controller interface {
 // BaseController implements common methods that may be shared by all API controllers
 type BaseController struct {
 	*AppContext
-	decoder   *schema.Decoder
-	validator *val.Validate
+	decoder       *schema.Decoder
+	validator     *val.Validate
+	webhookClient webhook.Client
 }
 
 // NewBaseController returns a new instance of BaseController
-func NewBaseController(ctx *AppContext, validator *val.Validate) BaseController {
+func NewBaseController(ctx *AppContext, validator *val.Validate, webhookClient webhook.Client) BaseController {
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
 
 	return BaseController{
-		AppContext: ctx,
-		decoder:    decoder,
-		validator:  validator,
+		AppContext:    ctx,
+		decoder:       decoder,
+		validator:     validator,
+		webhookClient: webhookClient,
 	}
 }
 

@@ -8,7 +8,7 @@ require (
 	github.com/GoogleCloudPlatform/spark-on-k8s-operator v0.0.0-20221025152940-c261df66a006
 	github.com/antihax/optional v1.0.0
 	github.com/caraml-dev/merlin v0.0.0
-	github.com/caraml-dev/mlp v1.12.0
+	github.com/caraml-dev/mlp v1.13.2-rc2
 	github.com/caraml-dev/turing/engines/experiment v0.0.0
 	github.com/caraml-dev/turing/engines/router v0.0.0
 	github.com/caraml-dev/universal-prediction-interface v0.3.6
@@ -66,6 +66,7 @@ require (
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/avast/retry-go/v4 v4.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.30.6-0.20240906182417-827d25db0048 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.4 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.17.8 // indirect
@@ -267,10 +268,10 @@ replace (
 
 	github.com/caraml-dev/merlin => github.com/caraml-dev/merlin/api v0.0.0-20240313065547-6778bd14c119
 	github.com/caraml-dev/merlin-pyspark-app => github.com/caraml-dev/merlin/python/batch-predictor v0.0.0-20240313065547-6778bd14c119
-	github.com/caraml-dev/mlp => github.com/deadlycoconuts/mlp v0.0.0-20240917090435-d94d92572eac
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
+	github.com/go-gota/gota => github.com/gojekfarm/gota v0.12.1-0.20230221101638-6cd9260bd598
 
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.120.1
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20240116073220-b488e7be5902

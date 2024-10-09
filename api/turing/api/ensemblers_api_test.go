@@ -2,7 +2,10 @@ package api
 
 import (
 	"errors"
+	"net/http"
 	"testing"
+
+	"github.com/caraml-dev/turing/api/turing/webhook"
 
 	"github.com/caraml-dev/mlp/api/pkg/client/mlflow"
 	mlflowMock "github.com/caraml-dev/mlp/api/pkg/client/mlflow/mocks"
@@ -16,6 +19,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 )
 
 func TestEnsemblersController_ListEnsemblers(t *testing.T) {
@@ -130,11 +134,13 @@ func TestEnsemblersController_ListEnsemblers(t *testing.T) {
 				ensemblersSvc = tt.ensemblerSvc()
 			}
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
+
 			ctrl := &EnsemblersController{
 				NewBaseController(
 					&AppContext{
 						EnsemblersService: ensemblersSvc,
-					}, validator,
+					}, validator, mockWebhookClient,
 				),
 			}
 			response := ctrl.ListEnsemblers(nil, tt.vars, nil)
@@ -221,6 +227,8 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
+
 			var ensemblerSvc service.EnsemblersService
 			if tt.ensemblerSvc != nil {
 				ensemblerSvc = tt.ensemblerSvc()
@@ -231,6 +239,7 @@ func TestEnsemblersController_GetEnsembler(t *testing.T) {
 						EnsemblersService: ensemblerSvc,
 					},
 					validator,
+					mockWebhookClient,
 				),
 			}
 			response := ctrl.GetEnsembler(nil, tt.vars, nil)
@@ -267,13 +276,16 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 	}
 
 	tests := map[string]struct {
+		req          *http.Request
 		vars         RequestVars
 		ensemblerSvc func() service.EnsemblersService
 		mlflowSvc    func() mlflow.Service
+		webhookSvc   func() webhook.Client
 		body         interface{}
 		expected     *Response
 	}{
 		"success": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -308,9 +320,15 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteRun", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 				return mlflowSvc
 			},
+			webhookSvc: func() webhook.Client {
+				webhookSvc := webhookMock.NewClient(t)
+				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerUpdated, mock.Anything).Return(nil)
+				return webhookSvc
+			},
 			expected: Ok(updated),
 		},
 		"failure | bad request": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"unknown"}},
 			expected: BadRequest(
 				"failed to fetch ensembler",
@@ -318,6 +336,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			),
 		},
 		"failure | ensembler not found": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"1"},
 				"ensembler_id": {"2"},
@@ -337,6 +356,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			),
 		},
 		"failure | invalid payload": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -364,6 +384,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			),
 		},
 		"failure | incompatible types": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -391,6 +412,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			),
 		},
 		"failure | failed to save": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -433,6 +455,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+
 			var ensemblerSvc service.EnsemblersService
 			if tt.ensemblerSvc != nil {
 				ensemblerSvc = tt.ensemblerSvc()
@@ -440,6 +463,10 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			var mlflowSvc mlflow.Service
 			if tt.mlflowSvc != nil {
 				mlflowSvc = tt.mlflowSvc()
+			}
+			var webhookSvc webhook.Client
+			if tt.webhookSvc != nil {
+				webhookSvc = tt.webhookSvc()
 			}
 
 			ctrl := &EnsemblersController{
@@ -449,9 +476,10 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 						MlflowService:     mlflowSvc,
 					},
 					validator,
+					webhookSvc,
 				),
 			}
-			response := ctrl.UpdateEnsembler(nil, tt.vars, tt.body)
+			response := ctrl.UpdateEnsembler(tt.req, tt.vars, tt.body)
 			assert.Equal(t, tt.expected, response)
 		})
 	}
@@ -512,14 +540,17 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 	dummyEnsemblingJob := GenerateEnsemblingJobFixture(1, models.ID(1), models.ID(1), "", true)
 
 	tests := map[string]struct {
+		req               *http.Request
 		vars              RequestVars
 		ensemblerSvc      func() service.EnsemblersService
 		mlflowSvc         func() mlflow.Service
 		routerVersionsSvc func() service.RouterVersionsService
 		ensemblingJobSvc  func() service.EnsemblingJobService
+		webhookSvc        func() webhook.Client
 		expected          *Response
 	}{
 		"failure | bad request": {
+			req:  &http.Request{},
 			vars: RequestVars{"project_id": {"unknown"}},
 			expected: BadRequest(
 				"failed to fetch ensembler",
@@ -527,6 +558,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			),
 		},
 		"failure | ensembler not found": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"1"},
 				"ensembler_id": {"2"},
@@ -546,6 +578,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			),
 		},
 		"failure | there is active router version": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -587,6 +620,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			expected: BadRequest("failed to delete the ensembler", "there are active router version using this ensembler"),
 		},
 		"failure | there is active ensembling job": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -631,6 +665,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				"there is ensembling job in terminating process, please wait until the job is successfully terminated"),
 		},
 		"failure | there is current router version": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -684,6 +719,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			),
 		},
 		"failure | failed to delete router version": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -741,6 +777,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			expected: InternalServerError("unable to delete router version", "failed to delete router version"),
 		},
 		"failure | failed to delete ensembling job": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -800,6 +837,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			expected: InternalServerError("unable to delete ensembling job", "failed to delete ensembling job"),
 		},
 		"failure | failed to delete mlflow experiment": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -845,6 +883,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			expected: InternalServerError("failed to delete the ensembler", "failed to delete mlflow experiment"),
 		},
 		"failure | failed to delete": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -890,6 +929,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			expected: InternalServerError("failed to delete the ensembler", "failed to delete"),
 		},
 		"success | batch ensembling is not enabled": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -917,9 +957,15 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
+			webhookSvc: func() webhook.Client {
+				webhookSvc := webhookMock.NewClient(t)
+				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
+				return webhookSvc
+			},
 			expected: Ok(map[string]int{"id": 2}),
 		},
 		"success": {
+			req: &http.Request{},
 			vars: RequestVars{
 				"project_id":   {"2"},
 				"ensembler_id": {"2"},
@@ -962,12 +1008,18 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 				mlflowSvc.On("DeleteExperiment", mock.Anything, "1", true).Return(nil)
 				return mlflowSvc
 			},
+			webhookSvc: func() webhook.Client {
+				webhookSvc := webhookMock.NewClient(t)
+				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
+				return webhookSvc
+			},
 			expected: Ok(map[string]int{"id": 2}),
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+
 			var ensemblerSvc service.EnsemblersService
 			if tt.ensemblerSvc != nil {
 				ensemblerSvc = tt.ensemblerSvc()
@@ -984,6 +1036,10 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			if tt.routerVersionsSvc != nil {
 				routerVersionsSvc = tt.routerVersionsSvc()
 			}
+			var webhookClient webhook.Client
+			if tt.webhookSvc != nil {
+				webhookClient = tt.webhookSvc()
+			}
 
 			ctrl := &EnsemblersController{
 				NewBaseController(
@@ -994,9 +1050,10 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 						RouterVersionsService: routerVersionsSvc,
 					},
 					validator,
+					webhookClient,
 				),
 			}
-			response := ctrl.DeleteEnsembler(nil, tt.vars, nil)
+			response := ctrl.DeleteEnsembler(tt.req, tt.vars, nil)
 			assert.Equal(t, tt.expected, response)
 		})
 	}

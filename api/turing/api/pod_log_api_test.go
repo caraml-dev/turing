@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/caraml-dev/mlp/api/client"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/caraml-dev/turing/api/turing/batch"
@@ -16,13 +17,11 @@ import (
 	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	openapi "github.com/caraml-dev/turing/api/turing/generated"
 	"github.com/caraml-dev/turing/api/turing/internal/ref"
-	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/validation"
-
-	"github.com/caraml-dev/mlp/api/client"
-
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/validation"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 )
 
 func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
@@ -298,6 +297,8 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
+
 			c := PodLogController{
 				NewBaseController(
 					&AppContext{
@@ -306,6 +307,7 @@ func TestPodLogControllerListEnsemblingPodLogs(t *testing.T) {
 						EnsemblingJobService: tt.ensemblingJobService(),
 					},
 					validator,
+					mockWebhookClient,
 				),
 			}
 			if got := c.ListEnsemblingJobPodLogs(nil, tt.vars, nil); !reflect.DeepEqual(got, tt.expected) {
@@ -650,6 +652,8 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
+
 			c := PodLogController{
 				NewBaseController(
 					&AppContext{
@@ -659,6 +663,7 @@ func TestPodLogControllerListRouterPodLogs(t *testing.T) {
 						RouterVersionsService: tt.routerVersionsService(),
 					},
 					validator,
+					mockWebhookClient,
 				),
 			}
 			if got := c.ListRouterPodLogs(tt.args.r, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {
