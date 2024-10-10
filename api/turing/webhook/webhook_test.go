@@ -190,6 +190,19 @@ func Test_webhook_TriggerRouterEvent(t *testing.T) {
 				).Once().Return(nil)
 			},
 		},
+		{
+			name: "negative - invalid event type",
+			fields: fields{
+				manager: mockWebhookManager,
+			},
+			args: args{
+				ctx:       context.TODO(),
+				eventType: OnEnsemblerCreated,
+				router:    &models.Router{},
+			},
+			mockFunc: func(_ args) {},
+			wantErr:  true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -244,6 +257,19 @@ func Test_webhook_TriggerEnsemblerEvent(t *testing.T) {
 					"InvokeWebhooks", args.ctx, args.eventType, body, mock.Anything, mock.Anything,
 				).Once().Return(nil)
 			},
+		},
+		{
+			name: "negative - invalid event type",
+			fields: fields{
+				manager: mockWebhookManager,
+			},
+			args: args{
+				ctx:       context.TODO(),
+				eventType: OnRouterCreated,
+				ensembler: &models.GenericEnsembler{},
+			},
+			mockFunc: func(_ args) {},
+			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {

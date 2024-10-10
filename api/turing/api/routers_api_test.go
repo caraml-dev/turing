@@ -240,7 +240,7 @@ func TestCreateRouter(t *testing.T) {
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 
 	// Webhook service
-	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterCreated, mock.Anything).Return(nil)
 
 	// Define tests
@@ -592,7 +592,7 @@ func TestDeleteRouter(t *testing.T) {
 		Return([]*models.RouterVersion{}, nil)
 
 	// Webhook service
-	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeleted, mock.Anything).Return(nil)
 
 	// Define tests
@@ -762,7 +762,7 @@ func TestDeployRouter(t *testing.T) {
 	routerVersionSvc.On("FindByID", models.ID(2)).Return(routerVersion, nil)
 
 	// Webhook service
-	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything).Return(nil)
 
 	// Define tests
@@ -914,7 +914,7 @@ func TestUndeployRouter(t *testing.T) {
 		Return(nil)
 
 	// Webhook service
-	webhookSvc := webhookMock.NewClient(t)
+	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterUndeployed, mock.Anything).Return(nil)
 
 	// Define tests

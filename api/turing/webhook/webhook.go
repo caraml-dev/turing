@@ -14,7 +14,17 @@ type Client interface {
 }
 
 func NewWebhook(cfg *webhooks.Config) (Client, error) {
-	webhookManager, err := webhooks.InitializeWebhooks(cfg, eventList)
+	var eventTypeList []webhooks.EventType
+
+	for eventType := range eventListRouter {
+		eventTypeList = append(eventTypeList, eventType)
+	}
+
+	for eventType := range eventListEnsembler {
+		eventTypeList = append(eventTypeList, eventType)
+	}
+
+	webhookManager, err := webhooks.InitializeWebhooks(cfg, eventTypeList)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +61,10 @@ func (w *webhook) isEventConfigured(eventType webhooks.EventType) bool {
 }
 
 func (w *webhook) TriggerRouterEvent(ctx context.Context, eventType webhooks.EventType, router *models.Router) error {
+	if isValid := eventListRouter[eventType]; !isValid {
+		return ErrInvalidEventType
+	}
+
 	body := &routerRequest{
 		EventType: eventType,
 		Router:    router,
@@ -64,6 +78,10 @@ func (w *webhook) TriggerEnsemblerEvent(
 	eventType webhooks.EventType,
 	ensembler models.EnsemblerLike,
 ) error {
+	if isValid := eventListEnsembler[eventType]; !isValid {
+		return ErrInvalidEventType
+	}
+
 	body := &ensemblerRequest{
 		EventType: eventType,
 		Ensembler: ensembler,
