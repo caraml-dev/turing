@@ -12,6 +12,7 @@ import (
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/newrelic"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
+	"github.com/caraml-dev/mlp/api/pkg/webhooks"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"gopkg.in/yaml.v2"
@@ -89,6 +90,8 @@ type Config struct {
 	TuringUIConfig                *SinglePageApplicationConfig
 	OpenapiConfig                 *OpenapiConfig
 	MlflowConfig                  *MlflowConfig
+	WebhooksConfig                webhooks.Config
+
 	// Experiment specifies the JSON configuration to set up experiment managers and runners.
 	//
 	// The configuration follows the following format to support different experiment engines
