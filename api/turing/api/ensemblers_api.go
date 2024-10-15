@@ -88,7 +88,10 @@ func (c EnsemblersController) CreateEnsembler(
 
 	// call webhook for ensembler creation event
 	if errWebhook := c.webhookClient.TriggerEnsemblerEvent(ctx, webhook.OnEnsemblerCreated, ensembler); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnEnsemblerCreated, errWebhook)
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerCreated, ensembler.GetID(), errWebhook,
+		)
 	}
 
 	return Created(ensembler)
@@ -163,7 +166,10 @@ func (c EnsemblersController) UpdateEnsembler(
 
 	// call webhook for ensembler update event
 	if errWebhook := c.webhookClient.TriggerEnsemblerEvent(ctx, webhook.OnEnsemblerUpdated, ensembler); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnEnsemblerUpdated, errWebhook)
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerUpdated, ensembler.GetID(), errWebhook,
+		)
 	}
 
 	return Ok(ensembler)
@@ -233,7 +239,10 @@ func (c EnsemblersController) DeleteEnsembler(
 
 	// call webhook for ensembler deletion event
 	if errWebhook := c.webhookClient.TriggerEnsemblerEvent(ctx, webhook.OnEnsemblerDeleted, ensembler); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnEnsemblerDeleted, errWebhook)
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerDeleted, ensembler.GetID(), errWebhook,
+		)
 	}
 
 	return Ok(map[string]int{"id": int(ensembler.GetID())})

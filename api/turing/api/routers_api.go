@@ -123,17 +123,18 @@ func (c RoutersController) CreateRouter(
 		return InternalServerError("unable to create router", strings.Join(errorStrings, ". "))
 	}
 
-	// call webhook for router creation event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnRouterCreated, errWebhook)
-	}
-
 	// deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router creation event
+		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterCreated, router.ID, errWebhook)
 		}
 	}()
 
@@ -195,17 +196,18 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 		return InternalServerError("unable to update router", err.Error())
 	}
 
-	// call webhook for router update event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnRouterUpdated, errWebhook)
-	}
-
 	// Deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router update event
+		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterUpdated, router.ID, errWebhook)
 		}
 	}()
 
@@ -250,7 +252,10 @@ func (c RoutersController) DeleteRouter(
 
 	// call webhook for router deletion event
 	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeleted, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnRouterDeleted, errWebhook)
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterDeleted, router.ID, errWebhook,
+		)
 	}
 
 	return Ok(map[string]int{"id": int(router.ID)})
@@ -298,17 +303,20 @@ func (c RoutersController) DeployRouter(
 		return NotFound("router version not found", err.Error())
 	}
 
-	// call webhook for router deployment event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnRouterDeployed, errWebhook)
-	}
-
 	// Deploy the version asynchronously
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router deployment event
+		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterDeployed, router.ID, errWebhook,
+			)
 		}
 	}()
 
@@ -347,7 +355,10 @@ func (c RoutersController) UndeployRouter(
 
 	// call webhook for router undeployment event
 	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUndeployed, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, %v", webhook.OnRouterUndeployed, errWebhook)
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterUndeployed, router.ID, errWebhook,
+		)
 	}
 
 	return Ok(map[string]int{"router_id": int(router.ID)})
