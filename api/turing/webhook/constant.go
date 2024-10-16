@@ -7,15 +7,15 @@ import (
 )
 
 var (
-	OnRouterCreated    = webhooks.EventType("OnRouterCreated")
-	OnRouterUpdated    = webhooks.EventType("OnRouterUpdated")
-	OnRouterDeleted    = webhooks.EventType("OnRouterDeleted")
-	OnRouterDeployed   = webhooks.EventType("OnRouterDeployed")
-	OnRouterUndeployed = webhooks.EventType("OnRouterUndeployed")
+	OnRouterCreated    = webhooks.EventType("on-router-created")
+	OnRouterUpdated    = webhooks.EventType("on-router-updated")
+	OnRouterDeleted    = webhooks.EventType("on-router-deleted")
+	OnRouterDeployed   = webhooks.EventType("on-router-deployed")
+	OnRouterUndeployed = webhooks.EventType("on-router-undeployed")
 
-	OnEnsemblerCreated = webhooks.EventType("OnEnsemblerCreated")
-	OnEnsemblerUpdated = webhooks.EventType("OnEnsemblerUpdated")
-	OnEnsemblerDeleted = webhooks.EventType("OnEnsemblerDeleted")
+	OnEnsemblerCreated = webhooks.EventType("on-ensembler-created")
+	OnEnsemblerUpdated = webhooks.EventType("on-ensembler-updated")
+	OnEnsemblerDeleted = webhooks.EventType("on-ensembler-deleted")
 )
 
 var (
