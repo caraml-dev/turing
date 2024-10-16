@@ -242,6 +242,7 @@ func TestCreateRouter(t *testing.T) {
 	// Webhook service
 	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterCreated, mock.Anything).Return(nil)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {
@@ -405,6 +406,7 @@ func TestUpdateRouter(t *testing.T) {
 	// Webhook service
 	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterUpdated, mock.Anything).Return(nil)
+	webhookSvc.On("TriggerRouterEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {

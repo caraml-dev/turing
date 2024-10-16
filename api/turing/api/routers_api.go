@@ -123,6 +123,12 @@ func (c RoutersController) CreateRouter(
 		return InternalServerError("unable to create router", strings.Join(errorStrings, ". "))
 	}
 
+	// call webhook for router creation event
+	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
+		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterCreated, router.ID, errWebhook)
+	}
+
 	// deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
@@ -131,10 +137,12 @@ func (c RoutersController) CreateRouter(
 				project.Name, router.Name, routerVersion.Version, err)
 		}
 
-		// call webhook for router creation event
-		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
-			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
-				webhook.OnRouterCreated, router.ID, errWebhook)
+		// call webhook for router deployment event
+		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterDeployed, router.ID, errWebhook,
+			)
 		}
 	}()
 
@@ -196,6 +204,12 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 		return InternalServerError("unable to update router", err.Error())
 	}
 
+	// call webhook for router update event
+	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterUpdated, router.ID, errWebhook)
+	}
+
 	// Deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
@@ -204,10 +218,12 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 				project.Name, router.Name, routerVersion.Version, err)
 		}
 
-		// call webhook for router update event
-		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
-			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
-				webhook.OnRouterUpdated, router.ID, errWebhook)
+		// call webhook for router deployment event
+		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterDeployed, router.ID, errWebhook,
+			)
 		}
 	}()
 
