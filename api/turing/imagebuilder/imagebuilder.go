@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"sort"
 	"strings"
 	"time"
@@ -298,15 +297,7 @@ func (ib *imageBuilder) createKanikoJob(
 		"--single-snapshot",
 	}
 
-	if ib.artifactServiceType == "s3" {
-		kanikoArgs = append(
-			kanikoArgs,
-			fmt.Sprintf("--build-arg=%s=%s", "AWS_ACCESS_KEY_ID", os.Getenv("AWS_ACCESS_KEY_ID")),
-			fmt.Sprintf("--build-arg=%s=%s", "AWS_SECRET_ACCESS_KEY", os.Getenv("AWS_SECRET_ACCESS_KEY")),
-			fmt.Sprintf("--build-arg=%s=%s", "AWS_DEFAULT_REGION", os.Getenv("AWS_DEFAULT_REGION")),
-			fmt.Sprintf("--build-arg=%s=%s", "AWS_ENDPOINT_URL", os.Getenv("AWS_ENDPOINT_URL")),
-		)
-	}
+	kanikoArgs = append(kanikoArgs, ib.imageBuildingConfig.KanikoConfig.AdditionalArgs...)
 
 	annotations := make(map[string]string)
 	if !ib.imageBuildingConfig.SafeToEvict {

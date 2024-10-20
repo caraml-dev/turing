@@ -203,6 +203,8 @@ type KanikoConfig struct {
 	Image string `validate:"required"`
 	// ImageVersion is the version tag of the Kaniko image
 	ImageVersion string `validate:"required"`
+	// AdditionalArgs allows platform-level additional arguments to be configured for Kaniko jobs
+	AdditionalArgs []string
 	// Kaniko kubernetes service account
 	ServiceAccount string
 	// ResourceRequestsLimits is the resources required by Kaniko executor.
@@ -430,7 +432,12 @@ type MLPConfig struct {
 }
 
 type MlflowConfig struct {
-	TrackingURL         string `validate:"required_if=ArtifactServiceType gcs ArtifactServiceType s3"`
+	TrackingURL string `validate:"required_if=ArtifactServiceType gcs ArtifactServiceType s3"`
+	// Note that the Kaniko image builder needs to be configured correctly to have the necessary credentials to download
+	// the artifacts from the blob storage tool depending on the artifact service type selected (gcs/s3). For gcs, the
+	// credentials can be provided via a k8s service account or a secret but for s3, the credentials can be provided via
+	// additional arguments in the config KanikoConfig.AdditionalArgs e.g.
+	// --build-arg=[AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_DEFAULT_REGION/AWS_ENDPOINT_URL]=xxx
 	ArtifactServiceType string `validate:"required,oneof=nop gcs s3"`
 }
 
