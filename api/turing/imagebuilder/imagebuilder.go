@@ -286,8 +286,6 @@ func (ib *imageBuilder) createKanikoJob(
 		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
 	}
 
-	kanikoSecretFilePath := fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName)
-
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
@@ -323,44 +321,10 @@ func (ib *imageBuilder) createKanikoJob(
 	var volumeMounts []cluster.VolumeMount
 	var envVars []cluster.Env
 
-	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" {
-		// If kaniko service account is not set, use kaniko secret
-		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
-			kanikoArgs = append(kanikoArgs,
-				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s", kanikoSecretFilePath))
-			volumes = []cluster.SecretVolume{
-				{
-					Name:       kanikoSecretName,
-					SecretName: kanikoSecretName,
-				},
-			}
-			volumeMounts = []cluster.VolumeMount{
-				{
-					Name:      kanikoSecretName,
-					MountPath: kanikoSecretMountpath,
-				},
-			}
-			envVars = []cluster.Env{
-				{
-					Name:  googleApplicationEnvVarName,
-					Value: kanikoSecretFilePath,
-				},
-			}
-		}
-	} else if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
-		volumes = []cluster.SecretVolume{
-			{
-				Name:       kanikoSecretName,
-				SecretName: ib.imageBuildingConfig.KanikoConfig.DockerCredentialSecretName,
-			},
-		}
-		volumeMounts = []cluster.VolumeMount{
-			{
-				Name:      kanikoSecretName,
-				MountPath: kanikoDockerCredentialConfigPath,
-			},
-		}
-	}
+	// Configure additional credentials for specific image registries and artifact services
+	kanikoArgs = ib.configureKanikoArgsToAddCredentials(kanikoArgs)
+	volumes, volumeMounts = ib.configureVolumesAndVolumeMountsToAddCredentials(volumes, volumeMounts)
+	envVars = ib.configureEnvVarsToAddCredentials(envVars)
 
 	job := cluster.Job{
 		Name:                    kanikoJobName,
@@ -413,6 +377,58 @@ func (ib *imageBuilder) createKanikoJob(
 		ib.imageBuildingConfig.BuildNamespace,
 		job,
 	)
+}
+
+func (ib *imageBuilder) configureKanikoArgsToAddCredentials(kanikoArgs []string) []string {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
+			kanikoArgs = append(kanikoArgs,
+				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s/%s",
+					kanikoSecretMountpath, kanikoSecretFileName))
+		}
+	}
+	return kanikoArgs
+}
+
+func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
+	volumes []cluster.SecretVolume,
+	volumeMounts []cluster.VolumeMount,
+) ([]cluster.SecretVolume, []cluster.VolumeMount) {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+		// If kaniko service account is not set, use kaniko secret
+		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
+			volumes = append(volumes, cluster.SecretVolume{
+				Name:       kanikoSecretName,
+				SecretName: kanikoSecretName,
+			})
+			volumeMounts = append(volumeMounts, cluster.VolumeMount{
+				Name:      kanikoSecretName,
+				MountPath: kanikoSecretMountpath,
+			})
+		}
+	} else if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
+		volumes = append(volumes, cluster.SecretVolume{
+			Name:       kanikoSecretName,
+			SecretName: ib.imageBuildingConfig.KanikoConfig.DockerCredentialSecretName,
+		})
+		volumeMounts = append(volumeMounts, cluster.VolumeMount{
+			Name:      kanikoSecretName,
+			MountPath: kanikoDockerCredentialConfigPath,
+		})
+	}
+	return volumes, volumeMounts
+}
+
+func (ib *imageBuilder) configureEnvVarsToAddCredentials(envVar []cluster.Env) []cluster.Env {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
+			envVar = append(envVar, cluster.Env{
+				Name:  googleApplicationEnvVarName,
+				Value: fmt.Sprintf("%s/%s", kanikoSecretMountpath, kanikoSecretFileName),
+			})
+		}
+	}
+	return envVar
 }
 
 // getGCPSubDomains returns the list of GCP container registry and artifact registry subdomains.
