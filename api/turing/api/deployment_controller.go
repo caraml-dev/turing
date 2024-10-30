@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,8 +10,10 @@ import (
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
 
+	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
@@ -25,6 +28,8 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 	router *models.Router,
 	routerVersion *models.RouterVersion,
 ) error {
+	ctx := context.Background()
+
 	// Get the router environment
 	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
@@ -48,7 +53,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		"starting deployment for router %s version %d", router.Name, routerVersion.Version))
 
 	// Deploy the given router version
-	endpoint, err := c.deployRouterVersion(project, environment, routerVersion, eventsCh)
+	endpoint, err := c.deployRouterVersion(ctx, project, environment, routerVersion, eventsCh)
 
 	// Start accumulating non-critical errors
 	errorStrings := make([]string, 0)
@@ -93,6 +98,16 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		}
 
 		err = errors.New(strings.Join(errorStrings, ". "))
+
+		// call webhook for router un-deployment event
+		if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
+			ctx, webhook.OnRouterUndeployed, routerVersion, uint(router.ProjectID),
+		); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+				webhook.OnRouterUndeployed, router.ID, routerVersion.ID, errWebhook,
+			)
+		}
 		return err
 	}
 
@@ -110,6 +125,16 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 			eventsCh.Write(models.NewInfoEvent(models.EventStageUndeployingPreviousVersion,
 				"successfully undeployed previously deployed version %d",
 				router.CurrRouterVersion.Version))
+
+			// call webhook for router un-deployment event
+			if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
+				ctx, webhook.OnRouterUndeployed, currVersion, uint(router.ProjectID),
+			); errWebhook != nil {
+				log.Warnf(
+					"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+					webhook.OnRouterUndeployed, router.ID, currVersion.ID, errWebhook,
+				)
+			}
 		}
 	}
 
@@ -149,6 +174,7 @@ func (c RouterDeploymentController) writeDeploymentEvents(
 // (current version reference, status, endpoint, etc.) are not in the scope of this method.
 // This method returns the new router endpoint (if successful) and any error.
 func (c RouterDeploymentController) deployRouterVersion(
+	ctx context.Context,
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
@@ -273,6 +299,17 @@ func (c RouterDeploymentController) deployRouterVersion(
 	// Deploy succeeded - update version's status to deployed and return endpoint
 	routerVersion.Status = models.RouterVersionStatusDeployed
 	_, err = c.RouterVersionsService.Save(routerVersion)
+
+	// call webhook for router deployment event
+	if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
+		ctx, webhook.OnRouterDeployed, routerVersion, uint(router.ProjectID),
+	); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+			webhook.OnRouterDeployed, router.ID, routerVersion.ID, errWebhook,
+		)
+	}
+
 	return endpoint, err
 }
 

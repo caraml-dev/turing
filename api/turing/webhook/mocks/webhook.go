@@ -31,6 +31,20 @@ func (_m *Client) TriggerEnsemblerEvent(ctx context.Context, eventType webhooks.
 	return r0
 }
 
+// TriggerRouterDeploymentEvent provides a mock function with given fields: ctx, eventType, router, projectID
+func (_m *Client) TriggerRouterDeploymentEvent(ctx context.Context, eventType webhooks.EventType, router *models.RouterVersion, projectID uint) error {
+	ret := _m.Called(ctx, eventType, router, projectID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, webhooks.EventType, *models.RouterVersion, uint) error); ok {
+		r0 = rf(ctx, eventType, router, projectID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // TriggerRouterEvent provides a mock function with given fields: ctx, eventType, router
 func (_m *Client) TriggerRouterEvent(ctx context.Context, eventType webhooks.EventType, router *models.Router) error {
 	ret := _m.Called(ctx, eventType, router)

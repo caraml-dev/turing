@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -13,6 +14,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/caraml-dev/turing/api/turing/webhook"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
+
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
@@ -21,6 +25,8 @@ import (
 )
 
 func TestDeployVersionSuccess(t *testing.T) {
+	ctx := context.TODO()
+
 	testEnv := "test-env"
 	environment := &merlin.Environment{Name: testEnv}
 	project := &mlp.Project{ID: 1, Name: "test-project"}
@@ -144,6 +150,12 @@ func TestDeployVersionSuccess(t *testing.T) {
 	cs := &mocks.CryptoService{}
 	cs.On("Decrypt", testPassKey).Return(testDecPassKey, nil)
 
+	// Mock webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On(
+		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything, mock.Anything,
+	).Return(nil)
+
 	// Run tests and validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -186,12 +198,13 @@ func TestDeployVersionSuccess(t *testing.T) {
 						CryptoService:         cs,
 						ExperimentsService:    exps,
 					},
+					webhookClient: webhookSvc,
 				},
 			}
 
 			// Run deploy and test that the router version's status is deployed and the endpoint
 			// returned by deploy version is expected.
-			endpoint, err := ctrl.deployRouterVersion(project, environment, data.routerVersion, eventsCh)
+			endpoint, err := ctrl.deployRouterVersion(ctx, project, environment, data.routerVersion, eventsCh)
 			assert.NoError(t, err)
 			assert.Equal(t, models.RouterVersionStatusDeployed, data.routerVersion.Status)
 			assert.Equal(t, "test-url", endpoint)
@@ -295,6 +308,15 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	exps := &mocks.ExperimentsService{}
 	exps.On("IsClientSelectionEnabled", "nop").Return(false, nil)
 
+	// Mock webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On(
+		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything, mock.Anything,
+	).Return(nil)
+	webhookSvc.On(
+		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterUndeployed, mock.Anything, mock.Anything,
+	).Return(nil)
+
 	// Create test controller
 	ctrl := RouterDeploymentController{
 		BaseController{
@@ -306,6 +328,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 				EventService:          es,
 				ExperimentsService:    exps,
 			},
+			webhookClient: webhookSvc,
 		},
 	}
 

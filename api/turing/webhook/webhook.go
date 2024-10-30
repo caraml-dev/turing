@@ -10,6 +10,12 @@ import (
 
 type Client interface {
 	TriggerRouterEvent(ctx context.Context, eventType webhooks.EventType, router *models.Router) error
+	TriggerRouterDeploymentEvent(
+		ctx context.Context,
+		eventType webhooks.EventType,
+		router *models.RouterVersion,
+		projectID uint,
+	) error
 	TriggerEnsemblerEvent(ctx context.Context, eventType webhooks.EventType, ensembler models.EnsemblerLike) error
 }
 
@@ -68,6 +74,25 @@ func (w *webhook) TriggerRouterEvent(ctx context.Context, eventType webhooks.Eve
 	body := &routerRequest{
 		EventType: eventType,
 		Router:    router,
+	}
+
+	return w.triggerEvent(ctx, eventType, body)
+}
+
+func (w *webhook) TriggerRouterDeploymentEvent(
+	ctx context.Context,
+	eventType webhooks.EventType,
+	router *models.RouterVersion,
+	projectID uint,
+) error {
+	if isValid := eventListRouterDeployment[eventType]; !isValid {
+		return ErrInvalidEventType
+	}
+
+	body := &routerDeploymentRequest{
+		EventType:     eventType,
+		ProjectID:     projectID,
+		RouterVersion: router,
 	}
 
 	return w.triggerEvent(ctx, eventType, body)

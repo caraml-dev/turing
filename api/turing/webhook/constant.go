@@ -21,9 +21,13 @@ var (
 var (
 	// event list for router event
 	eventListRouter = map[webhooks.EventType]bool{
-		OnRouterCreated:    true,
-		OnRouterUpdated:    true,
-		OnRouterDeleted:    true,
+		OnRouterCreated: true,
+		OnRouterUpdated: true,
+		OnRouterDeleted: true,
+	}
+
+	// event list for router deployment event
+	eventListRouterDeployment = map[webhooks.EventType]bool{
 		OnRouterDeployed:   true,
 		OnRouterUndeployed: true,
 	}

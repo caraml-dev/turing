@@ -136,14 +136,6 @@ func (c RoutersController) CreateRouter(
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
-
-		// call webhook for router deployment event
-		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
-			log.Warnf(
-				"Error triggering webhook for event %s, router id: %d, %v",
-				webhook.OnRouterDeployed, router.ID, errWebhook,
-			)
-		}
 	}()
 
 	return Ok(router)
@@ -217,14 +209,6 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
-
-		// call webhook for router deployment event
-		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
-			log.Warnf(
-				"Error triggering webhook for event %s, router id: %d, %v",
-				webhook.OnRouterDeployed, router.ID, errWebhook,
-			)
-		}
 	}()
 
 	return Ok(router)
@@ -286,11 +270,11 @@ func (c RoutersController) DeployRouter(
 ) *Response {
 	// Parse request vars
 	var (
-		ctx     = req.Context()
 		errResp *Response
 		project *mlp.Project
 		router  *models.Router
 	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -325,14 +309,6 @@ func (c RoutersController) DeployRouter(
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
-		}
-
-		// call webhook for router deployment event
-		if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
-			log.Warnf(
-				"Error triggering webhook for event %s, router id: %d, %v",
-				webhook.OnRouterDeployed, router.ID, errWebhook,
-			)
 		}
 	}()
 
@@ -369,7 +345,7 @@ func (c RoutersController) UndeployRouter(
 		return InternalServerError("unable to undeploy router", err.Error())
 	}
 
-	// call webhook for router undeployment event
+	// call webhook for router un-deployment event
 	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUndeployed, router); errWebhook != nil {
 		log.Warnf(
 			"Error triggering webhook for event %s, router id: %d, %v",

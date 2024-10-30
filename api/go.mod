@@ -271,7 +271,6 @@ replace (
 
 	github.com/caraml-dev/turing/engines/experiment => ../engines/experiment
 	github.com/caraml-dev/turing/engines/router => ../engines/router
-	github.com/go-gota/gota => github.com/gojekfarm/gota v0.12.1-0.20230221101638-6cd9260bd598
 
 	k8s.io/klog/v2 => k8s.io/klog/v2 v2.120.1
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20240116073220-b488e7be5902
