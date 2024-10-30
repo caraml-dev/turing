@@ -26,6 +26,10 @@ func NewWebhook(cfg *webhooks.Config) (Client, error) {
 		eventTypeList = append(eventTypeList, eventType)
 	}
 
+	for eventType := range eventListRouterDeployment {
+		eventTypeList = append(eventTypeList, eventType)
+	}
+
 	for eventType := range eventListEnsembler {
 		eventTypeList = append(eventTypeList, eventType)
 	}

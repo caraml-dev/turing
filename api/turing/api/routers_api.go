@@ -264,7 +264,7 @@ func (c RoutersController) DeleteRouter(
 // DeployRouter deploys the current version of the given router into the associated
 // kubernetes cluster. If there is no current version, an error is returned.
 func (c RoutersController) DeployRouter(
-	req *http.Request,
+	_ *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
