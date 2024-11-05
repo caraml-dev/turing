@@ -5,17 +5,17 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/caraml-dev/turing/api/turing/webhook"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
@@ -468,26 +468,26 @@ func TestUpdateRouter(t *testing.T) {
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
-		//"success": {
-		//	req: &http.Request{},
-		//	body: &request.CreateOrUpdateRouterRequest{
-		//		Name:        "router4",
-		//		Environment: "dev",
-		//		Config: &request.RouterConfig{
-		//			ExperimentEngine: &request.ExperimentEngineConfig{
-		//				Type: "nop",
-		//			},
-		//			LogConfig: &request.LogConfig{
-		//				ResultLoggerType: models.NopLogger,
-		//			},
-		//		},
-		//	},
-		//	vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
-		//	expected: &Response{
-		//		code: 200,
-		//		data: router4,
-		//	},
-		//},
+		"success": {
+			req: &http.Request{},
+			body: &request.CreateOrUpdateRouterRequest{
+				Name:        "router4",
+				Environment: "dev",
+				Config: &request.RouterConfig{
+					ExperimentEngine: &request.ExperimentEngineConfig{
+						Type: "nop",
+					},
+					LogConfig: &request.LogConfig{
+						ResultLoggerType: models.NopLogger,
+					},
+				},
+			},
+			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
+			expected: &Response{
+				code: 200,
+				data: router4,
+			},
+		},
 	}
 
 	// Run tests

@@ -203,13 +203,13 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
-	}()
 
-	// call webhook for router update event
-	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
-			webhook.OnRouterUpdated, router.ID, errWebhook)
-	}
+		// call webhook for router update event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterUpdated, router.ID, errWebhook)
+		}
+	}()
 
 	return Ok(router)
 }

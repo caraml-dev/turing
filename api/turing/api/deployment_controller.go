@@ -153,7 +153,7 @@ func (c RouterDeploymentController) writeDeploymentEvents(
 // (current version reference, status, endpoint, etc.) are not in the scope of this method.
 // This method returns the new router endpoint (if successful) and any error.
 func (c RouterDeploymentController) deployRouterVersion(
-	ctx context.Context,
+	_ context.Context,
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
