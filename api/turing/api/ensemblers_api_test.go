@@ -322,7 +322,7 @@ func TestEnsemblersController_UpdateEnsembler(t *testing.T) {
 			},
 			webhookSvc: func() webhook.Client {
 				webhookSvc := webhookMock.NewClient(t)
-				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerUpdated, mock.Anything).Return(nil)
+				webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnEnsemblerUpdated, mock.Anything).Return(nil)
 				return webhookSvc
 			},
 			expected: Ok(updated),
@@ -959,7 +959,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			webhookSvc: func() webhook.Client {
 				webhookSvc := webhookMock.NewClient(t)
-				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
+				webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
 				return webhookSvc
 			},
 			expected: Ok(map[string]int{"id": 2}),
@@ -1010,7 +1010,7 @@ func TestEnsemblerController_DeleteEnsembler(t *testing.T) {
 			},
 			webhookSvc: func() webhook.Client {
 				webhookSvc := webhookMock.NewClient(t)
-				webhookSvc.On("TriggerEnsemblerEvent", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
+				webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnEnsemblerDeleted, mock.Anything).Return(nil)
 				return webhookSvc
 			},
 			expected: Ok(map[string]int{"id": 2}),
