@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/caraml-dev/turing/api/turing/webhook"
 	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 
 	"github.com/caraml-dev/turing/api/turing/config"
@@ -150,12 +149,6 @@ func TestDeployVersionSuccess(t *testing.T) {
 	cs := &mocks.CryptoService{}
 	cs.On("Decrypt", testPassKey).Return(testDecPassKey, nil)
 
-	// Mock webhook service
-	webhookSvc := &webhookMock.Client{}
-	webhookSvc.On(
-		"TriggerWebhooks", mock.Anything, webhook.OnRouterDeployed, mock.Anything,
-	).Return(nil)
-
 	// Run tests and validate
 	for name, data := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -198,7 +191,6 @@ func TestDeployVersionSuccess(t *testing.T) {
 						CryptoService:         cs,
 						ExperimentsService:    exps,
 					},
-					webhookClient: webhookSvc,
 				},
 			}
 
@@ -308,15 +300,6 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	exps := &mocks.ExperimentsService{}
 	exps.On("IsClientSelectionEnabled", "nop").Return(false, nil)
 
-	// Mock webhook service
-	webhookSvc := &webhookMock.Client{}
-	webhookSvc.On(
-		"TriggerWebhooks", mock.Anything, webhook.OnRouterDeployed, mock.Anything,
-	).Return(nil)
-	webhookSvc.On(
-		"TriggerWebhooks", mock.Anything, webhook.OnRouterUndeployed, mock.Anything,
-	).Return(nil)
-
 	// Create test controller
 	ctrl := RouterDeploymentController{
 		BaseController{
@@ -328,7 +311,7 @@ func TestRollbackVersionSuccess(t *testing.T) {
 				EventService:          es,
 				ExperimentsService:    exps,
 			},
-			webhookClient: webhookSvc,
+			webhookClient: &webhookMock.Client{},
 		},
 	}
 

@@ -763,6 +763,7 @@ func TestDeployRouter(t *testing.T) {
 
 	// Webhook service
 	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnRouterDeployed, mock.Anything).Return(nil)
 
 	// Define tests
 	tests := map[string]struct {

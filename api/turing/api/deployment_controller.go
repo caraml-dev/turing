@@ -10,10 +10,8 @@ import (
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
 
-	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
-	"github.com/caraml-dev/turing/api/turing/webhook"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
 )
 
@@ -99,15 +97,6 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 
 		err = errors.New(strings.Join(errorStrings, ". "))
 
-		// call webhook for router un-deployment event
-		if errWebhook := c.webhookClient.TriggerWebhooks(
-			ctx, webhook.OnRouterUndeployed, routerVersion,
-		); errWebhook != nil {
-			log.Warnf(
-				"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
-				webhook.OnRouterUndeployed, router.ID, routerVersion.ID, errWebhook,
-			)
-		}
 		return err
 	}
 
@@ -125,16 +114,6 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 			eventsCh.Write(models.NewInfoEvent(models.EventStageUndeployingPreviousVersion,
 				"successfully undeployed previously deployed version %d",
 				router.CurrRouterVersion.Version))
-
-			// call webhook for router un-deployment event
-			if errWebhook := c.webhookClient.TriggerWebhooks(
-				ctx, webhook.OnRouterUndeployed, currVersion,
-			); errWebhook != nil {
-				log.Warnf(
-					"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
-					webhook.OnRouterUndeployed, router.ID, currVersion.ID, errWebhook,
-				)
-			}
 		}
 	}
 
@@ -299,16 +278,6 @@ func (c RouterDeploymentController) deployRouterVersion(
 	// Deploy succeeded - update version's status to deployed and return endpoint
 	routerVersion.Status = models.RouterVersionStatusDeployed
 	_, err = c.RouterVersionsService.Save(routerVersion)
-
-	// call webhook for router deployment event
-	if errWebhook := c.webhookClient.TriggerWebhooks(
-		ctx, webhook.OnRouterDeployed, routerVersion,
-	); errWebhook != nil {
-		log.Warnf(
-			"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
-			webhook.OnRouterDeployed, router.ID, routerVersion.ID, errWebhook,
-		)
-	}
 
 	return endpoint, err
 }

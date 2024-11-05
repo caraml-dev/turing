@@ -13,6 +13,10 @@ var (
 	OnRouterDeployed   = webhooks.EventType("on-router-deployed")
 	OnRouterUndeployed = webhooks.EventType("on-router-undeployed")
 
+	OnRouterVersionCreated  = webhooks.EventType("on-router-version-created")
+	OnRouterVersionDeleted  = webhooks.EventType("on-router-version-deleted")
+	OnRouterVersionDeployed = webhooks.EventType("on-router-version-deployed")
+
 	OnEnsemblerCreated = webhooks.EventType("on-ensembler-created")
 	OnEnsemblerUpdated = webhooks.EventType("on-ensembler-updated")
 	OnEnsemblerDeleted = webhooks.EventType("on-ensembler-deleted")
@@ -23,6 +27,9 @@ var events = []webhooks.EventType{
 	OnRouterUpdated,
 	OnRouterDeleted,
 	OnRouterDeployed,
+	OnRouterVersionCreated,
+	OnRouterVersionDeleted,
+	OnRouterVersionDeployed,
 	OnRouterUndeployed,
 	OnEnsemblerCreated,
 	OnEnsemblerUpdated,

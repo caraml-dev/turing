@@ -123,18 +123,18 @@ func (c RoutersController) CreateRouter(
 		return InternalServerError("unable to create router", strings.Join(errorStrings, ". "))
 	}
 
-	// call webhook for router creation event
-	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
-			webhook.OnRouterCreated, router.ID, errWebhook)
-	}
-
 	// deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
 		if err != nil {
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router creation event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterCreated, router.ID, errWebhook)
 		}
 	}()
 
@@ -196,12 +196,6 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 		return InternalServerError("unable to update router", err.Error())
 	}
 
-	// call webhook for router update event
-	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
-		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
-			webhook.OnRouterUpdated, router.ID, errWebhook)
-	}
-
 	// Deploy the new version
 	go func() {
 		err := c.deployOrRollbackRouter(project, router, routerVersion)
@@ -210,6 +204,12 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 				project.Name, router.Name, routerVersion.Version, err)
 		}
 	}()
+
+	// call webhook for router update event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterUpdated, router.ID, errWebhook)
+	}
 
 	return Ok(router)
 }
@@ -264,12 +264,13 @@ func (c RoutersController) DeleteRouter(
 // DeployRouter deploys the current version of the given router into the associated
 // kubernetes cluster. If there is no current version, an error is returned.
 func (c RoutersController) DeployRouter(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
 	var (
+		ctx     = req.Context()
 		errResp *Response
 		project *mlp.Project
 		router  *models.Router
@@ -309,6 +310,14 @@ func (c RoutersController) DeployRouter(
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router deployment event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterDeployed, router.ID, errWebhook,
+			)
 		}
 	}()
 
