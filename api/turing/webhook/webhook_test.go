@@ -12,6 +12,11 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
+type routerRequest struct {
+	EventType webhooks.EventType `json:"event_type"`
+	Router    *models.Router     `json:"router"`
+}
+
 func TestNewWebhook(t *testing.T) {
 	type args struct {
 		cfg *webhooks.Config
