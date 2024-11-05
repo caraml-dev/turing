@@ -27,7 +27,7 @@ func TestNewWebhook(t *testing.T) {
 			args: args{
 				cfg: &webhooks.Config{},
 			},
-			want: &webhook{},
+			want: webhook{},
 		},
 		{
 			name: "negative - num retries is negative",
