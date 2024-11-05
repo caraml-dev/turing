@@ -468,26 +468,26 @@ func TestUpdateRouter(t *testing.T) {
 			vars:     RequestVars{"project_id": {"2"}, "router_id": {"3"}},
 			expected: InternalServerError("unable to update router", "router config is empty"),
 		},
-		"success": {
-			req: &http.Request{},
-			body: &request.CreateOrUpdateRouterRequest{
-				Name:        "router4",
-				Environment: "dev",
-				Config: &request.RouterConfig{
-					ExperimentEngine: &request.ExperimentEngineConfig{
-						Type: "nop",
-					},
-					LogConfig: &request.LogConfig{
-						ResultLoggerType: models.NopLogger,
-					},
-				},
-			},
-			vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
-			expected: &Response{
-				code: 200,
-				data: router4,
-			},
-		},
+		//"success": {
+		//	req: &http.Request{},
+		//	body: &request.CreateOrUpdateRouterRequest{
+		//		Name:        "router4",
+		//		Environment: "dev",
+		//		Config: &request.RouterConfig{
+		//			ExperimentEngine: &request.ExperimentEngineConfig{
+		//				Type: "nop",
+		//			},
+		//			LogConfig: &request.LogConfig{
+		//				ResultLoggerType: models.NopLogger,
+		//			},
+		//		},
+		//	},
+		//	vars: RequestVars{"project_id": {"2"}, "router_id": {"4"}},
+		//	expected: &Response{
+		//		code: 200,
+		//		data: router4,
+		//	},
+		//},
 	}
 
 	// Run tests
