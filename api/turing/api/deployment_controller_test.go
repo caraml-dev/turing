@@ -14,8 +14,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
-
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
@@ -311,7 +309,6 @@ func TestRollbackVersionSuccess(t *testing.T) {
 				EventService:          es,
 				ExperimentsService:    exps,
 			},
-			webhookClient: &webhookMock.Client{},
 		},
 	}
 
