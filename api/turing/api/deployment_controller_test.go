@@ -153,7 +153,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 	// Mock webhook service
 	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On(
-		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything, mock.Anything,
+		"TriggerWebhooks", mock.Anything, webhook.OnRouterDeployed, mock.Anything,
 	).Return(nil)
 
 	// Run tests and validate
@@ -311,10 +311,10 @@ func TestRollbackVersionSuccess(t *testing.T) {
 	// Mock webhook service
 	webhookSvc := &webhookMock.Client{}
 	webhookSvc.On(
-		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterDeployed, mock.Anything, mock.Anything,
+		"TriggerWebhooks", mock.Anything, webhook.OnRouterDeployed, mock.Anything,
 	).Return(nil)
 	webhookSvc.On(
-		"TriggerRouterDeploymentEvent", mock.Anything, webhook.OnRouterUndeployed, mock.Anything, mock.Anything,
+		"TriggerWebhooks", mock.Anything, webhook.OnRouterUndeployed, mock.Anything,
 	).Return(nil)
 
 	// Create test controller

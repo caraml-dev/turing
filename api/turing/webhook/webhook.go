@@ -4,117 +4,64 @@ import (
 	"context"
 
 	"github.com/caraml-dev/mlp/api/pkg/webhooks"
-
-	"github.com/caraml-dev/turing/api/turing/models"
 )
 
+var (
+	OnRouterCreated    = webhooks.EventType("on-router-created")
+	OnRouterUpdated    = webhooks.EventType("on-router-updated")
+	OnRouterDeleted    = webhooks.EventType("on-router-deleted")
+	OnRouterDeployed   = webhooks.EventType("on-router-deployed")
+	OnRouterUndeployed = webhooks.EventType("on-router-undeployed")
+
+	OnEnsemblerCreated = webhooks.EventType("on-ensembler-created")
+	OnEnsemblerUpdated = webhooks.EventType("on-ensembler-updated")
+	OnEnsemblerDeleted = webhooks.EventType("on-ensembler-deleted")
+)
+
+var events = []webhooks.EventType{
+	OnRouterCreated,
+	OnRouterUpdated,
+	OnRouterDeleted,
+	OnRouterDeployed,
+	OnRouterUndeployed,
+	OnEnsemblerCreated,
+	OnEnsemblerUpdated,
+	OnEnsemblerDeleted,
+}
+
+type webhook struct {
+	webhookManager webhooks.WebhookManager
+}
+
 type Client interface {
-	TriggerRouterEvent(ctx context.Context, eventType webhooks.EventType, router *models.Router) error
-	TriggerRouterDeploymentEvent(
-		ctx context.Context,
-		eventType webhooks.EventType,
-		router *models.RouterVersion,
-		projectID uint,
-	) error
-	TriggerEnsemblerEvent(ctx context.Context, eventType webhooks.EventType, ensembler models.EnsemblerLike) error
+	TriggerWebhooks(ctx context.Context, eventType webhooks.EventType, body interface{}) error
 }
 
 func NewWebhook(cfg *webhooks.Config) (Client, error) {
-	var eventTypeList []webhooks.EventType
-
-	for eventType := range eventListRouter {
-		eventTypeList = append(eventTypeList, eventType)
-	}
-
-	for eventType := range eventListRouterDeployment {
-		eventTypeList = append(eventTypeList, eventType)
-	}
-
-	for eventType := range eventListEnsembler {
-		eventTypeList = append(eventTypeList, eventType)
-	}
-
-	webhookManager, err := webhooks.InitializeWebhooks(cfg, eventTypeList)
+	webhookManager, err := webhooks.InitializeWebhooks(cfg, events)
 	if err != nil {
 		return nil, err
 	}
 
-	return &webhook{
-		manager: webhookManager,
+	return webhook{
+		webhookManager: webhookManager,
 	}, nil
 }
 
-type webhook struct {
-	manager webhooks.WebhookManager
-}
-
-func (w *webhook) triggerEvent(ctx context.Context, eventType webhooks.EventType, body interface{}) error {
+func (w webhook) TriggerWebhooks(ctx context.Context, eventType webhooks.EventType, body interface{}) error {
 	if !w.isEventConfigured(eventType) {
 		return nil
 	}
 
-	if err := w.manager.InvokeWebhooks(
+	return w.webhookManager.InvokeWebhooks(
 		ctx,
 		eventType,
 		body,
 		webhooks.NoOpCallback,
 		webhooks.NoOpErrorHandler,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }
 
-func (w *webhook) isEventConfigured(eventType webhooks.EventType) bool {
-	return w.manager != nil && w.manager.IsEventConfigured(eventType)
-}
-
-func (w *webhook) TriggerRouterEvent(ctx context.Context, eventType webhooks.EventType, router *models.Router) error {
-	if isValid := eventListRouter[eventType]; !isValid {
-		return ErrInvalidEventType
-	}
-
-	body := &routerRequest{
-		EventType: eventType,
-		Router:    router,
-	}
-
-	return w.triggerEvent(ctx, eventType, body)
-}
-
-func (w *webhook) TriggerRouterDeploymentEvent(
-	ctx context.Context,
-	eventType webhooks.EventType,
-	router *models.RouterVersion,
-	projectID uint,
-) error {
-	if isValid := eventListRouterDeployment[eventType]; !isValid {
-		return ErrInvalidEventType
-	}
-
-	body := &routerDeploymentRequest{
-		EventType:     eventType,
-		ProjectID:     projectID,
-		RouterVersion: router,
-	}
-
-	return w.triggerEvent(ctx, eventType, body)
-}
-
-func (w *webhook) TriggerEnsemblerEvent(
-	ctx context.Context,
-	eventType webhooks.EventType,
-	ensembler models.EnsemblerLike,
-) error {
-	if isValid := eventListEnsembler[eventType]; !isValid {
-		return ErrInvalidEventType
-	}
-
-	body := &ensemblerRequest{
-		EventType: eventType,
-		Ensembler: ensembler,
-	}
-
-	return w.triggerEvent(ctx, eventType, body)
+func (w webhook) isEventConfigured(eventType webhooks.EventType) bool {
+	return w.webhookManager != nil && w.webhookManager.IsEventConfigured(eventType)
 }

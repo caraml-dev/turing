@@ -124,7 +124,7 @@ func (c RoutersController) CreateRouter(
 	}
 
 	// call webhook for router creation event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
 		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
 			webhook.OnRouterCreated, router.ID, errWebhook)
 	}
@@ -197,7 +197,7 @@ func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, bod
 	}
 
 	// call webhook for router update event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
 		log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
 			webhook.OnRouterUpdated, router.ID, errWebhook)
 	}
@@ -251,7 +251,7 @@ func (c RoutersController) DeleteRouter(
 	}
 
 	// call webhook for router deletion event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterDeleted, router); errWebhook != nil {
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterDeleted, router); errWebhook != nil {
 		log.Warnf(
 			"Error triggering webhook for event %s, router id: %d, %v",
 			webhook.OnRouterDeleted, router.ID, errWebhook,
@@ -346,7 +346,7 @@ func (c RoutersController) UndeployRouter(
 	}
 
 	// call webhook for router un-deployment event
-	if errWebhook := c.webhookClient.TriggerRouterEvent(ctx, webhook.OnRouterUndeployed, router); errWebhook != nil {
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUndeployed, router); errWebhook != nil {
 		log.Warnf(
 			"Error triggering webhook for event %s, router id: %d, %v",
 			webhook.OnRouterUndeployed, router.ID, errWebhook,

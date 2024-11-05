@@ -100,8 +100,8 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		err = errors.New(strings.Join(errorStrings, ". "))
 
 		// call webhook for router un-deployment event
-		if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
-			ctx, webhook.OnRouterUndeployed, routerVersion, uint(router.ProjectID),
+		if errWebhook := c.webhookClient.TriggerWebhooks(
+			ctx, webhook.OnRouterUndeployed, routerVersion,
 		); errWebhook != nil {
 			log.Warnf(
 				"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
@@ -127,8 +127,8 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 				router.CurrRouterVersion.Version))
 
 			// call webhook for router un-deployment event
-			if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
-				ctx, webhook.OnRouterUndeployed, currVersion, uint(router.ProjectID),
+			if errWebhook := c.webhookClient.TriggerWebhooks(
+				ctx, webhook.OnRouterUndeployed, currVersion,
 			); errWebhook != nil {
 				log.Warnf(
 					"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
@@ -301,8 +301,8 @@ func (c RouterDeploymentController) deployRouterVersion(
 	_, err = c.RouterVersionsService.Save(routerVersion)
 
 	// call webhook for router deployment event
-	if errWebhook := c.webhookClient.TriggerRouterDeploymentEvent(
-		ctx, webhook.OnRouterDeployed, routerVersion, uint(router.ProjectID),
+	if errWebhook := c.webhookClient.TriggerWebhooks(
+		ctx, webhook.OnRouterDeployed, routerVersion,
 	); errWebhook != nil {
 		log.Warnf(
 			"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
