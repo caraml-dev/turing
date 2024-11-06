@@ -34,12 +34,15 @@ var (
 )
 
 const (
-	imageBuilderContainerName        = "kaniko-builder"
-	googleApplicationEnvVarName      = "GOOGLE_APPLICATION_CREDENTIALS"
-	kanikoSecretName                 = "kaniko-secret"
-	kanikoSecretFileName             = "kaniko-secret.json"
-	kanikoSecretMountpath            = "/secret"
-	kanikoDockerCredentialConfigPath = "/kaniko/.docker"
+	dockerRegistryPushRegistryType        = "docker"
+	googleCloudRegistryPushRegistryType   = "gcr"
+	googleCloudStorageArtifactServiceType = "gcs"
+	imageBuilderContainerName             = "kaniko-builder"
+	googleApplicationEnvVarName           = "GOOGLE_APPLICATION_CREDENTIALS"
+	kanikoSecretName                      = "kaniko-secret"
+	kanikoSecretFileName                  = "kaniko-secret.json"
+	kanikoSecretMountpath                 = "/secret"
+	kanikoDockerCredentialConfigPath      = "/kaniko/.docker"
 )
 
 // JobStatus is the current status of the image building job.
@@ -371,7 +374,8 @@ func (ib *imageBuilder) createKanikoJob(
 }
 
 func (ib *imageBuilder) configureKanikoArgsToAddCredentials(kanikoArgs []string) []string {
-	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
+		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			kanikoArgs = append(kanikoArgs,
 				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s/%s",
@@ -385,7 +389,8 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 	volumes []cluster.SecretVolume,
 	volumeMounts []cluster.VolumeMount,
 ) ([]cluster.SecretVolume, []cluster.VolumeMount) {
-	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
+		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
 		// If kaniko service account is not set, use kaniko secret
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			volumes = append(volumes, cluster.SecretVolume{
@@ -398,7 +403,7 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 			})
 		}
 	}
-	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == dockerRegistryPushRegistryType {
 		volumes = append(volumes, cluster.SecretVolume{
 			Name:       kanikoSecretName,
 			SecretName: ib.imageBuildingConfig.KanikoConfig.DockerCredentialSecretName,
@@ -412,7 +417,8 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 }
 
 func (ib *imageBuilder) configureEnvVarsToAddCredentials(envVar []cluster.Env) []cluster.Env {
-	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "gcr" || ib.artifactServiceType == "gcs" {
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
+		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			envVar = append(envVar, cluster.Env{
 				Name:  googleApplicationEnvVarName,
