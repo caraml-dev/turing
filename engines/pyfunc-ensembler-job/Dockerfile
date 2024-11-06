@@ -8,8 +8,6 @@ ENV SPARK_BQ_CONNECTOR_VERSION=0.27.0
 
 RUN apt-get update && apt-get install unzip
 
-# Reset to root to include spark dependencies
-USER 0
 # Setup dependencies for Google Cloud Storage access.
 RUN rm $SPARK_HOME/jars/guava-14.0.1.jar
 ADD https://repo1.maven.org/maven2/com/google/guava/guava/23.0/guava-23.0.jar \
