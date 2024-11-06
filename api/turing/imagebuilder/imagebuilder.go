@@ -397,7 +397,8 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 				MountPath: kanikoSecretMountpath,
 			})
 		}
-	} else if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
+	}
+	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == "docker" {
 		volumes = append(volumes, cluster.SecretVolume{
 			Name:       kanikoSecretName,
 			SecretName: ib.imageBuildingConfig.KanikoConfig.DockerCredentialSecretName,
