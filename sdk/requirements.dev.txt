@@ -1,5 +1,5 @@
 black==22.6.0
-setuptools>=21.0.0
+setuptools>=21.0.0,<75
 wheel
 twine
 # The next release 8.2.0 of pytest breaks the unit tests

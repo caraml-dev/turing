@@ -293,7 +293,11 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 
-			ib, err := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, err := NewEnsemblerJobImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			assert.Nil(t, err)
 
 			buildImageRequest := BuildImageRequest{
@@ -601,7 +605,11 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
 
-			ib, err := NewEnsemblerServiceImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, err := NewEnsemblerServiceImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			assert.Nil(t, err)
 
 			buildImageRequest := BuildImageRequest{
@@ -900,7 +908,11 @@ CondaEnvException: Pip failed`,
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			status := ib.GetImageBuildingJobStatus(projectName, modelName, models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
 		})
@@ -1111,7 +1123,11 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerServiceImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, _ := NewEnsemblerServiceImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			status := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
 		})
@@ -1169,7 +1185,11 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
 			if tt.hasErr {
@@ -1231,7 +1251,11 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			clusterController := tt.clusterController()
-			ib, _ := NewEnsemblerJobImageBuilder(clusterController, tt.imageBuildingConfig)
+			ib, _ := NewEnsemblerJobImageBuilder(
+				clusterController,
+				tt.imageBuildingConfig,
+				googleCloudStorageArtifactServiceType,
+			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
 			if tt.hasErr {
