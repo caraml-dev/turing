@@ -117,7 +117,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 					"InvokeWebhooks",
 					args.ctx,
 					args.eventType,
-					&WebhookRequest{
+					&Request{
 						EventType: args.eventType,
 						Data:      args.body,
 					},
@@ -146,7 +146,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 					"InvokeWebhooks",
 					args.ctx,
 					args.eventType,
-					&WebhookRequest{
+					&Request{
 						EventType: args.eventType,
 						Data:      args.body,
 					},

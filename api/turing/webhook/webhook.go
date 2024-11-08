@@ -63,7 +63,7 @@ func (w webhook) TriggerWebhooks(ctx context.Context, eventType webhooks.EventTy
 	// Adds the eventType to the body of the webhook request so that a single webhook endpoint is able to respond
 	// differently to different event types, especially if the same webhook endpoint is configured for multiple events,
 	// This is because the event type does not normally get sent to the webhook endpoint.
-	newBody := &WebhookRequest{
+	newBody := &Request{
 		EventType: eventType,
 		Data:      body,
 	}
