@@ -9,8 +9,10 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
+	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 )
 
 type EnsemblersController struct {
@@ -62,12 +64,16 @@ func (c EnsemblersController) GetEnsembler(
 }
 
 func (c EnsemblersController) CreateEnsembler(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {
-	var errResp *Response
-	var project *mlp.Project
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		project *mlp.Project
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -80,14 +86,23 @@ func (c EnsemblersController) CreateEnsembler(
 		return InternalServerError("unable to save the ensembler", err.Error())
 	}
 
+	// call webhook for ensembler creation event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnEnsemblerCreated, ensembler); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerCreated, ensembler.GetID(), errWebhook,
+		)
+	}
+
 	return Created(ensembler)
 }
 
 func (c EnsemblersController) UpdateEnsembler(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {
+	ctx := req.Context()
 	options := EnsemblersPathOptions{}
 
 	if err := c.ParseVars(&options, vars); err != nil {
@@ -149,14 +164,23 @@ func (c EnsemblersController) UpdateEnsembler(
 		}
 	}
 
+	// call webhook for ensembler update event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnEnsemblerUpdated, ensembler); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerUpdated, ensembler.GetID(), errWebhook,
+		)
+	}
+
 	return Ok(ensembler)
 }
 
 func (c EnsemblersController) DeleteEnsembler(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
+	ctx := req.Context()
 	options := EnsemblersPathOptions{}
 
 	if err := c.ParseVars(&options, vars); err != nil {
@@ -211,6 +235,14 @@ func (c EnsemblersController) DeleteEnsembler(
 	httpStatus, err = c.deleteEnsembler(ensembler)
 	if err != nil {
 		return Error(httpStatus, "failed to delete the ensembler", err.Error())
+	}
+
+	// call webhook for ensembler deletion event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnEnsemblerDeleted, ensembler); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, ensembler id: %d, %v",
+			webhook.OnEnsemblerDeleted, ensembler.GetID(), errWebhook,
+		)
 	}
 
 	return Ok(map[string]int{"id": int(ensembler.GetID())})

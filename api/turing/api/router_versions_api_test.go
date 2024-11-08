@@ -2,17 +2,21 @@ package api
 
 import (
 	"errors"
+	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
+	"github.com/caraml-dev/turing/api/turing/webhook"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 	routerConfig "github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
@@ -127,6 +131,10 @@ func TestCreateRouterVersion(t *testing.T) {
 	routerVersionSvc := &mocks.RouterVersionsService{}
 	routerVersionSvc.On("Save", routerVersion).Return(routerVersion, nil)
 
+	// Webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnRouterVersionCreated, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
 		vars     RequestVars
@@ -187,11 +195,12 @@ func TestCreateRouterVersion(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.CreateRouterVersion(nil, data.vars, data.body)
+			response := ctrl.CreateRouterVersion(&http.Request{}, data.vars, data.body)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -331,6 +340,10 @@ func TestDeleteRouterVersion(t *testing.T) {
 		On("FindByID", models.ID(2)).
 		Return(router2, nil)
 
+	// Webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnRouterVersionDeleted, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
 		vars     RequestVars
@@ -404,11 +417,12 @@ func TestDeleteRouterVersion(t *testing.T) {
 							RoutersService:        routerSvc,
 							RouterVersionsService: routerVersionSvc,
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.DeleteRouterVersion(nil, data.vars, nil)
+			response := ctrl.DeleteRouterVersion(&http.Request{}, data.vars, nil)
 			assert.Equal(t, data.expected, response)
 		})
 	}
@@ -522,6 +536,10 @@ func TestDeployRouterVersion(t *testing.T) {
 		On("FindByRouterIDAndVersion", models.ID(4), uint(4)).
 		Return(routerVersion4, nil)
 
+	// Webhook service
+	webhookSvc := &webhookMock.Client{}
+	webhookSvc.On("TriggerWebhooks", mock.Anything, webhook.OnRouterVersionDeployed, mock.Anything).Return(nil)
+
 	// Define tests
 	tests := map[string]struct {
 		vars     RequestVars
@@ -586,11 +604,12 @@ func TestDeployRouterVersion(t *testing.T) {
 							RouterVersionsService: routerVersionSvc,
 							RouterDefaults:        &config.RouterDefaults{},
 						},
+						webhookClient: webhookSvc,
 					},
 				},
 			}
 			// Run test method and validate
-			response := ctrl.DeployRouterVersion(nil, data.vars, nil)
+			response := ctrl.DeployRouterVersion(&http.Request{}, data.vars, nil)
 			assert.Equal(t, data.expected, response)
 		})
 	}

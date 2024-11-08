@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -25,6 +26,8 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 	router *models.Router,
 	routerVersion *models.RouterVersion,
 ) error {
+	ctx := context.Background()
+
 	// Get the router environment
 	environment, err := c.MLPService.GetEnvironment(router.EnvironmentName)
 	if err != nil {
@@ -48,7 +51,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		"starting deployment for router %s version %d", router.Name, routerVersion.Version))
 
 	// Deploy the given router version
-	endpoint, err := c.deployRouterVersion(project, environment, routerVersion, eventsCh)
+	endpoint, err := c.deployRouterVersion(ctx, project, environment, routerVersion, eventsCh)
 
 	// Start accumulating non-critical errors
 	errorStrings := make([]string, 0)
@@ -93,6 +96,7 @@ func (c RouterDeploymentController) deployOrRollbackRouter(
 		}
 
 		err = errors.New(strings.Join(errorStrings, ". "))
+
 		return err
 	}
 
@@ -149,6 +153,7 @@ func (c RouterDeploymentController) writeDeploymentEvents(
 // (current version reference, status, endpoint, etc.) are not in the scope of this method.
 // This method returns the new router endpoint (if successful) and any error.
 func (c RouterDeploymentController) deployRouterVersion(
+	_ context.Context,
 	project *mlp.Project,
 	environment *merlin.Environment,
 	routerVersion *models.RouterVersion,
@@ -273,6 +278,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 	// Deploy succeeded - update version's status to deployed and return endpoint
 	routerVersion.Status = models.RouterVersionStatusDeployed
 	_, err = c.RouterVersionsService.Save(routerVersion)
+
 	return endpoint, err
 }
 

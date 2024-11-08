@@ -7,13 +7,15 @@ import (
 	"testing"
 
 	"github.com/caraml-dev/mlp/api/client"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/imagebuilder"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/api/turing/service/mocks"
 	"github.com/caraml-dev/turing/api/turing/validation"
-	"github.com/stretchr/testify/mock"
+	webhookMock "github.com/caraml-dev/turing/api/turing/webhook/mocks"
 )
 
 func TestEnsemblerImagesController_ListImages(t *testing.T) {
@@ -477,6 +479,7 @@ func TestEnsemblerImagesController_ListImages(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
 
 			c := EnsemblerImagesController{
 				BaseController: NewBaseController(
@@ -486,6 +489,7 @@ func TestEnsemblerImagesController_ListImages(t *testing.T) {
 						EnsemblerImagesService: tt.ensemblerImageService(),
 					},
 					validator,
+					mockWebhookClient,
 				),
 			}
 			if got := c.ListImages(tt.args.in0, tt.args.vars, tt.args.in2); !reflect.DeepEqual(got, tt.want) {
@@ -818,6 +822,7 @@ func TestEnsemblerImagesController_BuildImage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			validator, _ := validation.NewValidator(nil)
+			mockWebhookClient := webhookMock.NewClient(t)
 
 			c := EnsemblerImagesController{
 				BaseController: NewBaseController(
@@ -827,6 +832,7 @@ func TestEnsemblerImagesController_BuildImage(t *testing.T) {
 						EnsemblerImagesService: tt.ensemblerImageService(),
 					},
 					validator,
+					mockWebhookClient,
 				),
 			}
 			if got := c.BuildImage(tt.args.in0, tt.args.vars, tt.args.body); !reflect.DeepEqual(got, tt.want) {

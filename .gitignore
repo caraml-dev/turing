@@ -1,3 +1,4 @@
 .DS_Store
 config-dev-w-creds.yaml
 environments-dev-w-creds.yaml
+.idea/

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/caraml-dev/turing/api/turing/service"
-
 	mlp "github.com/caraml-dev/mlp/api/client"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
 	"github.com/caraml-dev/turing/api/turing/log"
 	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/service"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 )
 
 type RouterVersionsController struct {
@@ -41,11 +41,15 @@ func (c RouterVersionsController) ListRouterVersions(
 // CreateRouterVersion creates a router version from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created but NOT deployed.
-func (c RouterVersionsController) CreateRouterVersion(_ *http.Request, vars RequestVars, body interface{}) *Response {
+func (c RouterVersionsController) CreateRouterVersion(req *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
-	var errResp *Response
-	var router *models.Router
-	var project *mlp.Project
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		router  *models.Router
+		project *mlp.Project
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -79,6 +83,16 @@ func (c RouterVersionsController) CreateRouterVersion(_ *http.Request, vars Requ
 		return InternalServerError("unable to create router version", err.Error())
 	}
 
+	// call webhook for router version creation event
+	if errWebhook := c.webhookClient.TriggerWebhooks(
+		ctx, webhook.OnRouterVersionCreated, routerVersion,
+	); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+			webhook.OnRouterVersionCreated, router.ID, routerVersion.ID, errWebhook,
+		)
+	}
+
 	return Ok(routerVersion)
 }
 
@@ -100,14 +114,18 @@ func (c RouterVersionsController) GetRouterVersion(
 
 // DeleteRouterVersion deletes the config for the given version number.
 func (c RouterVersionsController) DeleteRouterVersion(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var router *models.Router
-	var routerVersion *models.RouterVersion
+	var (
+		ctx           = req.Context()
+		errResp       *Response
+		router        *models.Router
+		routerVersion *models.RouterVersion
+	)
+
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -130,20 +148,34 @@ func (c RouterVersionsController) DeleteRouterVersion(
 	if err != nil {
 		return InternalServerError("unable to delete router version", err.Error())
 	}
+
+	// call webhook for router version deletion event
+	if errWebhook := c.webhookClient.TriggerWebhooks(
+		ctx, webhook.OnRouterVersionDeleted, routerVersion,
+	); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+			webhook.OnRouterVersionDeleted, router.ID, routerVersion.ID, errWebhook,
+		)
+	}
 	return Ok(map[string]int{"router_id": int(router.ID), "version": int(routerVersion.Version)})
 }
 
 // DeployRouterVersion deploys the given router version into the associated kubernetes cluster
 func (c RouterVersionsController) DeployRouterVersion(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var project *mlp.Project
-	var router *models.Router
-	var routerVersion *models.RouterVersion
+	var (
+		ctx           = req.Context()
+		errResp       *Response
+		project       *mlp.Project
+		router        *models.Router
+		routerVersion *models.RouterVersion
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -172,6 +204,16 @@ func (c RouterVersionsController) DeployRouterVersion(
 		if err != nil {
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
+		}
+
+		// call webhook for router version deployment event
+		if errWebhook := c.webhookClient.TriggerWebhooks(
+			ctx, webhook.OnRouterVersionDeployed, routerVersion,
+		); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, router version id: %d, %v",
+				webhook.OnRouterVersionDeployed, router.ID, routerVersion.ID, errWebhook,
+			)
 		}
 	}()
 

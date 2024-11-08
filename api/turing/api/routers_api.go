@@ -8,9 +8,9 @@ import (
 	mlp "github.com/caraml-dev/mlp/api/client"
 
 	"github.com/caraml-dev/turing/api/turing/api/request"
-	"github.com/caraml-dev/turing/api/turing/models"
-
 	"github.com/caraml-dev/turing/api/turing/log"
+	"github.com/caraml-dev/turing/api/turing/models"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 )
 
 type RoutersController struct {
@@ -59,13 +59,17 @@ func (c RoutersController) GetRouter(
 // a router within the provided project with the same name, this method will throw an error.
 // If not, a new Router and associated RouterVersion will be created and deployed.
 func (c RoutersController) CreateRouter(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	body interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var project *mlp.Project
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		project *mlp.Project
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -126,6 +130,12 @@ func (c RoutersController) CreateRouter(
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
+
+		// call webhook for router creation event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterCreated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterCreated, router.ID, errWebhook)
+		}
 	}()
 
 	return Ok(router)
@@ -134,11 +144,15 @@ func (c RoutersController) CreateRouter(
 // UpdateRouter updates a router from the provided configuration. If no router exists
 // within the provided project with the provided id, this method will throw an error.
 // If the update is valid, a new RouterVersion will be created and deployed.
-func (c RoutersController) UpdateRouter(_ *http.Request, vars RequestVars, body interface{}) *Response {
+func (c RoutersController) UpdateRouter(req *http.Request, vars RequestVars, body interface{}) *Response {
 	// Parse request vars
-	var errResp *Response
-	var project *mlp.Project
-	var router *models.Router
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		project *mlp.Project
+		router  *models.Router
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -189,6 +203,12 @@ func (c RoutersController) UpdateRouter(_ *http.Request, vars RequestVars, body 
 			log.Errorf("Error deploying router %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
+
+		// call webhook for router update event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUpdated, router); errWebhook != nil {
+			log.Warnf("Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterUpdated, router.ID, errWebhook)
+		}
 	}()
 
 	return Ok(router)
@@ -196,13 +216,17 @@ func (c RoutersController) UpdateRouter(_ *http.Request, vars RequestVars, body 
 
 // DeleteRouter deletes a router and all its associated versions.
 func (c RoutersController) DeleteRouter(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var router *models.Router
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		router  *models.Router
+	)
+
 	if router, errResp = c.getRouterFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -225,20 +249,33 @@ func (c RoutersController) DeleteRouter(
 	if err != nil {
 		return InternalServerError("unable to delete router", err.Error())
 	}
+
+	// call webhook for router deletion event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterDeleted, router); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterDeleted, router.ID, errWebhook,
+		)
+	}
+
 	return Ok(map[string]int{"id": int(router.ID)})
 }
 
 // DeployRouter deploys the current version of the given router into the associated
 // kubernetes cluster. If there is no current version, an error is returned.
 func (c RoutersController) DeployRouter(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var project *mlp.Project
-	var router *models.Router
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		project *mlp.Project
+		router  *models.Router
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -274,6 +311,14 @@ func (c RoutersController) DeployRouter(
 			log.Errorf("Error deploying router version %s:%s:%d: %v",
 				project.Name, router.Name, routerVersion.Version, err)
 		}
+
+		// call webhook for router deployment event
+		if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterDeployed, router); errWebhook != nil {
+			log.Warnf(
+				"Error triggering webhook for event %s, router id: %d, %v",
+				webhook.OnRouterDeployed, router.ID, errWebhook,
+			)
+		}
 	}()
 
 	return Accepted(map[string]int{
@@ -284,14 +329,18 @@ func (c RoutersController) DeployRouter(
 
 // UndeployRouter deletes the given router specs from the associated kubernetes cluster
 func (c RoutersController) UndeployRouter(
-	_ *http.Request,
+	req *http.Request,
 	vars RequestVars,
 	_ interface{},
 ) *Response {
 	// Parse request vars
-	var errResp *Response
-	var project *mlp.Project
-	var router *models.Router
+	var (
+		ctx     = req.Context()
+		errResp *Response
+		project *mlp.Project
+		router  *models.Router
+	)
+
 	if project, errResp = c.getProjectFromRequestVars(vars); errResp != nil {
 		return errResp
 	}
@@ -303,6 +352,14 @@ func (c RoutersController) UndeployRouter(
 	err := c.undeployRouter(project, router)
 	if err != nil {
 		return InternalServerError("unable to undeploy router", err.Error())
+	}
+
+	// call webhook for router un-deployment event
+	if errWebhook := c.webhookClient.TriggerWebhooks(ctx, webhook.OnRouterUndeployed, router); errWebhook != nil {
+		log.Warnf(
+			"Error triggering webhook for event %s, router id: %d, %v",
+			webhook.OnRouterUndeployed, router.ID, errWebhook,
+		)
 	}
 
 	return Ok(map[string]int{"router_id": int(router.ID)})
