@@ -114,7 +114,15 @@ func Test_webhook_triggerEvent(t *testing.T) {
 				mockWebhookManager.On("IsEventConfigured", args.eventType).
 					Once().Return(true)
 				mockWebhookManager.On(
-					"InvokeWebhooks", args.ctx, args.eventType, args.body, mock.Anything, mock.Anything,
+					"InvokeWebhooks",
+					args.ctx,
+					args.eventType,
+					&WebhookRequest{
+						EventType: args.eventType,
+						Data:      args.body,
+					},
+					mock.Anything,
+					mock.Anything,
 				).Once().Return(nil)
 			},
 		},
@@ -135,7 +143,15 @@ func Test_webhook_triggerEvent(t *testing.T) {
 				mockWebhookManager.On("IsEventConfigured", args.eventType).
 					Once().Return(true)
 				mockWebhookManager.On(
-					"InvokeWebhooks", args.ctx, args.eventType, args.body, mock.Anything, mock.Anything,
+					"InvokeWebhooks",
+					args.ctx,
+					args.eventType,
+					&WebhookRequest{
+						EventType: args.eventType,
+						Data:      args.body,
+					},
+					mock.Anything,
+					mock.Anything,
 				).Once().Return(errors.New("mock error"))
 			},
 			wantErr: true,
