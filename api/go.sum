@@ -72,6 +72,8 @@ github.com/antihax/optional v1.0.0 h1:xK2lYat7ZLaVVcIuj82J8kIro4V6kDe0AUDFboUCwc
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
+github.com/avast/retry-go/v4 v4.6.0 h1:K9xNA+KeB8HHc2aWFuLb25Offp+0iVRXEvFx8IinRJA=
+github.com/avast/retry-go/v4 v4.6.0/go.mod h1:gvWlPhBVsvBbLkVGDg/KwvBv0bEkCOLRRSHKIr2PyOE=
 github.com/aws/aws-sdk-go v1.17.7/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/aws/aws-sdk-go-v2 v1.16.16/go.mod h1:SwiyXi/1zTUZ6KIAmLK5V5ll8SiURNUYOqTerZPaF9k=
 github.com/aws/aws-sdk-go-v2 v1.30.6-0.20240906182417-827d25db0048 h1:wXvkIvYQ3EPVO5MhCoEv2u5LDwfWp+kLTQMIGyyvi/0=
@@ -125,6 +127,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/caraml-dev/merlin/api v0.0.0-20240313065547-6778bd14c119 h1:8zt/6B7ySOokLa7WDpjaybBOL8x5C35nbMIrKFMsZcg=
 github.com/caraml-dev/merlin/api v0.0.0-20240313065547-6778bd14c119/go.mod h1:b2MbvZaVUSJQaoF0AuEgwTVVYK8lPHCIvnYpfvnjkQY=
+github.com/caraml-dev/mlp v1.13.2 h1:N3lk+ToQ281duZImQLTQ28uJtmoc9Zkxx1CR94rS15U=
+github.com/caraml-dev/mlp v1.13.2/go.mod h1:9kPooDSYsVu5q/z2K4T9uu08RGyiFNbCAFnQVBMJxOk=
 github.com/caraml-dev/universal-prediction-interface v0.3.6 h1:G/D4aukfjLECl8armJqFy/R2+0u/f4AiurSFqAo33uQ=
 github.com/caraml-dev/universal-prediction-interface v0.3.6/go.mod h1:e0qmFOXQxx8HFg5ObYyQO3WVnrqsr5v5JApFmeF7eJo=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
@@ -170,8 +174,6 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/deadlycoconuts/mlp v0.0.0-20240917090435-d94d92572eac h1:M6dR1d3O+xY4suQPumkbNO1Ie70M6WoYFaoW+cjKT+8=
-github.com/deadlycoconuts/mlp v0.0.0-20240917090435-d94d92572eac/go.mod h1:9kPooDSYsVu5q/z2K4T9uu08RGyiFNbCAFnQVBMJxOk=
 github.com/denisenkom/go-mssqldb v0.0.0-20190515213511-eb9f6a1743f3/go.mod h1:zAg7JM8CkOJ43xKXIj7eRO9kmWm/TW578qo+oDO6tuM=
 github.com/dgraph-io/ristretto v0.0.1 h1:cJwdnj42uV8Jg4+KLrYovLiCgIfz9wtWm6E6KA+1tLs=
 github.com/dgraph-io/ristretto v0.0.1/go.mod h1:T40EBc7CJke8TkpiYfGGKAeFjSaxuFXhuXRyumBd6RE=

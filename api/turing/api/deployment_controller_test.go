@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -21,6 +22,8 @@ import (
 )
 
 func TestDeployVersionSuccess(t *testing.T) {
+	ctx := context.TODO()
+
 	testEnv := "test-env"
 	environment := &merlin.Environment{Name: testEnv}
 	project := &mlp.Project{ID: 1, Name: "test-project"}
@@ -191,7 +194,7 @@ func TestDeployVersionSuccess(t *testing.T) {
 
 			// Run deploy and test that the router version's status is deployed and the endpoint
 			// returned by deploy version is expected.
-			endpoint, err := ctrl.deployRouterVersion(project, environment, data.routerVersion, eventsCh)
+			endpoint, err := ctrl.deployRouterVersion(ctx, project, environment, data.routerVersion, eventsCh)
 			assert.NoError(t, err)
 			assert.Equal(t, models.RouterVersionStatusDeployed, data.routerVersion.Status)
 			assert.Equal(t, "test-url", endpoint)

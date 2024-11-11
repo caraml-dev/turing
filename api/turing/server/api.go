@@ -13,6 +13,7 @@ import (
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/middleware"
 	"github.com/caraml-dev/turing/api/turing/validation"
+	"github.com/caraml-dev/turing/api/turing/webhook"
 )
 
 func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg *config.Config) error {
@@ -31,8 +32,14 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 
 	apiRouter.Use(openapiMiddleware, sentry.Recoverer)
 
+	// Initialize webhook client
+	webhookClient, err := webhook.NewWebhook(&cfg.WebhooksConfig)
+	if err != nil {
+		return err
+	}
+
 	validator, _ := validation.NewValidator(appCtx.ExperimentsService)
-	baseController := api.NewBaseController(appCtx, validator)
+	baseController := api.NewBaseController(appCtx, validator, webhookClient)
 	deploymentController := api.RouterDeploymentController{BaseController: baseController}
 	controllers := []api.Controller{
 		api.AlertsController{BaseController: baseController},
