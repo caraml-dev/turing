@@ -1,7 +1,7 @@
 import React from "react";
-import { DockerRegistryPopover } from "./DockerRegistryPopover";
 import "./SelectDockerImageComboBox.scss";
 import { EuiComboBoxSelect } from "../combo_box/EuiComboBoxSelect";
+import { DockerRegistryPopover } from "./DockerRegistryPopover";
 
 const extractRegistry = (image, registries) => {
   if (image) {
