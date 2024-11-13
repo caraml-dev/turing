@@ -105,10 +105,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 			args: args{
 				ctx:       context.TODO(),
 				eventType: OnRouterCreated,
-				body: routerRequest{
-					EventType: OnRouterCreated,
-					Router:    &models.Router{},
-				},
+				body:      &models.Router{},
 			},
 			mockFunc: func(args args) {
 				mockWebhookManager.On("IsEventConfigured", args.eventType).
@@ -119,7 +116,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 					args.eventType,
 					&Request{
 						EventType: args.eventType,
-						Data:      args.body,
+						Data:      map[string]interface{}{"router": args.body},
 					},
 					mock.Anything,
 					mock.Anything,
@@ -134,10 +131,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 			args: args{
 				ctx:       context.TODO(),
 				eventType: OnRouterCreated,
-				body: routerRequest{
-					EventType: OnRouterCreated,
-					Router:    &models.Router{},
-				},
+				body:      &models.Router{},
 			},
 			mockFunc: func(args args) {
 				mockWebhookManager.On("IsEventConfigured", args.eventType).
@@ -148,7 +142,7 @@ func Test_webhook_triggerEvent(t *testing.T) {
 					args.eventType,
 					&Request{
 						EventType: args.eventType,
-						Data:      args.body,
+						Data:      map[string]interface{}{"router": args.body},
 					},
 					mock.Anything,
 					mock.Anything,
