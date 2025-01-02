@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -319,6 +320,11 @@ func (ib *imageBuilder) createKanikoJob(
 	kanikoArgs = ib.configureKanikoArgsToAddCredentials(kanikoArgs)
 	volumes, volumeMounts = ib.configureVolumesAndVolumeMountsToAddCredentials(volumes, volumeMounts)
 	envVars = ib.configureEnvVarsToAddCredentials(envVars)
+
+	// Add all other env vars that are propagated from the API server as build args
+	for _, envVar := range ib.imageBuildingConfig.KanikoConfig.APIServerEnvVars {
+		kanikoArgs = append(kanikoArgs, fmt.Sprintf("--build-arg=%s=%s", envVar, os.Getenv(envVar)))
+	}
 
 	job := cluster.Job{
 		Name:                    kanikoJobName,
