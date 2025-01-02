@@ -444,8 +444,8 @@ type MlflowConfig struct {
 	// 1) additional arguments in the config KanikoConfig.AdditionalArgs e.g.
 	// --build-arg=[AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_DEFAULT_REGION/AWS_ENDPOINT_URL]=xxx
 	// OR
-	// 2) additional arguments in the config KanikoConfig.APIServerEnvVars, which will pass the specified environment variables
-	// PRESENT within the Merlin API server's container to the image builder as build arguments
+	// 2) additional arguments in the config KanikoConfig.APIServerEnvVars, which will pass the specified environment
+	// variables PRESENT within the Merlin API server's container to the image builder as build arguments
 	ArtifactServiceType string `validate:"required,oneof=nop gcs s3"`
 }
 
