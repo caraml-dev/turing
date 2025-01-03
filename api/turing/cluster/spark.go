@@ -71,6 +71,18 @@ var DefaultSparkDriverRoleRules = []apirbacv1.PolicyRule{
 			"*",
 		},
 	},
+	{
+		// Allow driver to manage configmaps
+		APIGroups: []string{
+			"", // indicates the core API group
+		},
+		Resources: []string{
+			"configmaps",
+		},
+		Verbs: []string{
+			"*",
+		},
+	},
 }
 
 // CreateSparkRequest is the request for creating a spark driver
