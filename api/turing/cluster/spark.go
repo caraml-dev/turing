@@ -304,5 +304,5 @@ func getEnvVars(request *CreateSparkRequest) []apicorev1.EnvVar {
 		envVars = append(envVars, apicorev1.EnvVar{Name: ev, Value: os.Getenv(ev)})
 	}
 
-	return append(defaultEnvVars, getEnvVarFromRequest(request)...)
+	return append(envVars, getEnvVarFromRequest(request)...)
 }
