@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
@@ -192,7 +193,7 @@ func createSparkExecutor(request *CreateSparkRequest) (*apisparkv1beta2.Executor
 					Path: serviceAccountMount,
 				},
 			},
-			Env:    append(defaultEnvVars, getEnvVarFromRequest(request)...),
+			Env:    getEnvVars(request),
 			Labels: request.JobLabels,
 		},
 	}
@@ -242,7 +243,7 @@ func createSparkDriver(request *CreateSparkRequest) (*apisparkv1beta2.DriverSpec
 					Path: serviceAccountMount,
 				},
 			},
-			Env:            append(defaultEnvVars, getEnvVarFromRequest(request)...),
+			Env:            getEnvVars(request),
 			Labels:         request.JobLabels,
 			ServiceAccount: &request.ServiceAccountName,
 		},
@@ -294,4 +295,14 @@ func toMegabyte(request string) (*string, error) {
 	inMegaBytes := inBytes / (1024 * 1024)
 	strVal := fmt.Sprintf("%sm", strconv.Itoa(int(inMegaBytes)))
 	return &strVal, nil
+}
+
+func getEnvVars(request *CreateSparkRequest) []apicorev1.EnvVar {
+	envVars := defaultEnvVars
+
+	for _, ev := range request.SparkInfraConfig.APIServerEnvVars {
+		envVars = append(envVars, apicorev1.EnvVar{Name: ev, Value: os.Getenv(ev)})
+	}
+
+	return append(envVars, getEnvVarFromRequest(request)...)
 }

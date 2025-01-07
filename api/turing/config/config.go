@@ -223,6 +223,7 @@ type KanikoConfig struct {
 // SparkAppConfig contains the infra configurations that is unique to the user's Kubernetes
 type SparkAppConfig struct {
 	NodeSelector                   map[string]string
+	APIServerEnvVars               []string
 	CorePerCPURequest              float64 `validate:"required"`
 	CPURequestToCPULimit           float64 `validate:"required"`
 	SparkVersion                   string  `validate:"required"`

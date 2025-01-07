@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"os"
 	"testing"
 
 	apisparkv1beta2 "github.com/GoogleCloudPlatform/spark-on-k8s-operator/pkg/apis/sparkoperator.k8s.io/v1beta2"
@@ -120,6 +121,90 @@ func TestGetCPURequestAndLimit(t *testing.T) {
 			)
 			assert.Equal(t, tt.expectedCPURequestStr, *cpuRequestStr)
 			assert.Equal(t, tt.expectedCPULimitStr, *cpuLimitStr)
+		})
+	}
+}
+
+func TestGetEnvVars(t *testing.T) {
+	request := &CreateSparkRequest{
+		JobName:               jobName,
+		JobLabels:             jobLabels,
+		JobImageRef:           jobImageRef,
+		JobApplicationPath:    jobApplicationPath,
+		JobArguments:          jobArguments,
+		JobConfigMount:        batch.JobConfigMount,
+		DriverCPURequest:      cpuValue,
+		DriverMemoryRequest:   memoryValue,
+		ExecutorCPURequest:    cpuValue,
+		ExecutorMemoryRequest: memoryValue,
+		ExecutorReplica:       executorReplica,
+		ServiceAccountName:    serviceAccountName,
+		SparkInfraConfig:      sparkInfraConfig,
+		EnvVars:               &envVars,
+	}
+	tests := map[string]struct {
+		sparkInfraConfigAPIServerEnvVars []string
+		apiServerEnvVars                 []apicorev1.EnvVar
+		expectedEnvVars                  []apicorev1.EnvVar
+	}{
+		"api server env vars specified": {
+			[]string{"TEST_ENV_VAR_1"},
+			[]apicorev1.EnvVar{
+				{
+					Name:  "TEST_ENV_VAR_1",
+					Value: "TEST_VALUE_1",
+				},
+			},
+			[]apicorev1.EnvVar{
+				{
+					Name:  envServiceAccountPathKey,
+					Value: envServiceAccountPath,
+				},
+				{
+					Name:  "TEST_ENV_VAR_1",
+					Value: "TEST_VALUE_1",
+				},
+				{
+					Name:  "foo",
+					Value: barString,
+				},
+			},
+		},
+		"no api server env vars specified": {
+			[]string{},
+			[]apicorev1.EnvVar{
+				{
+					Name:  "TEST_ENV_VAR_1",
+					Value: "TEST_VALUE_1",
+				},
+			},
+			[]apicorev1.EnvVar{
+				{
+					Name:  envServiceAccountPathKey,
+					Value: envServiceAccountPath,
+				},
+				{
+					Name:  "foo",
+					Value: barString,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			for _, ev := range tt.apiServerEnvVars {
+				err := os.Setenv(ev.Name, ev.Value)
+				assert.NoError(t, err)
+			}
+
+			request.SparkInfraConfig.APIServerEnvVars = tt.sparkInfraConfigAPIServerEnvVars
+			envVars := getEnvVars(request)
+			assert.Equal(t, tt.expectedEnvVars, envVars)
+
+			for _, ev := range tt.apiServerEnvVars {
+				err := os.Unsetenv(ev.Name)
+				assert.NoError(t, err)
+			}
 		})
 	}
 }
