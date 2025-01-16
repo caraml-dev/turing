@@ -22,7 +22,7 @@ const (
 	// AppLabel refers to application of the Kubernetes Object
 	AppLabel = "app"
 	// managedLabel mark the kubernetes object as being managed by specific dev
-	managedLabel = "managed"
+	managedLabel = "caraml.dev/managed"
 )
 
 var (
