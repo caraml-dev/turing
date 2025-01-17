@@ -20,7 +20,7 @@ const (
 	fluentdMemRequest    = "1Gi"
 	fluentdPort          = 24224
 	cacheVolumeMountPath = "/cache/"
-	cacheVolumeSize      = "2Gi"
+	cacheVolumeSize      = "20Gi"
 
 	// defaultCPULimitRequestFactor is the default multiplication factor applied to the CPU request,
 	// to be set as the limit
