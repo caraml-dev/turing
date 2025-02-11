@@ -237,6 +237,9 @@ func getEnsemblerDirectory(ensembler *models.PyFuncEnsembler) string {
 type EnsemblingMonitoringVariables struct {
 	// Project is the MLP Project associated with the batch ensembler
 	Project string
+
+	// Ensembler is the name of the ensembler in the infra config
+	Ensembler string
 }
 
 func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, project *mlp.Project) (string, error) {
@@ -245,7 +248,8 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 	}
 
 	values := EnsemblingMonitoringVariables{
-		Project: project.Name,
+		Project:   project.Name,
+		Ensembler: *job.InfraConfig.EnsemblerName,
 	}
 
 	var b bytes.Buffer
