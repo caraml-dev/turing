@@ -249,7 +249,7 @@ func (s *ensemblingJobService) generateMonitoringURL(job *models.EnsemblingJob, 
 
 	values := EnsemblingMonitoringVariables{
 		Project:   project.Name,
-		Ensembler: *job.InfraConfig.EnsemblerName,
+		Ensembler: job.InfraConfig.GetEnsemblerName(),
 	}
 
 	var b bytes.Buffer
