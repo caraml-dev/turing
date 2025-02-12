@@ -24,9 +24,8 @@ import (
 )
 
 const (
-	artifactFolder string = "artifact"
-	// Actually this var-job=%s has a run_id appended to it, but it's ok since we use assert.Contains
-	dashboardURLStringFormat string = "https://a.co/dashboard?var-project=%s&var-job=%s"
+	artifactFolder           string = "artifact"
+	dashboardURLStringFormat string = "https://a.co/dashboard?var-project=%s&var-ensembler=%s"
 	mlpProjectName           string = "foo"
 )
 
@@ -39,7 +38,7 @@ var (
 
 	imageBuilderNamespace = "image"
 	loggingURLFormat      = "http://www.example.com/{{.Namespace}}/{{.PodName}}"
-	dashboardURLFormat    = "https://a.co/dashboard?var-project={{.Project}}&var-job={{.Job}}"
+	dashboardURLFormat    = "https://a.co/dashboard?var-project={{.Project}}&var-ensembler={{.Ensembler}}"
 )
 
 var defaultConfigurations = config.DefaultEnsemblingJobConfigurations{
