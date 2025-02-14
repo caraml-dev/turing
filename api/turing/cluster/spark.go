@@ -101,6 +101,7 @@ type CreateSparkRequest struct {
 	ExecutorReplica       int32
 	ServiceAccountName    string
 	SparkInfraConfig      *config.SparkAppConfig
+	Secrets               *[]openapi.MountedMLPSecret
 	EnvVars               *[]openapi.EnvVar
 }
 
@@ -154,6 +155,24 @@ func getEnvVarFromRequest(request *CreateSparkRequest) []apicorev1.EnvVar {
 		envVars = append(envVars, apicorev1.EnvVar{
 			Name:  envVar.GetName(),
 			Value: envVar.GetValue(),
+		})
+	}
+
+	if request.Secrets == nil {
+		return envVars
+	}
+
+	for _, secret := range *request.Secrets {
+		envVars = append(envVars, apicorev1.EnvVar{
+			Name: secret.GetEnvVarName(),
+			ValueFrom: &apicorev1.EnvVarSource{
+				SecretKeyRef: &apicorev1.SecretKeySelector{
+					LocalObjectReference: apicorev1.LocalObjectReference{
+						Name: request.JobName,
+					},
+					Key: secret.GetMlpSecretName(),
+				},
+			},
 		})
 	}
 

@@ -131,20 +131,13 @@ func (c *ensemblingController) Create(request *CreateEnsemblingJobRequest) error
 		)
 	}
 
-	secretString, err := c.mlpService.GetSecret(
-		request.EnsemblingJob.ProjectID,
-		request.EnsemblingJob.InfraConfig.GetServiceAccountName(),
-	)
+	// Get MLP secrets for Google service account and user-specified MLP secrets
+	secretMap, err := c.getMLPSecrets(request.EnsemblingJob, request.Namespace)
 	if err != nil {
-		return fmt.Errorf(
-			"service account %s is not found within %s project: %s",
-			request.EnsemblingJob.InfraConfig.GetServiceAccountName(),
-			request.Namespace,
-			err,
-		)
+		return fmt.Errorf("error retrieving secrets: %w", err)
 	}
 
-	err = c.createSecret(request, secretString)
+	err = c.createSecret(request, secretMap)
 	if err != nil {
 		return fmt.Errorf(
 			"failed creating secret for job %s in namespace %s: %v",
@@ -199,6 +192,7 @@ func (c *ensemblingController) createSparkApplication(
 		ExecutorReplica:       *infraConfig.GetResources().ExecutorReplica,
 		ServiceAccountName:    serviceAccount.Name,
 		SparkInfraConfig:      c.sparkInfraConfig,
+		Secrets:               jobRequest.EnsemblingJob.InfraConfig.Secrets,
 		EnvVars:               jobRequest.EnsemblingJob.InfraConfig.Env,
 	}
 	return c.clusterController.CreateSparkApplication(context.Background(), jobRequest.Namespace, request)
@@ -233,14 +227,12 @@ func (c *ensemblingController) createJobConfigMap(
 	return nil
 }
 
-func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest, secretName string) error {
+func (c *ensemblingController) createSecret(request *CreateEnsemblingJobRequest, secretMap map[string]string) error {
 	secret := &cluster.Secret{
 		Name:      request.EnsemblingJob.Name,
 		Namespace: request.Namespace,
-		Data: map[string]string{
-			cluster.ServiceAccountFileName: secretName,
-		},
-		Labels: request.Labels,
+		Data:      secretMap,
+		Labels:    request.Labels,
 	}
 	// I'm not sure why we need to pass in a context here but not other kubernetes cluster functions.
 	// Leaving a context.Background() until we figure out what to do with this.
@@ -303,6 +295,36 @@ func (c *ensemblingController) createSparkDriverAuthorization(
 		return nil, err
 	}
 	return sa, err
+}
+
+func (c *ensemblingController) getMLPSecrets(
+	ensemblingJob *models.EnsemblingJob,
+	namespace string,
+) (map[string]string, error) {
+	secretMap := make(map[string]string)
+	// Retrieve Google Service Account secret from MLP
+	secretString, err := c.mlpService.GetSecret(
+		ensemblingJob.ProjectID,
+		ensemblingJob.InfraConfig.GetServiceAccountName(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("service account %s is not found within %s project: %w", ensemblingJob.InfraConfig.GetServiceAccountName(), namespace, err)
+	}
+	secretMap[cluster.ServiceAccountFileName] = secretString
+	// Retrieve user-configured secrets from MLP
+	if ensemblingJob.InfraConfig.Secrets != nil {
+		for _, secret := range *ensemblingJob.InfraConfig.Secrets {
+			secretString, err = c.mlpService.GetSecret(
+				ensemblingJob.ProjectID,
+				secret.GetMlpSecretName(),
+			)
+			if err != nil {
+				return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w", secret.GetMlpSecretName(), namespace, err)
+			}
+			secretMap[secret.GetEnvVarName()] = secretString
+		}
+	}
+	return secretMap, nil
 }
 
 func createAuthorizationResourceNames(namespace string) (string, string, string) {
