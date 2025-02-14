@@ -801,6 +801,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
         service_account:
           type: "string"
           description: >
@@ -906,6 +910,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
         service_account:
           type: "string"
           description: >
@@ -938,6 +946,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
 
     ResourceRequest:
       type: "object"
