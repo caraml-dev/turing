@@ -308,7 +308,8 @@ func (c *ensemblingController) getMLPSecrets(
 		ensemblingJob.InfraConfig.GetServiceAccountName(),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("service account %s is not found within %s project: %w", ensemblingJob.InfraConfig.GetServiceAccountName(), namespace, err)
+		return nil, fmt.Errorf("service account %s is not found within %s project: %w",
+			ensemblingJob.InfraConfig.GetServiceAccountName(), namespace, err)
 	}
 	secretMap[cluster.ServiceAccountFileName] = secretString
 	// Retrieve user-configured secrets from MLP
@@ -319,7 +320,8 @@ func (c *ensemblingController) getMLPSecrets(
 				secret.GetMlpSecretName(),
 			)
 			if err != nil {
-				return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w", secret.GetMlpSecretName(), namespace, err)
+				return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w",
+					secret.GetMlpSecretName(), namespace, err)
 			}
 			secretMap[secret.GetEnvVarName()] = secretString
 		}
