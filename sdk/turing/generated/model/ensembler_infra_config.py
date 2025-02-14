@@ -29,8 +29,10 @@ from turing.generated.model_utils import (  # noqa: F401
 def lazy_import():
     from turing.generated.model.ensembling_resources import EnsemblingResources
     from turing.generated.model.env_var import EnvVar
+    from turing.generated.model.mounted_mlp_secret import MountedMLPSecret
     globals()['EnsemblingResources'] = EnsemblingResources
     globals()['EnvVar'] = EnvVar
+    globals()['MountedMLPSecret'] = MountedMLPSecret
 
 
 class EnsemblerInfraConfig(ModelNormal):
@@ -82,6 +84,7 @@ class EnsemblerInfraConfig(ModelNormal):
             'artifact_uri': (str,),  # noqa: E501
             'ensembler_name': (str,),  # noqa: E501
             'service_account_name': (str,),  # noqa: E501
+            'secrets': ([MountedMLPSecret],),  # noqa: E501
             'resources': (EnsemblingResources,),  # noqa: E501
             'run_id': (str,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
@@ -96,6 +99,7 @@ class EnsemblerInfraConfig(ModelNormal):
         'artifact_uri': 'artifact_uri',  # noqa: E501
         'ensembler_name': 'ensembler_name',  # noqa: E501
         'service_account_name': 'service_account_name',  # noqa: E501
+        'secrets': 'secrets',  # noqa: E501
         'resources': 'resources',  # noqa: E501
         'run_id': 'run_id',  # noqa: E501
         'env': 'env',  # noqa: E501
@@ -150,6 +154,7 @@ class EnsemblerInfraConfig(ModelNormal):
             artifact_uri (str): [optional]  # noqa: E501
             ensembler_name (str): [optional]  # noqa: E501
             service_account_name (str): [optional]  # noqa: E501
+            secrets ([MountedMLPSecret]): [optional]  # noqa: E501
             resources (EnsemblingResources): [optional]  # noqa: E501
             run_id (str): [optional]  # noqa: E501
             env ([EnvVar]): [optional]  # noqa: E501

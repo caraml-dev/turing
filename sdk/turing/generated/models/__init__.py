@@ -65,6 +65,7 @@ from turing.generated.model.job_id import JobId
 from turing.generated.model.kafka_config import KafkaConfig
 from turing.generated.model.label import Label
 from turing.generated.model.log_level import LogLevel
+from turing.generated.model.mounted_mlp_secret import MountedMLPSecret
 from turing.generated.model.pagination_paging import PaginationPaging
 from turing.generated.model.project import Project
 from turing.generated.model.protocol import Protocol

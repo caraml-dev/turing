@@ -29,9 +29,11 @@ from turing.generated.model_utils import (  # noqa: F401
 def lazy_import():
     from turing.generated.model.autoscaling_policy import AutoscalingPolicy
     from turing.generated.model.env_var import EnvVar
+    from turing.generated.model.mounted_mlp_secret import MountedMLPSecret
     from turing.generated.model.resource_request import ResourceRequest
     globals()['AutoscalingPolicy'] = AutoscalingPolicy
     globals()['EnvVar'] = EnvVar
+    globals()['MountedMLPSecret'] = MountedMLPSecret
     globals()['ResourceRequest'] = ResourceRequest
 
 
@@ -92,6 +94,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
             'timeout': (str,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
+            'secrets': ([MountedMLPSecret],),  # noqa: E501
         }
 
     @cached_property
@@ -106,6 +109,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
         'timeout': 'timeout',  # noqa: E501
         'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'env': 'env',  # noqa: E501
+        'secrets': 'secrets',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -162,6 +166,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
             env ([EnvVar]): [optional]  # noqa: E501
+            secrets ([MountedMLPSecret]): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)

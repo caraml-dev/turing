@@ -29,9 +29,11 @@ from turing.generated.model_utils import (  # noqa: F401
 def lazy_import():
     from turing.generated.model.autoscaling_policy import AutoscalingPolicy
     from turing.generated.model.env_var import EnvVar
+    from turing.generated.model.mounted_mlp_secret import MountedMLPSecret
     from turing.generated.model.resource_request import ResourceRequest
     globals()['AutoscalingPolicy'] = AutoscalingPolicy
     globals()['EnvVar'] = EnvVar
+    globals()['MountedMLPSecret'] = MountedMLPSecret
     globals()['ResourceRequest'] = ResourceRequest
 
 
@@ -94,6 +96,7 @@ class Enricher(ModelNormal):
             'env': ([EnvVar],),  # noqa: E501
             'id': (int,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
+            'secrets': ([MountedMLPSecret],),  # noqa: E501
             'service_account': (str,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
@@ -113,6 +116,7 @@ class Enricher(ModelNormal):
         'env': 'env',  # noqa: E501
         'id': 'id',  # noqa: E501
         'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
+        'secrets': 'secrets',  # noqa: E501
         'service_account': 'service_account',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
@@ -174,6 +178,7 @@ class Enricher(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             id (int): [optional]  # noqa: E501
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
+            secrets ([MountedMLPSecret]): [optional]  # noqa: E501
             service_account (str): (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file.\" . [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
