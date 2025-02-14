@@ -16,12 +16,13 @@ import (
 
 // EnsemblerInfraConfig struct for EnsemblerInfraConfig
 type EnsemblerInfraConfig struct {
-	ArtifactUri *string `json:"artifact_uri,omitempty"`
-	EnsemblerName *string `json:"ensembler_name,omitempty"`
-	ServiceAccountName *string `json:"service_account_name,omitempty" validate:"required"`
-	Resources NullableEnsemblingResources `json:"resources,omitempty"`
-	RunId *string `json:"run_id,omitempty"`
-	Env *[]EnvVar `json:"env,omitempty"`
+	ArtifactUri        *string                     `json:"artifact_uri,omitempty"`
+	EnsemblerName      *string                     `json:"ensembler_name,omitempty"`
+	ServiceAccountName *string                     `json:"service_account_name,omitempty" validate:"required"`
+	Secrets            *[]MountedMLPSecret         `json:"secrets,omitempty"`
+	Resources          NullableEnsemblingResources `json:"resources,omitempty"`
+	RunId              *string                     `json:"run_id,omitempty"`
+	Env                *[]EnvVar                   `json:"env,omitempty"`
 }
 
 // NewEnsemblerInfraConfig instantiates a new EnsemblerInfraConfig object
@@ -137,6 +138,38 @@ func (o *EnsemblerInfraConfig) SetServiceAccountName(v string) {
 	o.ServiceAccountName = &v
 }
 
+// GetSecrets returns the Secrets field value if set, zero value otherwise.
+func (o *EnsemblerInfraConfig) GetSecrets() []MountedMLPSecret {
+	if o == nil || o.Secrets == nil {
+		var ret []MountedMLPSecret
+		return ret
+	}
+	return *o.Secrets
+}
+
+// GetSecretsOk returns a tuple with the Secrets field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EnsemblerInfraConfig) GetSecretsOk() (*[]MountedMLPSecret, bool) {
+	if o == nil || o.Secrets == nil {
+		return nil, false
+	}
+	return o.Secrets, true
+}
+
+// HasSecrets returns a boolean if a field has been set.
+func (o *EnsemblerInfraConfig) HasSecrets() bool {
+	if o != nil && o.Secrets != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetSecrets gets a reference to the given []MountedMLPSecret and assigns it to the Secrets field.
+func (o *EnsemblerInfraConfig) SetSecrets(v []MountedMLPSecret) {
+	o.Secrets = &v
+}
+
 // GetResources returns the Resources field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *EnsemblerInfraConfig) GetResources() EnsemblingResources {
 	if o == nil || o.Resources.Get() == nil {
@@ -150,7 +183,7 @@ func (o *EnsemblerInfraConfig) GetResources() EnsemblingResources {
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *EnsemblerInfraConfig) GetResourcesOk() (*EnsemblingResources, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return o.Resources.Get(), o.Resources.IsSet()
@@ -169,6 +202,7 @@ func (o *EnsemblerInfraConfig) HasResources() bool {
 func (o *EnsemblerInfraConfig) SetResources(v EnsemblingResources) {
 	o.Resources.Set(&v)
 }
+
 // SetResourcesNil sets the value for Resources to be an explicit nil
 func (o *EnsemblerInfraConfig) SetResourcesNil() {
 	o.Resources.Set(nil)
@@ -254,6 +288,9 @@ func (o EnsemblerInfraConfig) MarshalJSON() ([]byte, error) {
 	if o.ServiceAccountName != nil {
 		toSerialize["service_account_name"] = o.ServiceAccountName
 	}
+	if o.Secrets != nil {
+		toSerialize["secrets"] = o.Secrets
+	}
 	if o.Resources.IsSet() {
 		toSerialize["resources"] = o.Resources.Get()
 	}
@@ -301,5 +338,3 @@ func (v *NullableEnsemblerInfraConfig) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-
