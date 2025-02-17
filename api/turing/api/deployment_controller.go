@@ -465,7 +465,10 @@ func (c RouterDeploymentController) getExperimentConfig(routerVersion *models.Ro
 	return experimentConfig, nil
 }
 
-func (c RouterDeploymentController) getMLPSecrets(routerVersion *models.RouterVersion, project *mlp.Project) (map[string]string, error) {
+func (c RouterDeploymentController) getMLPSecrets(
+	routerVersion *models.RouterVersion,
+	project *mlp.Project,
+) (map[string]string, error) {
 	secretMap := make(map[string]string)
 
 	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {

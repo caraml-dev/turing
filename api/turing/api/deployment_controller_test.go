@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"testing"
 
 	merlin "github.com/caraml-dev/merlin/client"
@@ -15,6 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
