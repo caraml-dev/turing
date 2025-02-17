@@ -161,7 +161,10 @@ class RouterEnsemblerConfig(DataObject):
         elif isinstance(standard_config, dict):
             openapi_standard_config = standard_config.copy()
             openapi_standard_config["experiment_mappings"] = None
-            if "experiment_mappings" in standard_config and standard_config["experiment_mappings"] is not None:
+            if (
+                "experiment_mappings" in standard_config
+                and standard_config["experiment_mappings"] is not None
+            ):
                 openapi_standard_config["experiment_mappings"] = [
                     turing.generated.models.EnsemblerStandardConfigExperimentMappings(
                         **mapping
@@ -357,12 +360,14 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
                 cpu_request=config.resource_request.cpu_request,
                 memory_request=config.resource_request.memory_request,
             ),
-            autoscaling_policy=AutoscalingPolicy(
-                metric=config.autoscaling_policy.metric,
-                target=config.autoscaling_policy.target,
-            )
-            if config.autoscaling_policy is not None
-            else DEFAULT_AUTOSCALING_POLICY,
+            autoscaling_policy=(
+                AutoscalingPolicy(
+                    metric=config.autoscaling_policy.metric,
+                    target=config.autoscaling_policy.target,
+                )
+                if config.autoscaling_policy is not None
+                else DEFAULT_AUTOSCALING_POLICY
+            ),
             env=[EnvVar(name=env.name, value=env.value) for env in config.env],
         )
 
@@ -491,12 +496,14 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
                 cpu_request=config.resource_request.cpu_request,
                 memory_request=config.resource_request.memory_request,
             ),
-            autoscaling_policy=AutoscalingPolicy(
-                metric=config.autoscaling_policy.metric,
-                target=config.autoscaling_policy.target,
-            )
-            if config.autoscaling_policy is not None
-            else DEFAULT_AUTOSCALING_POLICY,
+            autoscaling_policy=(
+                AutoscalingPolicy(
+                    metric=config.autoscaling_policy.metric,
+                    target=config.autoscaling_policy.target,
+                )
+                if config.autoscaling_policy is not None
+                else DEFAULT_AUTOSCALING_POLICY
+            ),
             endpoint=config.endpoint,
             timeout=config.timeout,
             port=config.port,
@@ -601,9 +608,11 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
         cls, config: EnsemblerStandardConfig
     ) -> "StandardRouterEnsemblerConfig":
         return cls(
-            experiment_mappings=[e.to_dict() for e in config.experiment_mappings]
-            if config.experiment_mappings
-            else None,
+            experiment_mappings=(
+                [e.to_dict() for e in config.experiment_mappings]
+                if config.experiment_mappings
+                else None
+            ),
             route_name_path=config.route_name_path,
             fallback_response_route_id=config.fallback_response_route_id,
             lazy_routing=config.lazy_routing,
@@ -611,14 +620,16 @@ class StandardRouterEnsemblerConfig(RouterEnsemblerConfig):
 
     def to_open_api(self) -> OpenApiModel:
         self.standard_config = EnsemblerStandardConfig(
-            experiment_mappings=[
-                turing.generated.models.EnsemblerStandardConfigExperimentMappings(
-                    **experiment_mapping
-                )
-                for experiment_mapping in self.experiment_mappings
-            ]
-            if self.experiment_mappings
-            else None,
+            experiment_mappings=(
+                [
+                    turing.generated.models.EnsemblerStandardConfigExperimentMappings(
+                        **experiment_mapping
+                    )
+                    for experiment_mapping in self.experiment_mappings
+                ]
+                if self.experiment_mappings
+                else None
+            ),
             route_name_path=self.route_name_path,
             fallback_response_route_id=self.fallback_response_route_id,
             lazy_routing=self.lazy_routing,

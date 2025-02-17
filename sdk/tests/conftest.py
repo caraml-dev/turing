@@ -277,7 +277,11 @@ def generic_router_version_status():
 @pytest.fixture
 def generic_resource_request():
     return turing.generated.models.ResourceRequest(
-        min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi", cpu_limit=None,
+        min_replica=1,
+        max_replica=3,
+        cpu_request="100m",
+        memory_request="512Mi",
+        cpu_limit=None,
     )
 
 

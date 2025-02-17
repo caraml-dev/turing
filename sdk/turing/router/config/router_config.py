@@ -217,9 +217,11 @@ class RouterConfig:
             # When the passkey value is not set, the Turing API server is able to automatically retrieve the correct
             # passkey from the existing router version (assuming it has been configured with the same standard
             # experiment engine and the same client username).
-            if self._experiment_engine.config is not None and \
-                    self._experiment_engine.config.get("client") is not None and \
-                    self._experiment_engine.config["client"].get("passkey") != "":
+            if (
+                self._experiment_engine.config is not None
+                and self._experiment_engine.config.get("client") is not None
+                and self._experiment_engine.config["client"].get("passkey") != ""
+            ):
                 self._experiment_engine.config["client"]["passkey"] = None
         else:
             self._experiment_engine = experiment_engine
