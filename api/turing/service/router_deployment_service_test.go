@@ -55,20 +55,12 @@ func (msb *mockClusterServiceBuilder) NewRouterEndpoint(
 func (msb *mockClusterServiceBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	routerServiceAccountKey string,
-	enricherServiceAccountKey string,
-	ensemblerServiceAccountKey string,
-	expEngineServiceAccountKey string,
+	secretMap map[string]string,
 ) *cluster.Secret {
 	return &cluster.Secret{
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: project.Name,
-		Data: map[string]string{
-			"SecretKeyNameRouter":    routerServiceAccountKey,
-			"SecretKeyNameEnricher":  enricherServiceAccountKey,
-			"SecretKeyNameEnsembler": ensemblerServiceAccountKey,
-			"SecretKeyNameExpEngine": expEngineServiceAccountKey,
-		},
+		Data:      secretMap,
 	}
 }
 
@@ -187,6 +179,15 @@ func (msb *mockClusterServiceBuilder) GetRouterServiceName(_ *models.RouterVersi
 	return "test-router-svc"
 }
 
+var (
+	secretMap = map[string]string{
+		servicebuilder.SecretKeyNameRouter:    "router-service-account-key",
+		servicebuilder.SecretKeyNameEnricher:  "enricher-service-account-key",
+		servicebuilder.SecretKeyNameEnsembler: "ensembler-service-account-key",
+		servicebuilder.SecretKeyNameExpEngine: "exp-engine-service-account-key",
+	}
+)
+
 func TestDeployEndpoint(t *testing.T) {
 	testEnv := "test-env"
 	testNamespace := "test-namespace"
@@ -258,10 +259,7 @@ func TestDeployEndpoint(t *testing.T) {
 		&merlin.Environment{Name: testEnv},
 		nil,
 		routerVersion,
-		"router-service-account-key",
-		"enricher-service-account-key",
-		"ensembler-service-account-key",
-		"exp-engine-service-account-key",
+		secretMap,
 		nil,
 		nil,
 		eventsCh,
@@ -281,10 +279,10 @@ func TestDeployEndpoint(t *testing.T) {
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: testNamespace,
 		Data: map[string]string{
-			"SecretKeyNameRouter":    "router-service-account-key",
-			"SecretKeyNameEnricher":  "enricher-service-account-key",
-			"SecretKeyNameEnsembler": "ensembler-service-account-key",
-			"SecretKeyNameExpEngine": "exp-engine-service-account-key",
+			servicebuilder.SecretKeyNameRouter:    "router-service-account-key",
+			servicebuilder.SecretKeyNameEnricher:  "enricher-service-account-key",
+			servicebuilder.SecretKeyNameEnsembler: "ensembler-service-account-key",
+			servicebuilder.SecretKeyNameExpEngine: "exp-engine-service-account-key",
 		},
 	})
 	controller.AssertCalled(t, "DeployKnativeService", mock.Anything, &cluster.KnativeService{
@@ -327,10 +325,10 @@ func TestDeployEndpoint(t *testing.T) {
 		Name:      fmt.Sprintf("%s-svc-acct-secret-%d", routerVersion.Router.Name, routerVersion.Version),
 		Namespace: testNamespace,
 		Data: map[string]string{
-			"SecretKeyNameRouter":    "router-service-account-key",
-			"SecretKeyNameEnricher":  "enricher-service-account-key",
-			"SecretKeyNameEnsembler": "ensembler-service-account-key",
-			"SecretKeyNameExpEngine": "exp-engine-service-account-key",
+			servicebuilder.SecretKeyNameRouter:    "router-service-account-key",
+			servicebuilder.SecretKeyNameEnricher:  "enricher-service-account-key",
+			servicebuilder.SecretKeyNameEnsembler: "ensembler-service-account-key",
+			servicebuilder.SecretKeyNameExpEngine: "exp-engine-service-account-key",
 		},
 	})
 	controller.AssertNumberOfCalls(t, "DeployKnativeService", 3)
@@ -372,10 +370,7 @@ func TestDeployEndpoint(t *testing.T) {
 		&merlin.Environment{Name: testEnv},
 		nil,
 		routerVersion,
-		"router-service-account-key",
-		"enricher-service-account-key",
-		"ensembler-service-account-key",
-		"exp-engine-service-account-key",
+		secretMap,
 		nil,
 		nil,
 		eventsCh,

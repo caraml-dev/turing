@@ -250,7 +250,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	// Add exp engine secret path as env var if service account key file path is specified for exp engine
 	if ver.ExperimentEngine != nil && ver.ExperimentEngine.ServiceAccountKeyFilePath != nil {
 		envs = mergeEnvVars(envs, []corev1.EnvVar{
-			{Name: envExpGoogleApplicationCredentials, Value: secretMountPathExpEngine + secretKeyNameExpEngine},
+			{Name: envExpGoogleApplicationCredentials, Value: secretMountPathExpEngine + SecretKeyNameExpEngine},
 		})
 	}
 
@@ -280,7 +280,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envBQDataset, Value: bqFQN[1]},
 			{Name: envBQTable, Value: bqFQN[2]},
 			{Name: envBQBatchLoad, Value: strconv.FormatBool(logConfig.BigQueryConfig.BatchLoad)},
-			{Name: envGoogleApplicationCredentials, Value: secretMountPathRouter + secretKeyNameRouter},
+			{Name: envGoogleApplicationCredentials, Value: secretMountPathRouter + SecretKeyNameRouter},
 		})
 		if logConfig.BigQueryConfig.BatchLoad {
 			envs = mergeEnvVars(envs, []corev1.EnvVar{
@@ -349,8 +349,8 @@ func buildRouterVolumes(
 						SecretName: secretName,
 						Items: []corev1.KeyToPath{
 							{
-								Key:  secretKeyNameExpEngine,
-								Path: secretKeyNameExpEngine,
+								Key:  SecretKeyNameExpEngine,
+								Path: SecretKeyNameExpEngine,
 							},
 						},
 					},
@@ -372,8 +372,8 @@ func buildRouterVolumes(
 					SecretName: secretName,
 					Items: []corev1.KeyToPath{
 						{
-							Key:  secretKeyNameRouter,
-							Path: secretKeyNameRouter,
+							Key:  SecretKeyNameRouter,
+							Path: SecretKeyNameRouter,
 						},
 					},
 				},

@@ -102,8 +102,8 @@ func TestNewFluentdService(t *testing.T) {
 							SecretName: "service-account",
 							Items: []corev1.KeyToPath{
 								{
-									Key:  secretKeyNameRouter,
-									Path: secretKeyNameRouter,
+									Key:  SecretKeyNameRouter,
+									Path: SecretKeyNameRouter,
 								},
 							},
 						},

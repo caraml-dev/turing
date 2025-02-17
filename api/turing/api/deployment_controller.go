@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	merlin "github.com/caraml-dev/merlin/client"
 	mlp "github.com/caraml-dev/mlp/api/client"
 
+	"github.com/caraml-dev/turing/api/turing/cluster/servicebuilder"
 	"github.com/caraml-dev/turing/api/turing/models"
 	"github.com/caraml-dev/turing/api/turing/service"
 	"github.com/caraml-dev/turing/engines/experiment/manager"
@@ -159,41 +161,12 @@ func (c RouterDeploymentController) deployRouterVersion(
 	routerVersion *models.RouterVersion,
 	eventsCh *service.EventChannel,
 ) (string, error) {
-	var routerServiceAccountKey, enricherServiceAccountKey, ensemblerServiceAccountKey,
-		expEngineServiceAccountKey string
 	var experimentConfig json.RawMessage
 	var err error
 
-	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
-		routerServiceAccountKey, err = c.MLPService.GetSecret(
-			models.ID(project.ID),
-			routerVersion.LogConfig.BigQueryConfig.ServiceAccountSecret,
-		)
-		if err != nil {
-			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
-		}
-	}
-
-	if routerVersion.Enricher != nil && routerVersion.Enricher.ServiceAccount != "" {
-		enricherServiceAccountKey, err = c.MLPService.GetSecret(
-			models.ID(project.ID),
-			routerVersion.Enricher.ServiceAccount,
-		)
-		if err != nil {
-			return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
-		}
-	}
-
-	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerDockerType {
-		if routerVersion.Ensembler.DockerConfig.ServiceAccount != "" {
-			ensemblerServiceAccountKey, err = c.MLPService.GetSecret(
-				models.ID(project.ID),
-				routerVersion.Ensembler.DockerConfig.ServiceAccount,
-			)
-			if err != nil {
-				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
-			}
-		}
+	secretMap, err := c.getMLPSecrets(routerVersion, project)
+	if err != nil {
+		return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 	}
 
 	if routerVersion.ExperimentEngine.Type != models.ExperimentEngineTypeNop {
@@ -208,7 +181,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 			if err != nil {
 				return "", c.updateRouterVersionStatusToFailed(err, routerVersion)
 			}
-			expEngineServiceAccountKey = *serviceAccountKey
+			secretMap[servicebuilder.SecretKeyNameExpEngine] = *serviceAccountKey
 		}
 	}
 
@@ -258,10 +231,7 @@ func (c RouterDeploymentController) deployRouterVersion(
 		environment,
 		currRouterVersion,
 		routerVersion,
-		routerServiceAccountKey,
-		enricherServiceAccountKey,
-		ensemblerServiceAccountKey,
-		expEngineServiceAccountKey,
+		secretMap,
 		pyfuncEnsembler,
 		experimentConfig,
 		eventsCh,
@@ -493,4 +463,96 @@ func (c RouterDeploymentController) getExperimentConfig(routerVersion *models.Ro
 	}
 
 	return experimentConfig, nil
+}
+
+func (c RouterDeploymentController) getMLPSecrets(routerVersion *models.RouterVersion, project *mlp.Project) (map[string]string, error) {
+	secretMap := make(map[string]string)
+
+	if routerVersion.LogConfig.ResultLoggerType == models.BigQueryLogger {
+		routerSecrets, err := c.getSecretsForComponent(
+			routerVersion.LogConfig.BigQueryConfig.ServiceAccountSecret,
+			servicebuilder.SecretKeyNameRouter,
+			[]models.Secret{}, // there are no user-configured secrets for the router
+			project,
+		)
+		if err != nil {
+			return nil, err
+		}
+		maps.Copy(secretMap, routerSecrets)
+	}
+
+	if routerVersion.Enricher != nil {
+		enricherSecrets, err := c.getSecretsForComponent(
+			routerVersion.Enricher.ServiceAccount,
+			servicebuilder.SecretKeyNameEnricher,
+			routerVersion.Enricher.Secrets,
+			project,
+		)
+		if err != nil {
+			return nil, err
+		}
+		maps.Copy(secretMap, enricherSecrets)
+	}
+
+	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerDockerType {
+		ensemblerSecrets, err := c.getSecretsForComponent(
+			routerVersion.Ensembler.DockerConfig.ServiceAccount,
+			servicebuilder.SecretKeyNameEnsembler,
+			routerVersion.Ensembler.DockerConfig.Secrets,
+			project,
+		)
+		if err != nil {
+			return nil, err
+		}
+		maps.Copy(secretMap, ensemblerSecrets)
+	}
+
+	if routerVersion.Ensembler != nil && routerVersion.Ensembler.Type == models.EnsemblerPyFuncType {
+		ensemblerSecrets, err := c.getSecretsForComponent(
+			"", // there are no service accounts for pyfunc ensemblers
+			"",
+			routerVersion.Ensembler.PyfuncConfig.Secrets,
+			project,
+		)
+		if err != nil {
+			return nil, err
+		}
+		maps.Copy(secretMap, ensemblerSecrets)
+	}
+
+	return secretMap, nil
+}
+
+func (c RouterDeploymentController) getSecretsForComponent(
+	serviceAccountName string,
+	serviceAccountSecretKey string,
+	secrets []models.Secret,
+	project *mlp.Project,
+) (map[string]string, error) {
+	secretMap := make(map[string]string)
+	// Retrieve Google Service Account secret from MLP
+	if serviceAccountName != "" {
+		serviceAccountKey, err := c.MLPService.GetSecret(
+			models.ID(project.ID),
+			serviceAccountName,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("service account %s is not found within %s project: %w",
+				serviceAccountName, project.Name, err)
+		}
+		secretMap[serviceAccountSecretKey] = serviceAccountKey
+	}
+	// Retrieve user-configured secrets from MLP
+	for _, secret := range secrets {
+		secretString, err := c.MLPService.GetSecret(
+			models.ID(project.ID),
+			secret.MLPSecretName,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w",
+				secret.MLPSecretName, project.Name, err)
+		}
+		secretMap[secret.EnvVarName] = secretString
+	}
+	return secretMap, nil
 }

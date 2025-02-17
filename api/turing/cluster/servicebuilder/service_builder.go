@@ -28,10 +28,10 @@ const (
 	// Kubernetes secret key name for usage in: router, ensembler, enricher.
 	// They will share the same Kubernetes secret for every RouterVersion deployment.
 	// Hence, the key name should be used to retrieve different credentials.
-	secretKeyNameRouter    = "router-service-account.json"
-	secretKeyNameEnsembler = "ensembler-service-account.json"
-	secretKeyNameEnricher  = "enricher-service-account.json"
-	secretKeyNameExpEngine = "exp-engine-service-account.json"
+	SecretKeyNameRouter    = "router-service-account.json"
+	SecretKeyNameEnsembler = "ensembler-service-account.json"
+	SecretKeyNameEnricher  = "enricher-service-account.json"
+	SecretKeyNameExpEngine = "exp-engine-service-account.json"
 )
 
 var ComponentTypes = struct {
@@ -99,10 +99,7 @@ type ClusterServiceBuilder interface {
 	NewSecret(
 		routerVersion *models.RouterVersion,
 		project *mlp.Project,
-		routerServiceAccountKey string,
-		enricherServiceAccountKey string,
-		ensemblerServiceAccountKey string,
-		expEngineServiceAccountKey string,
+		secretMap map[string]string,
 	) *cluster.Secret
 	NewPodDisruptionBudget(
 		routerVersion *models.RouterVersion,
@@ -170,7 +167,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			Name: secretVolume,
 			VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{
 				SecretName: secretName,
-				Items:      []corev1.KeyToPath{{Key: secretKeyNameEnricher, Path: secretKeyNameEnricher}},
+				Items:      []corev1.KeyToPath{{Key: SecretKeyNameEnricher, Path: SecretKeyNameEnricher}},
 			}},
 		}
 		volumes = append(volumes, v)
@@ -182,14 +179,14 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 		existingReplaced := false
 		for _, env := range enricher.Env {
 			if env.Name == envGoogleApplicationCredentials {
-				env.Value = filepath.Join(secretMountPath, secretKeyNameEnricher)
+				env.Value = filepath.Join(secretMountPath, SecretKeyNameEnricher)
 				existingReplaced = true
 			}
 		}
 		if !existingReplaced {
 			env := &models.EnvVar{
 				Name:  envGoogleApplicationCredentials,
-				Value: filepath.Join(secretMountPath, secretKeyNameEnricher),
+				Value: filepath.Join(secretMountPath, SecretKeyNameEnricher),
 			}
 			enricher.Env = append(enricher.Env, env)
 		}
@@ -256,7 +253,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			Name: secretVolume,
 			VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{
 				SecretName: secretName,
-				Items:      []corev1.KeyToPath{{Key: secretKeyNameEnsembler, Path: secretKeyNameEnsembler}},
+				Items:      []corev1.KeyToPath{{Key: SecretKeyNameEnsembler, Path: SecretKeyNameEnsembler}},
 			}},
 		}
 		volumes = append(volumes, v)
@@ -268,14 +265,14 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 		existingReplaced := false
 		for _, env := range docker.Env {
 			if env.Name == envGoogleApplicationCredentials {
-				env.Value = filepath.Join(secretMountPath, secretKeyNameEnsembler)
+				env.Value = filepath.Join(secretMountPath, SecretKeyNameEnsembler)
 				existingReplaced = true
 			}
 		}
 		if !existingReplaced {
 			env := &models.EnvVar{
 				Name:  envGoogleApplicationCredentials,
-				Value: filepath.Join(secretMountPath, secretKeyNameEnsembler),
+				Value: filepath.Join(secretMountPath, SecretKeyNameEnsembler),
 			}
 			docker.Env = append(docker.Env, env)
 		}
@@ -318,17 +315,10 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 func (sb *clusterSvcBuilder) NewSecret(
 	routerVersion *models.RouterVersion,
 	project *mlp.Project,
-	routerServiceAccountKey string,
-	enricherServiceAccountKey string,
-	ensemblerServiceAccountKey string,
-	expEngineServiceAccountKey string,
+	secretMap map[string]string,
 ) *cluster.Secret {
-	data := map[string]string{
-		secretKeyNameRouter:    routerServiceAccountKey,
-		secretKeyNameEnricher:  enricherServiceAccountKey,
-		secretKeyNameEnsembler: ensemblerServiceAccountKey,
-		secretKeyNameExpEngine: expEngineServiceAccountKey,
-	}
+	data := secretMap
+
 	return &cluster.Secret{
 		Name: fmt.Sprintf(
 			"%s-turing-%s-%d",

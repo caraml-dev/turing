@@ -97,7 +97,7 @@ func TestNewEnricherService(t *testing.T) {
 							Name: secretVolume,
 							VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{
 								SecretName: "secret",
-								Items:      []corev1.KeyToPath{{Key: secretKeyNameEnricher, Path: secretKeyNameEnricher}},
+								Items:      []corev1.KeyToPath{{Key: SecretKeyNameEnricher, Path: SecretKeyNameEnricher}},
 							}},
 						},
 					},
@@ -197,7 +197,7 @@ func TestNewEnsemblerService(t *testing.T) {
 							Name: secretVolume,
 							VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{
 								SecretName: "secret",
-								Items:      []corev1.KeyToPath{{Key: secretKeyNameEnsembler, Path: secretKeyNameEnsembler}},
+								Items:      []corev1.KeyToPath{{Key: SecretKeyNameEnsembler, Path: SecretKeyNameEnsembler}},
 							}},
 						},
 					},
@@ -241,7 +241,7 @@ func TestNewEnsemblerService(t *testing.T) {
 							Name: secretVolume,
 							VolumeSource: corev1.VolumeSource{Secret: &corev1.SecretVolumeSource{
 								SecretName: "secret",
-								Items:      []corev1.KeyToPath{{Key: secretKeyNameEnsembler, Path: secretKeyNameEnsembler}},
+								Items:      []corev1.KeyToPath{{Key: SecretKeyNameEnsembler, Path: SecretKeyNameEnsembler}},
 							}},
 						},
 					},
@@ -286,15 +286,19 @@ func TestNewEnsemblerService(t *testing.T) {
 }
 
 func TestNewSecret(t *testing.T) {
+	secretMap := map[string]string{
+		SecretKeyNameRouter:    "router-key",
+		SecretKeyNameEnricher:  "enricher-key",
+		SecretKeyNameEnsembler: "ensembler-key",
+		SecretKeyNameExpEngine: "exp-engine-key",
+	}
+
 	tests := map[string]struct {
-		version         *models.RouterVersion
-		project         *mlp.Project
-		envType         string
-		routerSvcKey    string
-		enricherSvcKey  string
-		ensemblerSvcKey string
-		expEngineSvcKey string
-		expected        *cluster.Secret
+		version   *models.RouterVersion
+		project   *mlp.Project
+		envType   string
+		secretMap map[string]string
+		expected  *cluster.Secret
 	}{
 		"success": {
 			version: &models.RouterVersion{
@@ -304,21 +308,13 @@ func TestNewSecret(t *testing.T) {
 					Type: "exp-engine",
 				},
 			},
-			project:         &mlp.Project{Name: "test-project"},
-			envType:         "test",
-			routerSvcKey:    "router-key",
-			enricherSvcKey:  "enricher-key",
-			ensemblerSvcKey: "ensembler-key",
-			expEngineSvcKey: "exp-engine-key",
+			project:   &mlp.Project{Name: "test-project"},
+			envType:   "test",
+			secretMap: secretMap,
 			expected: &cluster.Secret{
 				Name:      "test-router-turing-secret-2",
 				Namespace: "test-project",
-				Data: map[string]string{
-					"router-service-account.json":     "router-key",
-					"enricher-service-account.json":   "enricher-key",
-					"ensembler-service-account.json":  "ensembler-key",
-					"exp-engine-service-account.json": "exp-engine-key",
-				},
+				Data:      secretMap,
 				Labels: map[string]string{
 					"app":          "test-router",
 					"environment":  "",
@@ -332,8 +328,7 @@ func TestNewSecret(t *testing.T) {
 	sb := &clusterSvcBuilder{}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			secret := sb.NewSecret(tt.version, tt.project, tt.routerSvcKey, tt.enricherSvcKey, tt.ensemblerSvcKey,
-				tt.expEngineSvcKey)
+			secret := sb.NewSecret(tt.version, tt.project, tt.secretMap)
 			assert.Equal(t, tt.expected, secret)
 		})
 	}
