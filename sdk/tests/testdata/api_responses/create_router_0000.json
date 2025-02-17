@@ -94,6 +94,12 @@
           "value": "abc"
         }
       ],
+      "secrets": [
+        {
+          "mlp_secret_name": "mlp_secret_name",
+          "env_var_name": "env_var_name"
+        }
+      ],
       "service_account": ""
     },
     "ensembler": {
@@ -114,6 +120,12 @@
         "timeout": "500ms",
         "port": 5120,
         "env": [],
+        "secrets": [
+          {
+            "mlp_secret_name": "mlp_secret_name",
+            "env_var_name": "env_var_name"
+          }
+        ],
         "service_account": ""
       }
     },

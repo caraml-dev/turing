@@ -1,9 +1,11 @@
 import pytest
+import turing.mounted_mlp_secret
 import turing.batch.config.source
 import turing.batch.config.sink
 import turing.generated.models
 
 from turing.generated.model.env_var import EnvVar
+from turing.generated.model.mounted_mlp_secret import MountedMLPSecret
 
 
 @pytest.mark.parametrize(
@@ -62,7 +64,7 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
 
 
 @pytest.mark.parametrize(
-    "service_account,resource_request,env_vars,expected_fn",
+    "service_account,resource_request,env_vars,secrets,expected_fn",
     [
         pytest.param(
             "service-account@gcp-project.iam.gserviceaccount.com",
@@ -74,11 +76,23 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
                 executor_memory_request="800M",
             ),
             {"SOME_VAR": "SOME_VALUE"},
-            lambda service_account, resource_request, env_vars: turing.generated.models.EnsemblerInfraConfig(
+            [
+                turing.mounted_mlp_secret.MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
+            lambda service_account, resource_request, env_vars, secrets: turing.generated.models.EnsemblerInfraConfig(
                 service_account_name=service_account,
                 resources=resource_request,
                 env=[
                     EnvVar(name=name, value=value) for name, value in env_vars.items()
+                ],
+                secrets=[
+                    MountedMLPSecret(
+                        mlp_secret_name=secret.mlp_secret_name,
+                        env_var_name=secret.env_var_name,
+                    )
+                    for secret in secrets
                 ],
             ),
             id="Initialize ensembling job infra spec",
@@ -87,18 +101,30 @@ def test_job_spec(source, predictions, result_config, sink, expected_fn):
             "service-account@gcp-project.iam.gserviceaccount.com",
             None,
             {"SOME_VAR": "SOME_VALUE"},
-            lambda service_account, resource_request, env_vars: turing.generated.models.EnsemblerInfraConfig(
+            [
+                turing.mounted_mlp_secret.MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
+            lambda service_account, resource_request, env_vars, secrets: turing.generated.models.EnsemblerInfraConfig(
                 service_account_name=service_account,
                 resources=resource_request,
                 env=[
                     EnvVar(name=name, value=value) for name, value in env_vars.items()
+                ],
+                secrets=[
+                    MountedMLPSecret(
+                        mlp_secret_name=secret.mlp_secret_name,
+                        env_var_name=secret.env_var_name,
+                    )
+                    for secret in secrets
                 ],
             ),
             id="Initialize ensembling job with default resource request",
         ),
     ],
 )
-def test_infra_spec(service_account, resource_request, env_vars, expected_fn):
+def test_infra_spec(service_account, resource_request, env_vars, secrets, expected_fn):
     job_config = turing.batch.config.EnsemblingJobConfig(
         source=None,
         predictions={},
@@ -107,6 +133,7 @@ def test_infra_spec(service_account, resource_request, env_vars, expected_fn):
         service_account=service_account,
         resource_request=resource_request,
         env_vars=env_vars,
+        secrets=secrets,
     )
-    expected = expected_fn(service_account, resource_request, env_vars)
+    expected = expected_fn(service_account, resource_request, env_vars, secrets)
     assert job_config.infra_spec() == expected

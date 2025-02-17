@@ -1,6 +1,7 @@
 import pytest
 import turing
 from turing.generated.exceptions import ApiValueError
+from turing.mounted_mlp_secret import MountedMLPSecret
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.autoscaling_policy import (
     AutoscalingPolicy,
@@ -65,7 +66,7 @@ def test_create_router_ensembler_config(
 
 
 @pytest.mark.parametrize(
-    "project_id,ensembler_id,resource_request,autoscaling_policy,timeout,env,expected",
+    "project_id,ensembler_id,resource_request,autoscaling_policy,timeout,env,secrets,expected",
     [
         pytest.param(
             77,
@@ -76,6 +77,11 @@ def test_create_router_ensembler_config(
             AutoscalingPolicy(metric="concurrency", target="10"),
             "500ms",
             [EnvVar(name="env_name", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             "generic_pyfunc_router_ensembler_config",
         )
     ],
@@ -87,6 +93,7 @@ def test_create_pyfunc_router_ensembler_config(
     autoscaling_policy,
     timeout,
     env,
+    secrets,
     expected,
     request,
 ):
@@ -97,12 +104,13 @@ def test_create_pyfunc_router_ensembler_config(
         autoscaling_policy=autoscaling_policy,
         timeout=timeout,
         env=env,
+        secrets=secrets,
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "project_id,ensembler_id,resource_request,timeout,env,expected",
+    "project_id,ensembler_id,resource_request,timeout,env,secrets,expected",
     [
         pytest.param(
             77,
@@ -112,12 +120,17 @@ def test_create_pyfunc_router_ensembler_config(
             ),
             "500ks",
             [EnvVar(name="env_name", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             ApiValueError,
         )
     ],
 )
 def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
-    project_id, ensembler_id, resource_request, timeout, env, expected
+    project_id, ensembler_id, resource_request, timeout, env, secrets, expected
 ):
     with pytest.raises(expected):
         PyfuncRouterEnsemblerConfig(
@@ -126,11 +139,12 @@ def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
             resource_request=resource_request,
             timeout=timeout,
             env=env,
+            secrets=secrets,
         ).to_open_api()
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,autoscaling_policy,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,autoscaling_policy,endpoint,timeout,port,env,secrets,service_account,expected",
     [
         pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
@@ -142,6 +156,11 @@ def test_create_pyfunc_router_ensembler_config_with_invalid_timeout(
             "500ms",
             5120,
             [EnvVar(name="env_name", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             "secret-name-for-google-service-account",
             "generic_docker_router_ensembler_config",
         )
@@ -155,6 +174,7 @@ def test_create_docker_router_ensembler_config(
     timeout,
     port,
     env,
+    secrets,
     service_account,
     expected,
     request,
@@ -167,13 +187,14 @@ def test_create_docker_router_ensembler_config(
         timeout=timeout,
         port=port,
         env=env,
+        secrets=secrets,
         service_account=service_account,
     ).to_open_api()
     assert actual == request.getfixturevalue(expected)
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,endpoint,timeout,port,env,secrets,service_account,expected",
     [
         pytest.param(
             "#@!#!@#@!",
@@ -184,13 +205,26 @@ def test_create_docker_router_ensembler_config(
             "500ms",
             5120,
             [EnvVar(name="env_name", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             "secret-name-for-google-service-account",
             ApiValueError,
         )
     ],
 )
 def test_create_docker_router_ensembler_config_with_invalid_image(
-    image, resource_request, endpoint, timeout, port, env, service_account, expected
+    image,
+    resource_request,
+    endpoint,
+    timeout,
+    port,
+    env,
+    secrets,
+    service_account,
+    expected,
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
@@ -200,12 +234,13 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             timeout=timeout,
             port=port,
             env=env,
+            secrets=secrets,
             service_account=service_account,
         ).to_open_api()
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,endpoint,timeout,port,env,secrets,service_account,expected",
     [
         pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
@@ -216,13 +251,26 @@ def test_create_docker_router_ensembler_config_with_invalid_image(
             "500ks",
             5120,
             [EnvVar(name="env_name", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             "secret-name-for-google-service-account",
             ApiValueError,
         )
     ],
 )
 def test_create_docker_router_ensembler_config_with_invalid_timeout(
-    image, resource_request, endpoint, timeout, port, env, service_account, expected
+    image,
+    resource_request,
+    endpoint,
+    timeout,
+    port,
+    env,
+    secrets,
+    service_account,
+    expected,
 ):
     with pytest.raises(expected):
         DockerRouterEnsemblerConfig(
@@ -232,12 +280,13 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             timeout=timeout,
             port=port,
             env=env,
+            secrets=secrets,
             service_account=service_account,
         ).to_open_api()
 
 
 @pytest.mark.parametrize(
-    "image,resource_request,endpoint,timeout,port,env,service_account,expected",
+    "image,resource_request,endpoint,timeout,port,env,secrets,service_account,expected",
     [
         pytest.param(
             "test.io/just-a-test/turing-ensembler:0.0.0-build.0",
@@ -248,6 +297,11 @@ def test_create_docker_router_ensembler_config_with_invalid_timeout(
             "500ms",
             5120,
             [EnvVar(name="env_!@#!@$!", value="env_val")],
+            [
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
             "secret-name-for-google-service-account",
             ApiValueError,
         )
@@ -260,6 +314,7 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
     timeout,
     port,
     env,
+    secrets,
     service_account,
     expected,
 ):
@@ -271,6 +326,7 @@ def test_create_docker_router_ensembler_config_with_invalid_env(
             timeout=timeout,
             port=port,
             env=env,
+            secrets=secrets,
             service_account=service_account,
         ).to_open_api()
 
@@ -607,6 +663,12 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     env=[
                         turing.generated.models.EnvVar(name="env_name", value="env_val")
                     ],
+                    secrets=[
+                        turing.generated.models.MountedMLPSecret(
+                            mlp_secret_name="mlp_secret_name",
+                            env_var_name="env_var_name",
+                        )
+                    ],
                     image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
                     port=5120,
                     resource_request=turing.generated.models.ResourceRequest(
@@ -633,6 +695,12 @@ def test_create_nop_router_ensembler_config_with_invalid_route(
                     ensembler_id=11,
                     env=[
                         turing.generated.models.EnvVar(name="env_name", value="env_val")
+                    ],
+                    secrets=[
+                        turing.generated.models.MountedMLPSecret(
+                            mlp_secret_name="mlp_secret_name",
+                            env_var_name="env_var_name",
+                        )
                     ],
                     project_id=77,
                     resource_request=turing.generated.models.ResourceRequest(
@@ -725,6 +793,11 @@ def test_create_base_ensembler(ensembler_type, config, expected, request):
                 "timeout": "500ms",
                 "port": 5120,
                 "env": [EnvVar(name="env_name", value="env_val")],
+                "secrets": [
+                    MountedMLPSecret(
+                        mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                    )
+                ],
                 "service_account": "secret-name-for-google-service-account",
             },
         ),
@@ -746,6 +819,11 @@ def test_create_base_ensembler(ensembler_type, config, expected, request):
                 ),
                 "timeout": "500ms",
                 "env": [EnvVar(name="env_name", value="env_val")],
+                "secrets": [
+                    MountedMLPSecret(
+                        mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                    )
+                ],
             },
         ),
     ],

@@ -8,6 +8,7 @@ from turing.router.config.autoscaling_policy import (
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
+from turing.mounted_mlp_secret import MountedMLPSecret
 
 
 @dataclass
@@ -21,6 +22,7 @@ class Enricher:
     :param timeout: request timeout which when exceeded, the request to the enricher will be terminated
     :param port: port number exposed by the container
     :param env: environment variables required by the container
+    :param secrets: list of MLP secrets to mount into the enricher environment as environment variables
     :param id: id of the enricher
     :param service_account: optional service account for the Docker deployment
     """
@@ -32,6 +34,7 @@ class Enricher:
     timeout: str
     port: int
     env: List["EnvVar"]
+    secrets: List["MountedMLPSecret"]
     id: int = None
     service_account: str = None
 
@@ -43,6 +46,7 @@ class Enricher:
         timeout: str,
         port: int,
         env: List["EnvVar"],
+        secrets: List["MountedMLPSecret"],
         id: int = None,
         service_account: str = None,
         autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
@@ -56,6 +60,7 @@ class Enricher:
         self.timeout = timeout
         self.port = port
         self.env = env
+        self.secrets = secrets
         self.service_account = service_account
 
     @property
@@ -145,6 +150,22 @@ class Enricher:
             self._env = env
 
     @property
+    def secrets(self) -> List["MountedMLPSecret"]:
+        return self._secrets
+
+    @secrets.setter
+    def secrets(self, secrets: Union[List["MountedMLPSecret"], List[Dict[str, str]]]):
+        if isinstance(secrets, list):
+            if all(isinstance(secret, MountedMLPSecret) for secret in secrets):
+                self._secrets = secrets
+            elif all(isinstance(secret, dict) for secret in secrets):
+                self._secrets = [MountedMLPSecret(**secret) for secret in secrets]
+            else:
+                self._secrets = secrets
+        else:
+            self._secrets = secrets
+
+    @property
     def service_account(self) -> str:
         return self._service_account
 
@@ -169,5 +190,6 @@ class Enricher:
             timeout=self.timeout,
             port=self.port,
             env=[env_var.to_open_api() for env_var in self.env],
+            secrets=[secret.to_open_api() for secret in self.secrets],
             **kwargs
         )

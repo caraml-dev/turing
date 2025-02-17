@@ -10,6 +10,7 @@ from turing.router.config.autoscaling_policy import (
 )
 from turing.router.config.resource_request import ResourceRequest
 from turing.router.config.common.env_var import EnvVar
+from turing.mounted_mlp_secret import MountedMLPSecret
 
 
 @dataclass
@@ -203,6 +204,10 @@ class RouterEnsemblerConfig(DataObject):
                 turing.generated.models.EnvVar(**env_var)
                 for env_var in docker_config["env"]
             ]
+            openapi_docker_config["secrets"] = [
+                turing.generated.models.MountedMLPSecret(**secret)
+                for secret in docker_config["secrets"]
+            ]
             self._docker_config = turing.generated.models.EnsemblerDockerConfig(
                 **openapi_docker_config
             )
@@ -236,6 +241,10 @@ class RouterEnsemblerConfig(DataObject):
             openapi_pyfunc_config["env"] = [
                 turing.generated.models.EnvVar(**env_var)
                 for env_var in pyfunc_config["env"]
+            ]
+            openapi_pyfunc_config["secrets"] = [
+                turing.generated.models.MountedMLPSecret(**secret)
+                for secret in pyfunc_config["secrets"]
             ]
             self._pyfunc_config = turing.generated.models.EnsemblerPyfuncConfig(
                 **openapi_pyfunc_config
@@ -278,6 +287,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         timeout: str,
         resource_request: ResourceRequest,
         env: List["EnvVar"],
+        secrets: List["MountedMLPSecret"],
         autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
     ):
         """
@@ -289,6 +299,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param autoscaling_policy: AutoscalingPolicy instance containing configs for the deployment autoscaling
         :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
         :param env: environment variables required by the container
+        :param secrets: list of MLP secrets to mount into the ensembler environment as environment variables
         """
         self.project_id = project_id
         self.ensembler_id = ensembler_id
@@ -296,6 +307,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
         self.autoscaling_policy = autoscaling_policy
         self.timeout = timeout
         self.env = env
+        self.secrets = secrets
         super().__init__(type="pyfunc")
 
     @property
@@ -346,6 +358,14 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
     def env(self, env: List["EnvVar"]):
         self._env = env
 
+    @property
+    def secrets(self) -> List["MountedMLPSecret"]:
+        return self._secrets
+
+    @secrets.setter
+    def secrets(self, secrets: List["MountedMLPSecret"]):
+        self._secrets = secrets
+
     @classmethod
     def from_config(
         cls, config: turing.generated.models.EnsemblerPyfuncConfig
@@ -369,6 +389,13 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
                 else DEFAULT_AUTOSCALING_POLICY
             ),
             env=[EnvVar(name=env.name, value=env.value) for env in config.env],
+            secrets=[
+                MountedMLPSecret(
+                    mlp_secret_name=secret.mlp_secret_name,
+                    env_var_name=secret.env_var_name,
+                )
+                for secret in config.secrets
+            ],
         )
 
     def to_open_api(self) -> OpenApiModel:
@@ -381,6 +408,7 @@ class PyfuncRouterEnsemblerConfig(RouterEnsemblerConfig):
             autoscaling_policy=self.autoscaling_policy.to_open_api(),
             timeout=self.timeout,
             env=[env_var.to_open_api() for env_var in self.env],
+            secrets=[secret.to_open_api() for secret in self.secrets],
         )
         return super().to_open_api()
 
@@ -395,6 +423,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         timeout: str,
         port: int,
         env: List["EnvVar"],
+        secrets: List["MountedMLPSecret"],
         service_account: str = None,
         autoscaling_policy: AutoscalingPolicy = DEFAULT_AUTOSCALING_POLICY,
     ):
@@ -408,6 +437,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         :param timeout: request timeout which when exceeded, the request to the ensembler will be terminated
         :param port: port number exposed by the container
         :param env: environment variables required by the container
+        :param secrets: list of MLP secrets to mount into the ensembler environment as environment variables
         :param service_account: optional service account for the Docker deployment
         """
         self.image = image
@@ -417,6 +447,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self.timeout = timeout
         self.port = port
         self.env = env
+        self.secrets = secrets
         self.service_account = service_account
         super().__init__(type="docker")
 
@@ -477,6 +508,14 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
         self._env = env
 
     @property
+    def secrets(self) -> List["MountedMLPSecret"]:
+        return self._secrets
+
+    @secrets.setter
+    def secrets(self, secrets: List["MountedMLPSecret"]):
+        self._secrets = secrets
+
+    @property
     def service_account(self) -> str:
         return self._service_account
 
@@ -508,6 +547,13 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             timeout=config.timeout,
             port=config.port,
             env=[EnvVar(name=env.name, value=env.value) for env in config.env],
+            secrets=[
+                MountedMLPSecret(
+                    mlp_secret_name=secret.mlp_secret_name,
+                    env_var_name=secret.env_var_name,
+                )
+                for secret in config.secrets
+            ],
             service_account=config["service_account"],
         )
 
@@ -526,6 +572,7 @@ class DockerRouterEnsemblerConfig(RouterEnsemblerConfig):
             timeout=self.timeout,
             port=self.port,
             env=[env_var.to_open_api() for env_var in self.env],
+            secrets=[secret.to_open_api() for secret in self.secrets],
             **kwargs,
         )
         return super().to_open_api()
