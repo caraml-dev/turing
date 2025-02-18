@@ -1008,6 +1008,7 @@ func TestValidateAutoscaling(t *testing.T) {
 				Value: "value",
 			},
 		},
+		Secrets: []models.Secret{},
 	}
 	makeEnricher := func(
 		enricher request.EnricherEnsemblerConfig,
