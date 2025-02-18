@@ -55,7 +55,7 @@ type EnsemblerDockerConfig struct {
 	// Port number the container listens to for requests
 	Port int `json:"port" validate:"required"`
 	// MLP secrets to inject into the container
-	Secrets Secrets `json:"secrets"`
+	Secrets Secrets `json:"secrets" validate:"required"`
 	// Environment variables to set in the container
 	Env EnvVars `json:"env" validate:"required"`
 	// secret name in MLP containing service account key

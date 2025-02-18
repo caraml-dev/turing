@@ -82,6 +82,8 @@ type EnricherEnsemblerConfig struct {
 	Port int `json:"port" validate:"required"`
 	// Environment variables to inject into the pod.
 	Env models.EnvVars `json:"env" validate:"required"`
+	// MLP secrets to inject into the pod.
+	Secrets models.Secrets `json:"secrets" validate:"required"`
 	// ServiceAccount specifies the name of the secret registered in the MLP project containing the service account.
 	// The service account will be mounted into the user-container and the environment variable
 	// GOOGLE_APPLICATION_CREDENTIALS will reference the service account file.
@@ -98,6 +100,7 @@ func (cfg EnricherEnsemblerConfig) BuildEnricher() *models.Enricher {
 		Timeout:           cfg.Timeout,
 		Port:              cfg.Port,
 		Env:               cfg.Env,
+		Secrets:           cfg.Secrets,
 		ServiceAccount:    cfg.ServiceAccount,
 	}
 }
