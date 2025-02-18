@@ -72,7 +72,7 @@ type EnsemblerPyfuncConfig struct {
 	// Request timeout in duration format e.g. 60s
 	Timeout string `json:"timeout" validate:"required"`
 	// MLP secrets to inject into the container
-	Secrets Secrets `json:"secrets"`
+	Secrets Secrets `json:"secrets" validate:"required"`
 	// Environment variables to set in the container
 	Env EnvVars `json:"env" validate:"required"`
 }
