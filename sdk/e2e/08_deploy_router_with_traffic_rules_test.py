@@ -89,6 +89,7 @@ def test_deploy_router_with_traffic_rules():
         timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="ensembler")],
+        secrets=[],
     )
 
     # create the RouterConfig instance

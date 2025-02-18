@@ -35,6 +35,7 @@ def test_update_router_invalid_config():
         timeout="2s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="enricher")],
+        secrets=[],
     )
 
     # update router
