@@ -323,7 +323,7 @@ func (c *ensemblingController) getMLPSecrets(
 				return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w",
 					secret.GetMlpSecretName(), namespace, err)
 			}
-			secretMap[secret.GetEnvVarName()] = secretString
+			secretMap[secret.GetMlpSecretName()] = secretString
 		}
 	}
 	return secretMap, nil

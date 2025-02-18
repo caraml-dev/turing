@@ -555,7 +555,7 @@ func (c RouterDeploymentController) getSecretsForComponent(
 			return nil, fmt.Errorf("user-configured secret %s is not found within %s project: %w",
 				secret.MLPSecretName, project.Name, err)
 		}
-		secretMap[secret.EnvVarName] = secretString
+		secretMap[secret.MLPSecretName] = secretString
 	}
 	return secretMap, nil
 }
