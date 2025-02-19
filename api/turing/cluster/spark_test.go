@@ -126,6 +126,9 @@ func TestGetCPURequestAndLimit(t *testing.T) {
 }
 
 func TestGetEnvVars(t *testing.T) {
+	// Create a copy of sparkInfraConfig to avoid modifying the original when running tests in parallel
+	sparkInfraConfigCopy := *sparkInfraConfig
+
 	request := &CreateSparkRequest{
 		JobName:               jobName,
 		JobLabels:             jobLabels,
@@ -139,7 +142,7 @@ func TestGetEnvVars(t *testing.T) {
 		ExecutorMemoryRequest: memoryValue,
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
-		SparkInfraConfig:      sparkInfraConfig,
+		SparkInfraConfig:      &sparkInfraConfigCopy,
 		EnvVars:               &envVars,
 	}
 	tests := map[string]struct {
