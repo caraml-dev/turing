@@ -8,7 +8,7 @@ import {
   EuiText,
   EuiLink
 } from "@elastic/eui";
-import { LazyLog, ScrollFollow } from "react-lazylog";
+import { LazyLog, ScrollFollow } from "react-lazylog-with-emitter";
 import { slugify } from "@caraml-dev/ui-lib";
 import isArray from "lodash/isArray";
 
