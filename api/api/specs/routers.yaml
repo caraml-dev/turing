@@ -892,6 +892,7 @@ components:
         - timeout
         - port
         - env
+        - secrets
       properties:
         image:
           type: "string"
@@ -931,6 +932,8 @@ components:
         - ensembler_id
         - resource_request
         - timeout
+        - env
+        - secrets
       properties:
         project_id:
           type: "integer"

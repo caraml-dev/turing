@@ -2698,6 +2698,7 @@ components:
       - image
       - port
       - resource_request
+      - secrets
       - timeout
       type: object
     EnsemblerPyfuncConfig:
@@ -2748,8 +2749,10 @@ components:
           type: array
       required:
       - ensembler_id
+      - env
       - project_id
       - resource_request
+      - secrets
       - timeout
       type: object
     TrafficRule:

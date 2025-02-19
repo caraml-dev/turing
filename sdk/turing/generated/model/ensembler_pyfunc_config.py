@@ -92,9 +92,9 @@ class EnsemblerPyfuncConfig(ModelNormal):
             'ensembler_id': (int,),  # noqa: E501
             'resource_request': (ResourceRequest,),  # noqa: E501
             'timeout': (str,),  # noqa: E501
-            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
             'secrets': ([MountedMLPSecret],),  # noqa: E501
+            'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
         }
 
     @cached_property
@@ -107,9 +107,9 @@ class EnsemblerPyfuncConfig(ModelNormal):
         'ensembler_id': 'ensembler_id',  # noqa: E501
         'resource_request': 'resource_request',  # noqa: E501
         'timeout': 'timeout',  # noqa: E501
-        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
         'env': 'env',  # noqa: E501
         'secrets': 'secrets',  # noqa: E501
+        'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
     }
 
     _composed_schemas = {}
@@ -124,7 +124,7 @@ class EnsemblerPyfuncConfig(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, project_id, ensembler_id, resource_request, timeout, *args, **kwargs):  # noqa: E501
+    def __init__(self, project_id, ensembler_id, resource_request, timeout, env, secrets, *args, **kwargs):  # noqa: E501
         """EnsemblerPyfuncConfig - a model defined in OpenAPI
 
         Args:
@@ -132,6 +132,8 @@ class EnsemblerPyfuncConfig(ModelNormal):
             ensembler_id (int):
             resource_request (ResourceRequest):
             timeout (str):
+            env ([EnvVar]):
+            secrets ([MountedMLPSecret]):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -165,8 +167,6 @@ class EnsemblerPyfuncConfig(ModelNormal):
                                 through its discriminator because we passed in
                                 _visited_composed_classes = (Animal,)
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
-            env ([EnvVar]): [optional]  # noqa: E501
-            secrets ([MountedMLPSecret]): [optional]  # noqa: E501
         """
 
         _check_type = kwargs.pop('_check_type', True)
@@ -196,6 +196,8 @@ class EnsemblerPyfuncConfig(ModelNormal):
         self.ensembler_id = ensembler_id
         self.resource_request = resource_request
         self.timeout = timeout
+        self.env = env
+        self.secrets = secrets
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \
