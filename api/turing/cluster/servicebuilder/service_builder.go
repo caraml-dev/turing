@@ -206,7 +206,7 @@ func (sb *clusterSvcBuilder) NewEnricherService(
 			CPULimit:       sb.getCPULimit(enricher.ResourceRequest),
 			MemoryRequests: enricher.ResourceRequest.MemoryRequest,
 			MemoryLimit:    sb.getMemoryLimit(enricher.ResourceRequest),
-			Envs:           sb.getEnvVars(enricher.ResourceRequest, &enricher.Env),
+			Envs:           sb.getEnvVars(enricher.ResourceRequest, &enricher.Env, &enricher.Secrets, secretName),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
@@ -292,7 +292,7 @@ func (sb *clusterSvcBuilder) NewEnsemblerService(
 			CPULimit:       sb.getCPULimit(docker.ResourceRequest),
 			MemoryRequests: docker.ResourceRequest.MemoryRequest,
 			MemoryLimit:    sb.getMemoryLimit(docker.ResourceRequest),
-			Envs:           sb.getEnvVars(docker.ResourceRequest, &docker.Env),
+			Envs:           sb.getEnvVars(docker.ResourceRequest, &docker.Env, &docker.Secrets, secretName),
 			Labels:         buildLabels(project, routerVersion.Router),
 			Volumes:        volumes,
 			VolumeMounts:   volumeMounts,
@@ -422,13 +422,17 @@ func (sb *clusterSvcBuilder) getMemoryLimit(resourceRequest *models.ResourceRequ
 }
 
 func (sb *clusterSvcBuilder) getEnvVars(resourceRequest *models.ResourceRequest,
-	userEnvVars *models.EnvVars) (newEnvVars []corev1.EnvVar) {
+	userEnvVars *models.EnvVars, secrets *models.Secrets, secretName string) (newEnvVars []corev1.EnvVar) {
 	if resourceRequest != nil && (resourceRequest.CPULimit == nil || resourceRequest.CPULimit.IsZero()) &&
 		sb.knativeServiceConfig.UserContainerCPULimitRequestFactor == 0 {
 		newEnvVars = mergeEnvVars(newEnvVars, sb.knativeServiceConfig.DefaultEnvVarsWithoutCPULimits)
 	}
 	if userEnvVars != nil {
 		newEnvVars = mergeEnvVars(newEnvVars, userEnvVars.ToKubernetesEnvVars())
+	}
+
+	if secrets != nil {
+		newEnvVars = mergeEnvVars(newEnvVars, secrets.ToKubernetesEnvVars(secretName))
 	}
 	return
 }

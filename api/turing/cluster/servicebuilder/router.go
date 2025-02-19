@@ -210,7 +210,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	sentryDSN string,
 	ver *models.RouterVersion,
 ) ([]corev1.EnvVar, error) {
-	envs := sb.getEnvVars(ver.ResourceRequest, nil)
+	envs := sb.getEnvVars(ver.ResourceRequest, nil, nil, "")
 
 	// Add app name, router timeout, jaeger collector
 	envs = mergeEnvVars(envs,
