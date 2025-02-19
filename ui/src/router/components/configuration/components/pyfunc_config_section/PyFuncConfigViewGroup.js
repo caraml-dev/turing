@@ -5,6 +5,7 @@ import { ResourcesConfigTable } from "../ResourcesConfigTable";
 import { ConfigMultiSectionPanel } from "../../../../../components/config_multi_section_panel/ConfigMultiSectionPanel";
 import { PyFuncConfigTable } from "./PyFuncConfigTable";
 import { EnvVariablesConfigTable } from "../docker_config_section/EnvVariablesConfigTable";
+import { SecretsConfigTable } from "../docker_config_section/SecretsConfigTable";
 
 export const PyFuncConfigViewGroup = ({
   componentName,
@@ -25,10 +26,16 @@ export const PyFuncConfigViewGroup = ({
     });
   }
 
-  items.push({
-    title: "Environment Variables",
-    children: <EnvVariablesConfigTable variables={pyfuncConfig.env} />,
-  });
+  items.push(
+    {
+      title: "Environment Variables",
+      children: <EnvVariablesConfigTable variables={pyfuncConfig.env} />,
+    },
+    {
+      title: "Secrets",
+      children: <SecretsConfigTable variables={pyfuncConfig.secrets} />,
+    }
+  );
 
   return (
     <EuiFlexGroup direction="row" wrap>
