@@ -68,7 +68,10 @@ class AutoscalingPolicy:
 
     @target.setter
     def target(self, target: str):
-        assert target.isnumeric()
+        try:
+            float(target)
+        except ValueError:
+            raise AssertionError("Target value must be a number")
         self._target = target
 
     def to_open_api(self) -> OpenApiModel:
