@@ -108,6 +108,7 @@ export class RouterVersion {
             endpoint: this.enricher.endpoint,
             port: this.enricher.port,
             env: this.enricher.env,
+            secrets: this.enricher.secrets,
             service_account: this.enricher.service_account,
             resource_request: this.enricher.resource_request,
             autoscaling_policy: {

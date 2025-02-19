@@ -8,6 +8,7 @@ import { PyFuncEnsembler } from "../../../../../services/ensembler";
 import { PyFuncDeploymentPanel } from "./PyFuncDeploymentPanel";
 import { EnsemblersContextProvider } from "../../../../../providers/ensemblers/context";
 import { EnvVariablesPanel } from "../docker_config/EnvVariablesPanel";
+import { SecretsPanel } from "../docker_config/SecretsPanel";
 import { AutoscalingPolicyPanel } from "../autoscaling_policy/AutoscalingPolicyPanel";
 
 export const PyFuncConfigFormGroup = ({
@@ -31,8 +32,8 @@ export const PyFuncConfigFormGroup = ({
   return (
     !!pyfuncConfig && (
       <Fragment>
-        <EuiFlexItem>
-          <SecretsContextProvider projectId={projectId}>
+        <SecretsContextProvider projectId={projectId}>
+          <EuiFlexItem>
             <EnsemblersContextProvider
               projectId={projectId}
               ensemblerType={"pyfunc"}>
@@ -42,33 +43,41 @@ export const PyFuncConfigFormGroup = ({
                 errors={errors}
               />
             </EnsemblersContextProvider>
-          </SecretsContextProvider>
-        </EuiFlexItem>
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EnvVariablesPanel
-            variables={pyfuncConfig.env}
-            onChangeHandler={onChange("env")}
-            errors={errors.env}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <EnvVariablesPanel
+              variables={pyfuncConfig.env}
+              onChangeHandler={onChange("env")}
+              errors={errors.env}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <ResourcesPanel
-            resourcesConfig={pyfuncConfig.resource_request}
-            onChangeHandler={onChange("resource_request")}
-            errors={errors.resource_request}
-            maxAllowedReplica={maxAllowedReplica}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <SecretsPanel
+              variables={pyfuncConfig.secrets}
+              onChangeHandler={onChange("secrets")}
+              errors={errors.secrets}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <ResourcesPanel
+              resourcesConfig={pyfuncConfig.resource_request}
+              onChangeHandler={onChange("resource_request")}
+              errors={errors.resource_request}
+              maxAllowedReplica={maxAllowedReplica}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <AutoscalingPolicyPanel
+              autoscalingPolicyConfig={pyfuncConfig.autoscaling_policy}
+              onChangeHandler={onChange("autoscaling_policy")}
+              errors={errors.autoscaling_policy}
+            />
+          </EuiFlexItem>
+        </SecretsContextProvider>
       </Fragment>
     )
   );

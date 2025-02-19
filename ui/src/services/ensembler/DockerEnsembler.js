@@ -33,6 +33,7 @@ export class DockerEnsembler extends Ensembler {
         target: "1",
       },
       env: [],
+      secrets: [],
       service_account: "",
     };
   }

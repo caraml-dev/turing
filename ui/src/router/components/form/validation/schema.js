@@ -91,6 +91,7 @@ const routerNameRegex = /^[a-z0-9-]*$/,
   envVariableNameRegex = /^[a-z0-9_]*$/i,
   dockerImageRegex =
     /^([a-z0-9]+(?:[._-][a-z0-9]+)*(?::\d{2,5})?\/)?([a-z0-9]+(?:[._-][a-z0-9]+)*\/)*([a-z0-9]+(?:[._-][a-z0-9]+)*)(?::[a-z0-9]+(?:[._-][a-z0-9]+)*)?$/i,
+  configMapNameRegex = /^[-._a-zA-Z0-9]+$/,
   bigqueryTableRegex = /^[a-z][a-z0-9-]+\.\w+([_]?\w)+\.\w+([_]?\w)+$/i,
   kafkaBrokersRegex =
     /^([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+)(,([a-z]+:\/\/)?\[?([0-9a-zA-Z\-%._:]*)\]?:([0-9]+))*$/i,
@@ -184,9 +185,26 @@ const environmentVariableSchema = yup.object().shape({
     .required("Variable name can not be empty")
     .matches(
       envVariableNameRegex,
-      "The name of a variable can contain only alphanumeric character or the underscore"
+      "The name of an environment variable must contain only alphanumeric characters or '_'"
     ),
   value: yup.string(),
+});
+
+const secretSchema = yup.object().shape({
+  mlp_secret_name: yup
+    .string()
+    .required("MLP secret name is required")
+    .matches(
+      configMapNameRegex,
+      "The name of the MLP secret must contain only alphanumeric characters, '-', '_' or '.'"
+    ),
+  env_var_name: yup
+    .string()
+    .required("Environment variable name is required")
+    .matches(
+      envVariableNameRegex,
+      "The name of an environment variable must contain only alphanumeric characters or '_'"
+    ),
 });
 
 const resourceRequestSchema = (maxAllowedReplica) =>
@@ -267,6 +285,7 @@ const dockerDeploymentSchema = (maxAllowedReplica) => (_) =>
       .required("Port value is required, e.g. 8080"),
     timeout: timeoutSchema.required("Timeout is required"),
     env: yup.array(environmentVariableSchema),
+    secrets: yup.array(secretSchema),
     resource_request: resourceRequestSchema(maxAllowedReplica),
     autoscaling_policy: autoscalingPolicySchema,
   });
@@ -279,6 +298,7 @@ const pyfuncDeploymentSchema = (maxAllowedReplica) => (_) =>
     resource_request: resourceRequestSchema(maxAllowedReplica),
     autoscaling_policy: autoscalingPolicySchema,
     env: yup.array(environmentVariableSchema),
+    secrets: yup.array(secretSchema),
   });
 
 const mappingSchema = yup.object().shape({
