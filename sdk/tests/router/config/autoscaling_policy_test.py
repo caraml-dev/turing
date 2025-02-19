@@ -41,6 +41,35 @@ def test_set_invalid_metric():
         ),
     ],
 )
-def test_set_route_with_invalid_endpoint(metric, expected):
+def test_set_autoscaling_policy_metric(metric, expected):
     policy = AutoscalingPolicy(metric=metric, target=DEFAULT_AUTOSCALING_POLICY.target)
     assert policy.metric == expected
+
+
+@pytest.mark.parametrize(
+    "target,expected,error",
+    [
+        pytest.param(
+            "100",
+            "100",
+            None,
+        ),
+        pytest.param(
+            "0.5",
+            "0.5",
+            None,
+        ),
+        pytest.param(
+            "0.5.5",
+            None,
+            AssertionError,
+        ),
+    ],
+)
+def test_set_autoscaling_policy_target(target, expected, error):
+    if error is not None:
+        with pytest.raises(error):
+            AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target=target)
+    else:
+        policy = AutoscalingPolicy(metric=AutoscalingMetric.CONCURRENCY, target=target)
+        assert policy.target == expected
