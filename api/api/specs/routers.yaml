@@ -782,6 +782,7 @@ components:
         - timeout
         - port
         - env
+        - secrets
       properties:
         id:
           $ref: "common.yaml#/components/schemas/Id"

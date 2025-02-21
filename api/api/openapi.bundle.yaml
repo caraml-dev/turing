@@ -2517,6 +2517,7 @@ components:
       - image
       - port
       - resource_request
+      - secrets
       - timeout
       type: object
     RouterEnsemblerConfig:

@@ -94,9 +94,9 @@ class Enricher(ModelNormal):
             'timeout': (str,),  # noqa: E501
             'port': (int,),  # noqa: E501
             'env': ([EnvVar],),  # noqa: E501
+            'secrets': ([MountedMLPSecret],),  # noqa: E501
             'id': (int,),  # noqa: E501
             'autoscaling_policy': (AutoscalingPolicy,),  # noqa: E501
-            'secrets': ([MountedMLPSecret],),  # noqa: E501
             'service_account': (str,),  # noqa: E501
             'created_at': (datetime,),  # noqa: E501
             'updated_at': (datetime,),  # noqa: E501
@@ -114,9 +114,9 @@ class Enricher(ModelNormal):
         'timeout': 'timeout',  # noqa: E501
         'port': 'port',  # noqa: E501
         'env': 'env',  # noqa: E501
+        'secrets': 'secrets',  # noqa: E501
         'id': 'id',  # noqa: E501
         'autoscaling_policy': 'autoscaling_policy',  # noqa: E501
-        'secrets': 'secrets',  # noqa: E501
         'service_account': 'service_account',  # noqa: E501
         'created_at': 'created_at',  # noqa: E501
         'updated_at': 'updated_at',  # noqa: E501
@@ -134,7 +134,7 @@ class Enricher(ModelNormal):
     ])
 
     @convert_js_args_to_python_args
-    def __init__(self, image, resource_request, endpoint, timeout, port, env, *args, **kwargs):  # noqa: E501
+    def __init__(self, image, resource_request, endpoint, timeout, port, env, secrets, *args, **kwargs):  # noqa: E501
         """Enricher - a model defined in OpenAPI
 
         Args:
@@ -144,6 +144,7 @@ class Enricher(ModelNormal):
             timeout (str):
             port (int):
             env ([EnvVar]):
+            secrets ([MountedMLPSecret]):
 
         Keyword Args:
             _check_type (bool): if True, values for parameters in openapi_types
@@ -178,7 +179,6 @@ class Enricher(ModelNormal):
                                 _visited_composed_classes = (Animal,)
             id (int): [optional]  # noqa: E501
             autoscaling_policy (AutoscalingPolicy): [optional]  # noqa: E501
-            secrets ([MountedMLPSecret]): [optional]  # noqa: E501
             service_account (str): (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file.\" . [optional]  # noqa: E501
             created_at (datetime): [optional]  # noqa: E501
             updated_at (datetime): [optional]  # noqa: E501
@@ -213,6 +213,7 @@ class Enricher(ModelNormal):
         self.timeout = timeout
         self.port = port
         self.env = env
+        self.secrets = secrets
         for var_name, var_value in kwargs.items():
             if var_name not in self.attribute_map and \
                         self._configuration is not None and \
