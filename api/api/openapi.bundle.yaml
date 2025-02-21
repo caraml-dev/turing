@@ -1617,6 +1617,11 @@ components:
             value: value
           - name: name
             value: value
+          secrets:
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
         monitoring_url: monitoring_url
         environment_name: environment_name
       properties:
@@ -1672,6 +1677,11 @@ components:
           value: value
         - name: name
           value: value
+        secrets:
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
       properties:
         artifact_uri:
           type: string
@@ -1680,6 +1690,10 @@ components:
         service_account_name:
           type: string
           x-go-custom-tag: validate:"required"
+        secrets:
+          items:
+            $ref: '#/components/schemas/MountedMLPSecret'
+          type: array
         resources:
           $ref: '#/components/schemas/EnsemblingResources'
         run_id:
@@ -2136,6 +2150,11 @@ components:
             value: value
           - name: name
             value: value
+          secrets:
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
           timeout: timeout
         routes:
         - endpoint: endpoint
@@ -2186,6 +2205,11 @@ components:
               value: value
             - name: name
               value: value
+            secrets:
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
@@ -2220,6 +2244,11 @@ components:
               value: value
             - name: name
               value: value
+            secrets:
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
             timeout: timeout
       properties:
         id:
@@ -2438,6 +2467,11 @@ components:
           value: value
         - name: name
           value: value
+        secrets:
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
         timeout: timeout
       properties:
         id:
@@ -2460,6 +2494,10 @@ components:
           items:
             $ref: '#/components/schemas/EnvVar'
           type: array
+        secrets:
+          items:
+            $ref: '#/components/schemas/MountedMLPSecret'
+          type: array
         service_account:
           description: |
             (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
@@ -2479,6 +2517,7 @@ components:
       - image
       - port
       - resource_request
+      - secrets
       - timeout
       type: object
     RouterEnsemblerConfig:
@@ -2500,6 +2539,11 @@ components:
             value: value
           - name: name
             value: value
+          secrets:
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
           timeout: timeout
         updated_at: 2000-01-23T04:56:07.000+00:00
         standard_config:
@@ -2534,6 +2578,11 @@ components:
             value: value
           - name: name
             value: value
+          secrets:
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
           timeout: timeout
       properties:
         id:
@@ -2609,6 +2658,11 @@ components:
           value: value
         - name: name
           value: value
+        secrets:
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
         timeout: timeout
       nullable: true
       properties:
@@ -2630,6 +2684,10 @@ components:
           items:
             $ref: '#/components/schemas/EnvVar'
           type: array
+        secrets:
+          items:
+            $ref: '#/components/schemas/MountedMLPSecret'
+          type: array
         service_account:
           description: |
             (Optional) Name of the secret registered in the current MLP project that contains the Google service account JSON key. This secret will be mounted as a file inside the container and the environment variable GOOGLE_APPLICATION_CREDENTIALS will point to the service account file."
@@ -2641,6 +2699,7 @@ components:
       - image
       - port
       - resource_request
+      - secrets
       - timeout
       type: object
     EnsemblerPyfuncConfig:
@@ -2662,6 +2721,11 @@ components:
           value: value
         - name: name
           value: value
+        secrets:
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
+        - mlp_secret_name: mlp_secret_name
+          env_var_name: env_var_name
         timeout: timeout
       nullable: true
       properties:
@@ -2680,10 +2744,16 @@ components:
           items:
             $ref: '#/components/schemas/EnvVar'
           type: array
+        secrets:
+          items:
+            $ref: '#/components/schemas/MountedMLPSecret'
+          type: array
       required:
       - ensembler_id
+      - env
       - project_id
       - resource_request
+      - secrets
       - timeout
       type: object
     TrafficRule:
@@ -2794,6 +2864,11 @@ components:
               value: value
             - name: name
               value: value
+            secrets:
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
             timeout: timeout
           routes:
           - endpoint: endpoint
@@ -2867,6 +2942,11 @@ components:
                 value: value
               - name: name
                 value: value
+              secrets:
+              - mlp_secret_name: mlp_secret_name
+                env_var_name: env_var_name
+              - mlp_secret_name: mlp_secret_name
+                env_var_name: env_var_name
               timeout: timeout
             updated_at: 2000-01-23T04:56:07.000+00:00
             standard_config:
@@ -2901,6 +2981,11 @@ components:
                 value: value
               - name: name
                 value: value
+              secrets:
+              - mlp_secret_name: mlp_secret_name
+                env_var_name: env_var_name
+              - mlp_secret_name: mlp_secret_name
+                env_var_name: env_var_name
               timeout: timeout
           log_config:
             bigquery_config:
@@ -2957,6 +3042,11 @@ components:
             value: value
           - name: name
             value: value
+          secrets:
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
+          - mlp_secret_name: mlp_secret_name
+            env_var_name: env_var_name
           timeout: timeout
         routes:
         - endpoint: endpoint
@@ -3030,6 +3120,11 @@ components:
               value: value
             - name: name
               value: value
+            secrets:
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
             timeout: timeout
           updated_at: 2000-01-23T04:56:07.000+00:00
           standard_config:
@@ -3064,6 +3159,11 @@ components:
               value: value
             - name: name
               value: value
+            secrets:
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
+            - mlp_secret_name: mlp_secret_name
+              env_var_name: env_var_name
             timeout: timeout
         log_config:
           bigquery_config:
@@ -3475,6 +3575,21 @@ components:
           description: Total number of pages
           format: int32
           type: integer
+      type: object
+    MountedMLPSecret:
+      example:
+        mlp_secret_name: mlp_secret_name
+        env_var_name: env_var_name
+      properties:
+        mlp_secret_name:
+          pattern: ^[-._a-zA-Z0-9]+$
+          type: string
+        env_var_name:
+          pattern: ^[a-zA-Z0-9_]*$
+          type: string
+      required:
+      - env_var_name
+      - mlp_secret_name
       type: object
     EnvVar:
       example:

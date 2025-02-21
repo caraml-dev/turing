@@ -1,6 +1,6 @@
 const { ModuleFederationPlugin } = require("webpack").container;
 // Remove source code dependency react-lazylog which causes problems with sharing
-const { "react-lazylog": undefined, ...sharedDeps } = require("./package.json").dependencies;
+const { "react-lazylog-with-emitter": undefined, ...sharedDeps } = require("./package.json").dependencies;
 
 module.exports = ({ env }) => ({
   plugins: [

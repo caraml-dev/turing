@@ -32,10 +32,7 @@ type DeploymentService interface {
 		environment *merlin.Environment,
 		currentRouterVersion *models.RouterVersion,
 		routerVersion *models.RouterVersion,
-		routerServiceAccountKey string,
-		enricherServiceAccountKey string,
-		ensemblerServiceAccountKey string,
-		expEngineServiceAccountKey string,
+		secretMap map[string]string,
 		pyfuncEnsembler *models.PyFuncEnsembler,
 		experimentConfig json.RawMessage,
 		eventsCh *EventChannel,
@@ -114,10 +111,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	environment *merlin.Environment,
 	currRouterVersion *models.RouterVersion,
 	routerVersion *models.RouterVersion,
-	routerServiceAccountKey string,
-	enricherServiceAccountKey string,
-	ensemblerServiceAccountKey string,
-	expEngineServiceAccountKey string,
+	secretMap map[string]string,
 	pyfuncEnsembler *models.PyFuncEnsembler,
 	experimentConfig json.RawMessage,
 	eventsCh *EventChannel,
@@ -154,10 +148,7 @@ func (ds *deploymentService) DeployRouterVersion(
 	secret := ds.svcBuilder.NewSecret(
 		routerVersion,
 		project,
-		routerServiceAccountKey,
-		enricherServiceAccountKey,
-		ensemblerServiceAccountKey,
-		expEngineServiceAccountKey,
+		secretMap,
 	)
 	err = createSecret(ctx, controller, secret)
 	if err != nil {
@@ -253,7 +244,7 @@ func (ds *deploymentService) UndeployRouterVersion(
 
 	// Delete secret
 	eventsCh.Write(models.NewInfoEvent(models.EventStageDeletingDependencies, "deleting secrets"))
-	secret := ds.svcBuilder.NewSecret(routerVersion, project, "", "", "", "")
+	secret := ds.svcBuilder.NewSecret(routerVersion, project, nil)
 	err = deleteSecret(controller, secret, isCleanUp)
 	if err != nil {
 		return err
@@ -480,6 +471,7 @@ func (ds *deploymentService) buildEnsemblerServiceImage(
 		Timeout:           routerVersion.Ensembler.PyfuncConfig.Timeout,
 		Endpoint:          PyFuncEnsemblerServiceEndpoint,
 		Port:              PyFuncEnsemblerServicePort,
+		Secrets:           routerVersion.Ensembler.PyfuncConfig.Secrets,
 		Env:               routerVersion.Ensembler.PyfuncConfig.Env,
 	}
 

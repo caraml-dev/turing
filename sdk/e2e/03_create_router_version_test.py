@@ -43,6 +43,7 @@ def test_create_router_version():
         timeout="2s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="enricher")],
+        secrets=[],
     )
 
     # set up the new ensembler for the router
@@ -58,6 +59,7 @@ def test_create_router_version():
         timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="ensembler")],
+        secrets=[],
     )
 
     # update router

@@ -4,6 +4,7 @@ import React, { Fragment, useContext } from "react";
 import { FormContext, FormValidationContext } from "@caraml-dev/ui-lib";
 import { AutoscalingPolicyPanel } from "../components/autoscaling_policy/AutoscalingPolicyPanel";
 import { EnvVariablesPanel } from "../components/docker_config/EnvVariablesPanel";
+import { SecretsPanel } from "../components/docker_config/SecretsPanel";
 import { EnricherTypePanel } from "../components/enricher_config/EnricherTypePanel";
 import { DockerDeploymentPanel } from "../components/docker_config/DockerDeploymentPanel";
 import { DockerRegistriesContextProvider } from "../../../../providers/docker/context";
@@ -42,8 +43,8 @@ export const EnricherStep = ({ projectId }) => {
 
       {enricher.type === "docker" && (
         <Fragment>
-          <EuiFlexItem>
-            <SecretsContextProvider projectId={projectId}>
+          <SecretsContextProvider projectId={projectId}>
+            <EuiFlexItem>
               <DockerRegistriesContextProvider>
                 <DockerDeploymentPanel
                   projectId={projectId}
@@ -52,33 +53,41 @@ export const EnricherStep = ({ projectId }) => {
                   errors={get(errors, "config.enricher")}
                 />
               </DockerRegistriesContextProvider>
-            </SecretsContextProvider>
-          </EuiFlexItem>
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EnvVariablesPanel
-              variables={enricher.env}
-              onChangeHandler={onChange("config.enricher.env")}
-              errors={get(errors, "config.enricher.env")}
-            />
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <EnvVariablesPanel
+                variables={enricher.env}
+                onChangeHandler={onChange("config.enricher.env")}
+                errors={get(errors, "config.enricher.env")}
+              />
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <ResourcesPanel
-              resourcesConfig={enricher.resource_request}
-              onChangeHandler={onChange("config.enricher.resource_request")}
-              maxAllowedReplica={maxAllowedReplica}
-              errors={get(errors, "config.enricher.resource_request")}
-            />
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <SecretsPanel
+                variables={enricher.secrets}
+                onChangeHandler={onChange("config.enricher.secrets")}
+                errors={get(errors, "config.enricher.secrets")}
+              />
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <AutoscalingPolicyPanel
-              autoscalingPolicyConfig={enricher.autoscaling_policy}
-              onChangeHandler={onChange("config.enricher.autoscaling_policy")}
-              errors={get(errors, "config.enricher.autoscaling_policy")}
-            />
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <ResourcesPanel
+                resourcesConfig={enricher.resource_request}
+                onChangeHandler={onChange("config.enricher.resource_request")}
+                maxAllowedReplica={maxAllowedReplica}
+                errors={get(errors, "config.enricher.resource_request")}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <AutoscalingPolicyPanel
+                autoscalingPolicyConfig={enricher.autoscaling_policy}
+                onChangeHandler={onChange("config.enricher.autoscaling_policy")}
+                errors={get(errors, "config.enricher.autoscaling_policy")}
+              />
+            </EuiFlexItem>
+          </SecretsContextProvider>
         </Fragment>
       )}
     </EuiFlexGroup>

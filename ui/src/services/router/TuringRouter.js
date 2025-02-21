@@ -51,6 +51,7 @@ export class TuringRouter {
           target: "1",
         },
         env: [],
+        secrets: [],
         service_account: "",
       },
       ensembler: new NopEnsembler(),

@@ -417,6 +417,10 @@ components:
         service_account_name:
           type: string
           x-go-custom-tag: validate:"required"
+        secrets:
+          type: array
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
         resources:
           $ref: "#/components/schemas/EnsemblingResources"
         run_id:

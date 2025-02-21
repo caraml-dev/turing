@@ -126,6 +126,9 @@ func TestGetCPURequestAndLimit(t *testing.T) {
 }
 
 func TestGetEnvVars(t *testing.T) {
+	// Create a copy of sparkInfraConfig to avoid modifying the original when running tests in parallel
+	sparkInfraConfigCopy := *sparkInfraConfig
+
 	request := &CreateSparkRequest{
 		JobName:               jobName,
 		JobLabels:             jobLabels,
@@ -139,12 +142,13 @@ func TestGetEnvVars(t *testing.T) {
 		ExecutorMemoryRequest: memoryValue,
 		ExecutorReplica:       executorReplica,
 		ServiceAccountName:    serviceAccountName,
-		SparkInfraConfig:      sparkInfraConfig,
+		SparkInfraConfig:      &sparkInfraConfigCopy,
 		EnvVars:               &envVars,
 	}
 	tests := map[string]struct {
 		sparkInfraConfigAPIServerEnvVars []string
 		apiServerEnvVars                 []apicorev1.EnvVar
+		userConfiguredSecrets            *[]openapi.MountedMLPSecret
 		expectedEnvVars                  []apicorev1.EnvVar
 	}{
 		"api server env vars specified": {
@@ -155,6 +159,7 @@ func TestGetEnvVars(t *testing.T) {
 					Value: "TEST_VALUE_1",
 				},
 			},
+			nil,
 			[]apicorev1.EnvVar{
 				{
 					Name:  envServiceAccountPathKey,
@@ -178,6 +183,7 @@ func TestGetEnvVars(t *testing.T) {
 					Value: "TEST_VALUE_1",
 				},
 			},
+			nil,
 			[]apicorev1.EnvVar{
 				{
 					Name:  envServiceAccountPathKey,
@@ -186,6 +192,57 @@ func TestGetEnvVars(t *testing.T) {
 				{
 					Name:  "foo",
 					Value: barString,
+				},
+			},
+		},
+		"user-configured secrets exist": {
+			[]string{},
+			[]apicorev1.EnvVar{
+				{
+					Name:  "TEST_ENV_VAR_1",
+					Value: "TEST_VALUE_1",
+				},
+			},
+			&[]openapi.MountedMLPSecret{
+				{
+					MlpSecretName: "MLP_SECRET_1",
+					EnvVarName:    "SECRET_ENV_VAR_1",
+				},
+				{
+					MlpSecretName: "MLP_SECRET_2",
+					EnvVarName:    "SECRET_ENV_VAR_2",
+				},
+			},
+			[]apicorev1.EnvVar{
+				{
+					Name:  envServiceAccountPathKey,
+					Value: envServiceAccountPath,
+				},
+				{
+					Name:  "foo",
+					Value: barString,
+				},
+				{
+					Name: "SECRET_ENV_VAR_1",
+					ValueFrom: &apicorev1.EnvVarSource{
+						SecretKeyRef: &apicorev1.SecretKeySelector{
+							LocalObjectReference: apicorev1.LocalObjectReference{
+								Name: request.JobName,
+							},
+							Key: "MLP_SECRET_1",
+						},
+					},
+				},
+				{
+					Name: "SECRET_ENV_VAR_2",
+					ValueFrom: &apicorev1.EnvVarSource{
+						SecretKeyRef: &apicorev1.SecretKeySelector{
+							LocalObjectReference: apicorev1.LocalObjectReference{
+								Name: request.JobName,
+							},
+							Key: "MLP_SECRET_2",
+						},
+					},
 				},
 			},
 		},
@@ -198,6 +255,7 @@ func TestGetEnvVars(t *testing.T) {
 			}
 
 			request.SparkInfraConfig.APIServerEnvVars = tt.sparkInfraConfigAPIServerEnvVars
+			request.Secrets = tt.userConfiguredSecrets
 			envVars := getEnvVars(request)
 			assert.Equal(t, tt.expectedEnvVars, envVars)
 

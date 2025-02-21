@@ -25,3 +25,4 @@ globalProperties:
     - SaveMode
     - EnsemblerInfraConfig
     - EnvVar
+    - MountedMLPSecret

@@ -443,7 +443,7 @@ class PyFuncEnsembler(Ensembler):
 
 
 def _process_conda_env(
-    conda_env: Union[str, Dict[str, Any]]
+    conda_env: Union[str, Dict[str, Any]],
 ) -> Tuple[Dict[str, Any], str]:
     def match_dependency(spec, name):
         # Using direct match or regex match to match the dependency name,

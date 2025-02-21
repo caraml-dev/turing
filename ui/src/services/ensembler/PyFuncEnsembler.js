@@ -34,6 +34,7 @@ export class PyFuncEnsembler extends Ensembler {
         target: "1",
       },
       env: [],
+      secrets: [],
       timeout: "100ms",
     };
   }

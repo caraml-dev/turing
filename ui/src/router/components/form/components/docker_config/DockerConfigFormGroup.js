@@ -5,6 +5,7 @@ import { DockerDeploymentPanel } from "./DockerDeploymentPanel";
 import { DockerEnsembler } from "../../../../../services/ensembler";
 import { DockerRegistriesContextProvider } from "../../../../../providers/docker/context";
 import { EnvVariablesPanel } from "./EnvVariablesPanel";
+import { SecretsPanel } from "./SecretsPanel";
 import { ResourcesPanel } from "../ResourcesPanel";
 import { SecretsContextProvider } from "../../../../../providers/secrets/context";
 import { useOnChangeHandler } from "../../../../../components/form/hooks/useOnChangeHandler";
@@ -30,8 +31,8 @@ export const DockerConfigFormGroup = ({
   return (
     !!dockerConfig && (
       <Fragment>
-        <EuiFlexItem>
-          <SecretsContextProvider projectId={projectId}>
+        <SecretsContextProvider projectId={projectId}>
+          <EuiFlexItem>
             <DockerRegistriesContextProvider>
               <DockerDeploymentPanel
                 projectId={projectId}
@@ -40,33 +41,41 @@ export const DockerConfigFormGroup = ({
                 errors={errors}
               />
             </DockerRegistriesContextProvider>
-          </SecretsContextProvider>
-        </EuiFlexItem>
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <EnvVariablesPanel
-            variables={dockerConfig.env}
-            onChangeHandler={onChange("env")}
-            errors={errors.env}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <EnvVariablesPanel
+              variables={dockerConfig.env}
+              onChangeHandler={onChange("env")}
+              errors={errors.env}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <ResourcesPanel
-            resourcesConfig={dockerConfig.resource_request}
-            onChangeHandler={onChange("resource_request")}
-            errors={errors.resource_request}
-            maxAllowedReplica={maxAllowedReplica}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <SecretsPanel
+              variables={dockerConfig.secrets}
+              onChangeHandler={onChange("secrets")}
+              errors={errors.secrets}
+            />
+          </EuiFlexItem>
 
-        <EuiFlexItem>
-          <AutoscalingPolicyPanel
-            autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
-            onChangeHandler={onChange("autoscaling_policy")}
-            errors={errors.autoscaling_policy}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem>
+            <ResourcesPanel
+              resourcesConfig={dockerConfig.resource_request}
+              onChangeHandler={onChange("resource_request")}
+              errors={errors.resource_request}
+              maxAllowedReplica={maxAllowedReplica}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <AutoscalingPolicyPanel
+              autoscalingPolicyConfig={dockerConfig.autoscaling_policy}
+              onChangeHandler={onChange("autoscaling_policy")}
+              errors={errors.autoscaling_policy}
+            />
+          </EuiFlexItem>
+        </SecretsContextProvider>
       </Fragment>
     )
   );

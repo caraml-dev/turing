@@ -45,7 +45,7 @@ func (sb *clusterSvcBuilder) NewFluentdService(
 		{Name: "FLUENTD_WORKER_COUNT", Value: strconv.Itoa(fluentdConfig.WorkerCount)},
 		{Name: "FLUENTD_LOG_LEVEL", Value: "info"},
 		{Name: "FLUENTD_LOG_PATH", Value: "/cache/log/bq_load_logs.*.buffer"},
-		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + secretKeyNameRouter},
+		{Name: "FLUENTD_GCP_JSON_KEY_PATH", Value: secretMountPath + SecretKeyNameRouter},
 		{Name: "FLUENTD_BUFFER_LIMIT", Value: "10g"},
 		{Name: "FLUENTD_FLUSH_INTERVAL_SECONDS",
 			Value: strconv.Itoa(fluentdConfig.FlushIntervalSeconds * FluentdReplicaCount)},
@@ -128,8 +128,8 @@ func buildFluentdVolumes(
 				SecretName: svcAccountSecretName,
 				Items: []corev1.KeyToPath{
 					{
-						Key:  secretKeyNameRouter,
-						Path: secretKeyNameRouter,
+						Key:  SecretKeyNameRouter,
+						Path: SecretKeyNameRouter,
 					},
 				},
 			},

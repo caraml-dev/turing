@@ -1,10 +1,11 @@
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import turing.generated.models
 from turing.generated.model_utils import OpenApiModel
 from turing.generated.model.env_var import EnvVar
 from .source import EnsemblingJobSource, EnsemblingJobPredictionSource
 from .sink import EnsemblingJobSink
+from ...mounted_mlp_secret import MountedMLPSecret
 
 ResourceRequest = turing.generated.models.EnsemblingResources
 
@@ -49,6 +50,7 @@ class EnsemblingJobConfig:
         service_account: str,
         resource_request: ResourceRequest = None,
         env_vars: Dict[str, str] = {},
+        secrets: List[MountedMLPSecret] = None,
     ):
         """
         Create new instance of batch ensembling job configuration
@@ -61,6 +63,7 @@ class EnsemblingJobConfig:
         :param resource_request: optional resource request for starting the ensembling job.
             If not given the system default will be used.
         :param env_vars: optional environment variables in the form of a key value pair in a list.
+        :param secrets: list of MLP secrets to mount into the ensembling job environment as environment variables
         """
         self._source = source
         self._predictions = predictions
@@ -69,6 +72,7 @@ class EnsemblingJobConfig:
         self._service_account = service_account
         self._resource_request = resource_request
         self._env_vars = env_vars
+        self._secrets = secrets
 
     @property
     def source(self) -> "EnsemblingJobSource":
@@ -93,6 +97,10 @@ class EnsemblingJobConfig:
     @property
     def env_vars(self) -> Dict[str, str]:
         return self._env_vars
+
+    @property
+    def secrets(self) -> Optional[List[MountedMLPSecret]]:
+        return self._secrets
 
     @property
     def resource_request(self) -> Optional["ResourceRequest"]:
@@ -121,4 +129,9 @@ class EnsemblingJobConfig:
             service_account_name=self.service_account,
             resources=self.resource_request,
             env=env_vars,
+            secrets=(
+                [secret.to_open_api() for secret in self.secrets]
+                if self.secrets
+                else []
+            ),
         )

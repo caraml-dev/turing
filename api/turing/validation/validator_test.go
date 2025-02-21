@@ -1008,6 +1008,7 @@ func TestValidateAutoscaling(t *testing.T) {
 				Value: "value",
 			},
 		},
+		Secrets: []models.Secret{},
 	}
 	makeEnricher := func(
 		enricher request.EnricherEnsemblerConfig,
@@ -1043,6 +1044,7 @@ func TestValidateAutoscaling(t *testing.T) {
 					ResourceRequest: &models.ResourceRequest{},
 					Timeout:         "1s",
 					Env:             models.EnvVars{},
+					Secrets:         []models.Secret{},
 				},
 			},
 		},
@@ -1072,6 +1074,7 @@ func TestValidateAutoscaling(t *testing.T) {
 					},
 					Timeout: "5s",
 					Env:     models.EnvVars{},
+					Secrets: models.Secrets{},
 				},
 			},
 		},
@@ -1089,6 +1092,7 @@ func TestValidateAutoscaling(t *testing.T) {
 					},
 					Timeout: "1s",
 					Env:     models.EnvVars{},
+					Secrets: models.Secrets{},
 				},
 			},
 		},

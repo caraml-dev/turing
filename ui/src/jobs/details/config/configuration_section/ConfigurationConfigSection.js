@@ -4,6 +4,7 @@ import { ConfigSectionPanel } from "../../../../components/config_section";
 import { ResourceRequestConfigTable } from "./resource_request_table/ResourceRequestConfigTable";
 import { ConfigMultiSectionPanel } from "../../../../components/config_multi_section_panel/ConfigMultiSectionPanel";
 import { EnvVariablesConfigTable } from "../../../../router/components/configuration/components/docker_config_section/EnvVariablesConfigTable";
+import { SecretsConfigTable } from "../../../../router/components/configuration/components/docker_config_section/SecretsConfigTable";
 import { MiscConfigSection } from "./misc_table/MiscConfigSection";
 
 export const ConfigurationConfigSection = ({ job: { infra_config = {} } }) => {
@@ -15,6 +16,10 @@ export const ConfigurationConfigSection = ({ job: { infra_config = {} } }) => {
     {
       title: "Environment Variables",
       children: <EnvVariablesConfigTable variables={infra_config.env || []} />,
+    },
+    {
+      title: "Secrets",
+      children: <SecretsConfigTable variables={infra_config.secrets || []} />,
     },
   ];
 

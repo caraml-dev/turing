@@ -35,6 +35,19 @@ components:
         value:
           type: "string"
 
+    MountedMLPSecret:
+      type: "object"
+      required:
+        - mlp_secret_name
+        - env_var_name
+      properties:
+        mlp_secret_name:
+          type: "string"
+          pattern: '^[-._a-zA-Z0-9]+$'
+        env_var_name:
+          type: "string"
+          pattern: '^[a-zA-Z0-9_]*$'
+
     pagination.Paging:
       type: "object"
       properties:

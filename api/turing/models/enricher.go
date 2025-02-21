@@ -17,6 +17,8 @@ type Enricher struct {
 	Timeout string `json:"timeout"`
 	// Port to query.
 	Port int `json:"port"`
+	// MLP secrets to inject into the pod.
+	Secrets Secrets `json:"secrets"`
 	// Environment variables to inject into the pod.
 	Env EnvVars `json:"env"`
 	// (optional) ServiceAccount specifies the name of the secret registered in the MLP project containing the service

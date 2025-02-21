@@ -159,6 +159,21 @@ func generateEnsemblingJobFixture() *models.EnsemblingJob {
 	}
 }
 
+func generateEnsemblingJobFixtureWithUserDefinedSecrets() *models.EnsemblingJob {
+	baseEnsemblingJob := generateEnsemblingJobFixture()
+	baseEnsemblingJob.InfraConfig.Secrets = &[]openapi.MountedMLPSecret{
+		{
+			MlpSecretName: "MLP_SECRET_1",
+			EnvVarName:    "SECRET_ENV_VAR_1",
+		},
+		{
+			MlpSecretName: "MLP_SECRET_2",
+			EnvVarName:    "SECRET_ENV_VAR_2",
+		},
+	}
+	return baseEnsemblingJob
+}
+
 func TestCreate(t *testing.T) {
 	tests := map[string]struct {
 		expected          error
@@ -203,12 +218,22 @@ func TestCreate(t *testing.T) {
 				svc.On(
 					"GetSecret",
 					mock.Anything,
+					"test-service-account",
+				).Return("Alright then. Keep your secrets.", nil)
+				svc.On(
+					"GetSecret",
 					mock.Anything,
+					"MLP_SECRET_1",
+				).Return("Alright then. Keep your secrets.", nil)
+				svc.On(
+					"GetSecret",
+					mock.Anything,
+					"MLP_SECRET_2",
 				).Return("Alright then. Keep your secrets.", nil)
 				return svc
 			},
 			request: &CreateEnsemblingJobRequest{
-				EnsemblingJob: generateEnsemblingJobFixture(),
+				EnsemblingJob: generateEnsemblingJobFixtureWithUserDefinedSecrets(),
 				Labels:        standardLabels,
 				ImageRef:      imageRef,
 				Namespace:     namespace,
@@ -361,8 +386,8 @@ func TestCreate(t *testing.T) {
 				Namespace:     namespace,
 			},
 		},
-		"failure | fail to get secret": {
-			expected: fmt.Errorf("service account %s is not found within %s project: %s",
+		"failure | fail to get service account secret": {
+			expected: fmt.Errorf("error retrieving secrets: service account %s is not found within %s project: %w",
 				"test-service-account",
 				namespace,
 				fmt.Errorf("hi"),
@@ -407,6 +432,62 @@ func TestCreate(t *testing.T) {
 			},
 			request: &CreateEnsemblingJobRequest{
 				EnsemblingJob: generateEnsemblingJobFixture(),
+				Labels:        standardLabels,
+				ImageRef:      imageRef,
+				Namespace:     namespace,
+			},
+		},
+		"failure | fail to get user-configured secret": {
+			expected: fmt.Errorf("error retrieving secrets: user-configured secret %s is not found within %s project: %w",
+				"MLP_SECRET_1",
+				namespace,
+				fmt.Errorf("hi"),
+			),
+			clusterController: func() cluster.Controller {
+				ctrler := &clustermock.Controller{}
+				ctrler.On("CreateNamespace", mock.Anything, mock.Anything).Return(nil)
+				ctrler.On("CreateServiceAccount", mock.Anything, mock.Anything, mock.Anything).Return(
+					&apicorev1.ServiceAccount{
+						ObjectMeta: apimetav1.ObjectMeta{
+							Name: fmt.Sprintf("%s-driver-sa", namespace),
+						},
+					},
+					nil,
+				)
+				ctrler.On("CreateRole", mock.Anything, mock.Anything, mock.Anything).Return(
+					&apirbacv1.Role{
+						ObjectMeta: apimetav1.ObjectMeta{
+							Name: fmt.Sprintf("%s-driver-role", namespace),
+						},
+					},
+					nil,
+				)
+				ctrler.On(
+					"CreateRoleBinding",
+					mock.Anything,
+					mock.Anything,
+					mock.Anything,
+				).Return(nil, nil)
+				ctrler.On("DeleteSecret", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				ctrler.On("DeleteConfigMap", mock.Anything, mock.Anything, mock.Anything, false).Return(nil)
+				return ctrler
+			},
+			mlpService: func() service.MLPService {
+				svc := &servicemock.MLPService{}
+				svc.On(
+					"GetSecret",
+					mock.Anything,
+					"test-service-account",
+				).Return("Alright then. Keep your secrets.", nil)
+				svc.On(
+					"GetSecret",
+					mock.Anything,
+					"MLP_SECRET_1",
+				).Return("", fmt.Errorf("hi"))
+				return svc
+			},
+			request: &CreateEnsemblingJobRequest{
+				EnsemblingJob: generateEnsemblingJobFixtureWithUserDefinedSecrets(),
 				Labels:        standardLabels,
 				ImageRef:      imageRef,
 				Namespace:     namespace,

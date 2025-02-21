@@ -782,6 +782,7 @@ components:
         - timeout
         - port
         - env
+        - secrets
       properties:
         id:
           $ref: "common.yaml#/components/schemas/Id"
@@ -801,6 +802,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
         service_account:
           type: "string"
           description: >
@@ -888,6 +893,7 @@ components:
         - timeout
         - port
         - env
+        - secrets
       properties:
         image:
           type: "string"
@@ -906,6 +912,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
         service_account:
           type: "string"
           description: >
@@ -923,6 +933,8 @@ components:
         - ensembler_id
         - resource_request
         - timeout
+        - env
+        - secrets
       properties:
         project_id:
           type: "integer"
@@ -938,6 +950,10 @@ components:
           type: "array"
           items:
             $ref: "common.yaml#/components/schemas/EnvVar"
+        secrets:
+          type: "array"
+          items:
+            $ref: "common.yaml#/components/schemas/MountedMLPSecret"
 
     ResourceRequest:
       type: "object"

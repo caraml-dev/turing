@@ -14,6 +14,7 @@ import turing.generated.models
 from tests.fixtures.gcs import mock_gcs
 from tests.fixtures.mlflow import mock_mlflow
 from turing.ensembler import PyFuncEnsembler
+from turing.mounted_mlp_secret import MountedMLPSecret
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
 from turing.router.config.common.env_var import EnvVar
 from turing.router.config.enricher import Enricher
@@ -147,6 +148,11 @@ def docker_router_ensembler_config():
         timeout="500ms",
         port=5120,
         env=[],
+        secrets=[
+            MountedMLPSecret(
+                mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+            )
+        ],
     )
 
 
@@ -160,6 +166,11 @@ def pyfunc_router_ensembler_config():
         ),
         timeout="500ms",
         env=[],
+        secrets=[
+            MountedMLPSecret(
+                mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+            )
+        ],
     )
 
 
@@ -277,7 +288,11 @@ def generic_router_version_status():
 @pytest.fixture
 def generic_resource_request():
     return turing.generated.models.ResourceRequest(
-        min_replica=1, max_replica=3, cpu_request="100m", memory_request="512Mi", cpu_limit=None,
+        min_replica=1,
+        max_replica=3,
+        cpu_request="100m",
+        memory_request="512Mi",
+        cpu_limit=None,
     )
 
 
@@ -445,7 +460,17 @@ def generic_env_var():
 
 
 @pytest.fixture
-def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
+def generic_secret():
+    return turing.generated.models.MountedMLPSecret(
+        mlp_secret_name="mlp_secret_name",
+        env_var_name="env_var_name",
+    )
+
+
+@pytest.fixture
+def generic_ensembler_docker_config(
+    generic_resource_request, generic_env_var, generic_secret
+):
     return turing.generated.models.EnsemblerDockerConfig(
         image="test.io/just-a-test/turing-ensembler:0.0.0-build.0",
         resource_request=generic_resource_request,
@@ -453,6 +478,7 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
         timeout="500ms",
         port=5120,
         env=[generic_env_var],
+        secrets=[generic_secret],
         service_account="secret-name-for-google-service-account",
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
             metric="memory", target="80"
@@ -461,13 +487,16 @@ def generic_ensembler_docker_config(generic_resource_request, generic_env_var):
 
 
 @pytest.fixture
-def generic_ensembler_pyfunc_config(generic_resource_request, generic_env_var):
+def generic_ensembler_pyfunc_config(
+    generic_resource_request, generic_env_var, generic_secret
+):
     return turing.generated.models.EnsemblerPyfuncConfig(
         project_id=77,
         ensembler_id=11,
         resource_request=generic_resource_request,
         timeout="500ms",
         env=[generic_env_var],
+        secrets=[generic_secret],
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
             metric="concurrency", target="10"
         ),
@@ -537,7 +566,7 @@ def generic_pyfunc_router_ensembler_config(generic_ensembler_pyfunc_config):
 
 
 @pytest.fixture
-def generic_enricher(generic_resource_request, generic_env_var):
+def generic_enricher(generic_resource_request, generic_env_var, generic_secret):
     return turing.generated.models.Enricher(
         id=1,
         image="test.io/just-a-test/turing-enricher:0.0.0-build.0",
@@ -546,6 +575,7 @@ def generic_enricher(generic_resource_request, generic_env_var):
         timeout="500ms",
         port=5180,
         env=[generic_env_var],
+        secrets=[generic_secret],
         service_account="service-account",
         autoscaling_policy=turing.generated.models.AutoscalingPolicy(
             metric="rps", target="100"
@@ -658,6 +688,11 @@ def generic_router_config(docker_router_ensembler_config):
             timeout="60ms",
             port=8080,
             env=[EnvVar(name="test", value="abc")],
+            secrets=[
+                MountedMLPSecret(
+                    mlp_secret_name="mlp_secret_name", env_var_name="env_var_name"
+                )
+            ],
         ),
         ensembler=docker_router_ensembler_config,
     )

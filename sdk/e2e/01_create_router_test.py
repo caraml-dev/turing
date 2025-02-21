@@ -71,6 +71,7 @@ def test_create_router():
         timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="enricher")],
+        secrets=[],
     )
 
     # set up ensembler for the router
@@ -83,6 +84,7 @@ def test_create_router():
         timeout="3s",
         port=80,
         env=[EnvVar(name="TEST_ENV", value="ensembler")],
+        secrets=[],
     )
 
     # create the RouterConfig instance

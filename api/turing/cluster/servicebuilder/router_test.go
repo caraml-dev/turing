@@ -164,8 +164,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -267,8 +267,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -377,8 +377,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -478,8 +478,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -579,8 +579,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -680,8 +680,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -781,8 +781,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameRouter,
-											Path: secretKeyNameRouter,
+											Key:  SecretKeyNameRouter,
+											Path: SecretKeyNameRouter,
 										},
 									},
 								},
@@ -885,8 +885,8 @@ func TestNewRouterService(t *testing.T) {
 									SecretName: "service-account",
 									Items: []corev1.KeyToPath{
 										{
-											Key:  secretKeyNameExpEngine,
-											Path: secretKeyNameExpEngine,
+											Key:  SecretKeyNameExpEngine,
+											Path: SecretKeyNameExpEngine,
 										},
 									},
 								},

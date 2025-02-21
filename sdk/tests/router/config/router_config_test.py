@@ -131,15 +131,17 @@ def test_set_router_config_base_ensembler(
     ensembler = RouterEnsemblerConfig(
         type=type,
         nop_config=None if nop_config is None else request.getfixturevalue(nop_config),
-        standard_config=None
-        if standard_config is None
-        else request.getfixturevalue(standard_config),
-        docker_config=None
-        if docker_config is None
-        else request.getfixturevalue(docker_config),
-        pyfunc_config=None
-        if pyfunc_config is None
-        else request.getfixturevalue(pyfunc_config),
+        standard_config=(
+            None
+            if standard_config is None
+            else request.getfixturevalue(standard_config)
+        ),
+        docker_config=(
+            None if docker_config is None else request.getfixturevalue(docker_config)
+        ),
+        pyfunc_config=(
+            None if pyfunc_config is None else request.getfixturevalue(pyfunc_config)
+        ),
     )
     actual.ensembler = ensembler
     assert isinstance(actual.ensembler, expected_class)
@@ -224,6 +226,7 @@ def test_default_router_autoscaling_policy(request):
                 timeout="500ms",
                 port=5120,
                 env=[],
+                secrets=[],
             ),
             InvalidEnsemblerTypeException,
         ),
@@ -240,6 +243,7 @@ def test_default_router_autoscaling_policy(request):
                 ),
                 timeout="60ms",
                 env=[],
+                secrets=[],
             ),
             InvalidEnsemblerTypeException,
         ),
