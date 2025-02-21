@@ -317,8 +317,6 @@ func (sb *clusterSvcBuilder) NewSecret(
 	project *mlp.Project,
 	secretMap map[string]string,
 ) *cluster.Secret {
-	data := secretMap
-
 	return &cluster.Secret{
 		Name: fmt.Sprintf(
 			"%s-turing-%s-%d",
@@ -327,7 +325,7 @@ func (sb *clusterSvcBuilder) NewSecret(
 			routerVersion.Version,
 		),
 		Namespace: project.Name,
-		Data:      data,
+		Data:      secretMap,
 		Labels:    buildLabels(project, routerVersion.Router),
 	}
 }
