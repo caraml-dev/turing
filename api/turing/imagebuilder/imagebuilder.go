@@ -297,8 +297,6 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--destination=%s", imageRef),
-		"--cache=true",
-		"--single-snapshot",
 	}
 
 	kanikoArgs = append(kanikoArgs, ib.imageBuildingConfig.KanikoConfig.AdditionalArgs...)
