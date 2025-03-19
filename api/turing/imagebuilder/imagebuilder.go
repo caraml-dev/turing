@@ -173,6 +173,12 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		return imageRef, nil
 	}
 
+	hashedModelDependenciesUrl, err := ib.getHashedModelDependenciesUrl(context.Background(), request.ArtifactURI)
+	if err != nil {
+		log.Errorf("unable to get model dependencies url: %v", err)
+		return "", err
+	}
+
 	// Check if there is an existing build job
 	kanikoJobName := ib.nameGenerator.generateBuilderName(
 		request.ProjectName,
@@ -193,7 +199,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		}
 
 		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-			request.EnsemblerFolder, request.BaseImageRefTag)
+			request.EnsemblerFolder, request.BaseImageRefTag, hashedModelDependenciesUrl)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -214,7 +220,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			}
 
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-				request.EnsemblerFolder, request.BaseImageRefTag)
+				request.EnsemblerFolder, request.BaseImageRefTag, hashedModelDependenciesUrl)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -284,6 +290,7 @@ func (ib *imageBuilder) createKanikoJob(
 	buildLabels map[string]string,
 	ensemblerFolder string,
 	baseImageRefTag string,
+	hashedModelDependenciesUrl string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
@@ -300,6 +307,7 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
 		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
+		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesUrl),
 		fmt.Sprintf("--destination=%s", imageRef),
 	}
 
