@@ -1,6 +1,8 @@
 package imagebuilder
 
 import (
+	"context"
+	"crypto/sha256"
 	"fmt"
 	"testing"
 	"time"
@@ -13,6 +15,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
+	"github.com/caraml-dev/mlp/api/pkg/artifact"
+	"github.com/caraml-dev/mlp/api/pkg/artifact/mocks"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	clustermock "github.com/caraml-dev/turing/api/turing/cluster/mocks"
 	"github.com/caraml-dev/turing/api/turing/config"
@@ -1262,6 +1266,91 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func Test_imageBuilder_getHashedModelDependenciesUrl(t *testing.T) {
+	testArtifactURISuffix := "://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
+	testArtifactURI := "gs://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
+	testArtifactGsutilURL := &artifact.URL{
+		Bucket: "bucket-name",
+		Object: "mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts",
+	}
+	testCondaEnvContent := `dependencies:
+- python=3.9.*
+- pip:
+  - mlflow`
+	testCondaEnvUrlSuffix := testArtifactURISuffix + "/model/conda.yaml"
+
+	hash := sha256.New()
+	hash.Write([]byte(testCondaEnvContent))
+	hashEnv := hash.Sum(nil)
+
+	modelDependenciesURL := fmt.Sprintf("gs://%s/turing/model_dependencies/%x", testArtifactGsutilURL.Bucket, hashEnv)
+
+	type args struct {
+		ctx         context.Context
+		artifactURI string
+	}
+	tests := []struct {
+		name                string
+		args                args
+		artifactServiceMock func(*mocks.Service)
+		want                string
+		wantErr             bool
+	}{
+		{
+			name: "hash dependencies is already exist",
+			args: args{
+				ctx:         context.Background(),
+				artifactURI: testArtifactURI,
+			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
+			want:    modelDependenciesURL,
+			wantErr: false,
+		},
+		{
+			name: "hash dependencies is not exist yet",
+			args: args{
+				ctx:         context.Background(),
+				artifactURI: testArtifactURI,
+			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return(nil, artifact.ErrObjectNotExist)
+				artifactServiceMock.On("WriteArtifact", mock.Anything, modelDependenciesURL, []byte(testCondaEnvContent)).Return(nil)
+			},
+			want:    modelDependenciesURL,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
+			c := &imageBuilder{
+				artifactService: artifactServiceMock,
+			}
+
+			got, err := c.getHashedModelDependenciesUrl(tt.args.ctx, tt.args.artifactURI)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("imageBuilder.getHashedModelDependenciesUrl() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("imageBuilder.getHashedModelDependenciesUrl() = %v, want %v", got, tt.want)
 			}
 		})
 	}
