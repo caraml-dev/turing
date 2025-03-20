@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -12,14 +14,17 @@ import (
 	//nolint:all
 	"bou.ke/monkey"
 	merlin "github.com/caraml-dev/merlin/client"
+	"github.com/caraml-dev/mlp/api/pkg/artifact"
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	clientcmdapiv1 "k8s.io/client-go/tools/clientcmd/api/v1"
 
+	mlpmocks "github.com/caraml-dev/mlp/api/pkg/artifact/mocks"
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -242,6 +247,29 @@ func TestNewAppContext(t *testing.T) {
 		},
 	}, nil)
 
+	// create mock artifact service
+	testArtifactURISuffix := "://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
+	testArtifactGsutilURL := &artifact.URL{
+		Bucket: "bucket-name",
+		Object: "mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts",
+	}
+	testCondaEnvContent := `dependencies:
+- python=3.9.*
+- pip:
+  - mlflow`
+	hash := sha256.New()
+	hash.Write([]byte(testCondaEnvContent))
+	hashEnv := hash.Sum(nil)
+	modelDependenciesURL := fmt.Sprintf("gs://%s/turing/model_dependencies/%x", testArtifactGsutilURL.Bucket, hashEnv)
+
+	testCondaEnvUrlSuffix := testArtifactURISuffix + "/ensembler/conda.yaml"
+	artifactServiceMock := &mlpmocks.Service{}
+	artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+	artifactServiceMock.On("GetURLScheme").Return("gs")
+	artifactServiceMock.On("GetURLScheme").Return("gs")
+	artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+	artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+
 	// Patch the functions from other packages
 	defer monkey.UnpatchAll()
 	monkey.Patch(service.NewExperimentsService,
@@ -310,6 +338,7 @@ func TestNewAppContext(t *testing.T) {
 		nil,
 		*testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
 		testCfg.MlflowConfig.ArtifactServiceType,
+		artifactServiceMock,
 	)
 	assert.Nil(t, err)
 
@@ -344,6 +373,7 @@ func TestNewAppContext(t *testing.T) {
 		nil,
 		*testCfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
 		testCfg.MlflowConfig.ArtifactServiceType,
+		artifactServiceMock,
 	)
 
 	assert.NoError(t, err)
