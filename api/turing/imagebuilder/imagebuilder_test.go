@@ -23,7 +23,28 @@ import (
 	"github.com/caraml-dev/turing/api/turing/models"
 )
 
-var timeout, _ = time.ParseDuration("10s")
+var (
+	timeout, _            = time.ParseDuration("10s")
+	testArtifactURISuffix = "://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
+	testArtifactURI       = "gs://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
+	testArtifactGsutilURL = &artifact.URL{
+		Bucket: "bucket-name",
+		Object: "mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts",
+	}
+	testCondaEnvContent = `dependencies:
+- python=3.9.*
+- pip:
+  - mlflow`
+	testCondaEnvUrlSuffix = testArtifactURISuffix + "/ensembler/conda.yaml"
+)
+
+func getHashedModelDependenciesUrl() string {
+	hash := sha256.New()
+	hash.Write([]byte(testCondaEnvContent))
+	hashEnv := hash.Sum(nil)
+
+	return fmt.Sprintf("gs://%s/turing/model_dependencies/%x", testArtifactGsutilURL.Bucket, hashEnv)
+}
 
 const (
 	projectName                          = "test-project"
@@ -42,6 +63,8 @@ const (
 )
 
 func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -81,6 +104,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		clusterController   func() cluster.Controller
 		ensemblerFolder     string
 		imageTag            string
+		artifactServiceMock func(*mocks.Service)
 	}{
 		"success | no existing job": {
 			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -142,6 +166,13 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success: existing job is running": {
 			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -204,6 +235,13 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success: existing job failed": {
 			expected:    fmt.Sprintf("%s/%s/ensembler-jobs/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -290,17 +328,28 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 
 			ib, err := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			assert.Nil(t, err)
 
@@ -309,7 +358,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				tt.modelName,
 				tt.modelID,
 				tt.versionID,
-				tt.artifactURI,
+				testArtifactURI,
 				tt.buildLabels,
 				tt.ensemblerFolder,
 				tt.imageTag,
@@ -322,6 +371,8 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 }
 
 func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -362,6 +413,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		clusterController          func() cluster.Controller
 		ensemblerFolder            string
 		imageTag                   string
+		artifactServiceMock        func(*mocks.Service)
 	}{
 		"success | no existing job": {
 			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -423,6 +475,13 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success: existing job is running": {
 			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -485,6 +544,13 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success: existing job failed": {
 			expectedImage: fmt.Sprintf("%s/%s/ensembler-services/%s:%s", dockerRegistry, projectName, modelName, runID),
@@ -571,6 +637,13 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"failure: image tag not matched": {
 			expectedImageBuildingError: "error building OCI image",
@@ -602,17 +675,28 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			imageBuildingConfig: imageBuildingConfig,
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.8.*",
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 
 			ib, err := NewEnsemblerServiceImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			assert.Nil(t, err)
 
@@ -621,7 +705,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				tt.modelName,
 				tt.modelID,
 				tt.versionID,
-				tt.artifactURI,
+				testArtifactURI,
 				tt.buildLabels,
 				tt.ensemblerFolder,
 				tt.imageTag,
@@ -723,6 +807,8 @@ func TestParseResources(t *testing.T) {
 }
 
 func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -752,6 +838,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		hasErr              bool
 		expected            JobStatus
+		artifactServiceMock func(*mocks.Service)
 	}{
 		"success | active": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -771,6 +858,13 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatus{
 				State: JobStateActive,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success | succeeded": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -789,6 +883,13 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 			hasErr: false,
 			expected: JobStatus{
 				State: JobStateSucceeded,
+			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
 		"success | Failed": {
@@ -870,6 +971,13 @@ Pod container status:
 Pod last termination message:
 CondaEnvException: Pip failed`,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success | Unknown": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -891,6 +999,13 @@ CondaEnvException: Pip failed`,
 			expected: JobStatus{
 				State: JobStateUnknown,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"failure | Unknown": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -907,15 +1022,26 @@ CondaEnvException: Pip failed`,
 				State:   JobStateUnknown,
 				Message: "hello",
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			status := ib.GetImageBuildingJobStatus(projectName, modelName, models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
@@ -924,6 +1050,8 @@ CondaEnvException: Pip failed`,
 }
 
 func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -953,6 +1081,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 		imageBuildingConfig config.ImageBuildingConfig
 		hasErr              bool
 		expected            JobStatus
+		artifactServiceMock func(*mocks.Service)
 	}{
 		"success | active": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -972,6 +1101,13 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatus{
 				State: JobStateActive,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success | succeeded": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -990,6 +1126,13 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			hasErr: false,
 			expected: JobStatus{
 				State: JobStateSucceeded,
+			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
 		"success | Failed": {
@@ -1039,6 +1182,13 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatus{
 				State: JobStateFailed,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"success | Unknown": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -1083,6 +1233,13 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			expected: JobStatus{
 				State: JobStateUnknown,
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 		"failure | Unknown": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -1122,15 +1279,26 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				State:   JobStateUnknown,
 				Message: "hello",
 			},
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerServiceImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			status := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
 			assert.Equal(t, tt.expected, status)
@@ -1139,6 +1307,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 }
 
 func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -1167,6 +1337,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
 		hasErr              bool
+		artifactServiceMock func(*mocks.Service)
 	}{
 		"success | no error": {
 			imageBuildingConfig: imageBuildingConfig,
@@ -1184,15 +1355,26 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 				return ctlr
 			},
 			hasErr: false,
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
@@ -1206,10 +1388,13 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 }
 
 func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
+	modelDependenciesURL := getHashedModelDependenciesUrl()
+
 	tests := map[string]struct {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
 		hasErr              bool
+		artifactServiceMock func(*mocks.Service)
 	}{
 		"success | no error": {
 			imageBuildingConfig: config.ImageBuildingConfig{
@@ -1250,15 +1435,26 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				return ctlr
 			},
 			hasErr: false,
+			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("GetURLScheme").Return("gs")
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
+			artifactServiceMock := &mocks.Service{}
+			tt.artifactServiceMock(artifactServiceMock)
+
 			clusterController := tt.clusterController()
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
 				googleCloudStorageArtifactServiceType,
+				artifactServiceMock,
 			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
 
@@ -1272,23 +1468,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 }
 
 func Test_imageBuilder_getHashedModelDependenciesUrl(t *testing.T) {
-	testArtifactURISuffix := "://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
-	testArtifactURI := "gs://bucket-name/mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts"
-	testArtifactGsutilURL := &artifact.URL{
-		Bucket: "bucket-name",
-		Object: "mlflow/3069/e130c40703ee424da97b9ecee7b874b7/artifacts",
-	}
-	testCondaEnvContent := `dependencies:
-- python=3.9.*
-- pip:
-  - mlflow`
-	testCondaEnvUrlSuffix := testArtifactURISuffix + "/model/conda.yaml"
-
-	hash := sha256.New()
-	hash.Write([]byte(testCondaEnvContent))
-	hashEnv := hash.Sum(nil)
-
-	modelDependenciesURL := fmt.Sprintf("gs://%s/turing/model_dependencies/%x", testArtifactGsutilURL.Bucket, hashEnv)
+	modelDependenciesURL := getHashedModelDependenciesUrl()
 
 	type args struct {
 		ctx         context.Context
