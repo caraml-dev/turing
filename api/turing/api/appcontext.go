@@ -10,6 +10,7 @@ import (
 
 	mlpcluster "github.com/caraml-dev/mlp/api/pkg/cluster"
 
+	"github.com/caraml-dev/mlp/api/pkg/artifact"
 	batchensembling "github.com/caraml-dev/turing/api/turing/batch/ensembling"
 	batchrunner "github.com/caraml-dev/turing/api/turing/batch/runner"
 	"github.com/caraml-dev/turing/api/turing/cluster"
@@ -94,6 +95,8 @@ func NewAppContext(
 	// Init ensemblers service
 	ensemblersService := service.NewEnsemblersService(db)
 
+	artifactService, err := initArtifactService(cfg)
+
 	if cfg.BatchEnsemblingConfig.Enabled {
 		if cfg.BatchEnsemblingConfig.JobConfig == nil {
 			return nil, errors.Wrapf(err, "BatchEnsemblingConfig.JobConfig was not set")
@@ -125,6 +128,7 @@ func NewAppContext(
 			imageBuildingController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
 			cfg.MlflowConfig.ArtifactServiceType,
+			artifactService,
 		)
 		if err != nil {
 			return nil, errors.Wrapf(err, "Failed initializing ensembling image builder")
@@ -160,6 +164,7 @@ func NewAppContext(
 		clusterControllers[cfg.EnsemblerServiceBuilderConfig.ClusterName],
 		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
 		cfg.MlflowConfig.ArtifactServiceType,
+		artifactService,
 	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed initializing ensembler service builder")
@@ -235,4 +240,17 @@ func buildKubeconfigStore(mlpSvc service.MLPService, cfg *config.Config) (map[st
 		}
 	}
 	return k8sConfigStore, nil
+}
+
+func initArtifactService(cfg *config.Config) (artifact.Service, error) {
+	if cfg.MlflowConfig.ArtifactServiceType == "gcs" {
+		return artifact.NewGcsArtifactClient()
+	}
+	if cfg.MlflowConfig.ArtifactServiceType == "s3" {
+		return artifact.NewS3ArtifactClient()
+	}
+	if cfg.MlflowConfig.ArtifactServiceType == "nop" {
+		return artifact.NewNopArtifactClient(), nil
+	}
+	return nil, fmt.Errorf("invalid artifact service type %s", cfg.MlflowConfig.ArtifactServiceType)
 }

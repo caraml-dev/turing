@@ -144,6 +144,7 @@ func newImageBuilder(
 	nameGenerator nameGenerator,
 	runnerType models.EnsemblerRunnerType,
 	artifactServiceType string,
+	artifactService artifact.Service,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
@@ -156,6 +157,7 @@ func newImageBuilder(
 		nameGenerator:       nameGenerator,
 		runnerType:          runnerType,
 		artifactServiceType: artifactServiceType,
+		artifactService:     artifactService,
 	}, nil
 }
 
@@ -682,7 +684,7 @@ func (ib *imageBuilder) getHashedModelDependenciesUrl(ctx context.Context, artif
 		return "", err
 	}
 
-	condaEnvUrl := fmt.Sprintf("%s://%s/%s/model/conda.yaml", ib.artifactService.GetURLScheme(), artifactURL.Bucket, artifactURL.Object)
+	condaEnvUrl := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", ib.artifactService.GetURLScheme(), artifactURL.Bucket, artifactURL.Object)
 
 	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvUrl)
 	if err != nil {
