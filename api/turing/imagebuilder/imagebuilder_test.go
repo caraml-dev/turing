@@ -52,7 +52,6 @@ const (
 	modelVersion                         = models.ID(1)
 	runID                                = "abc123"
 	dockerRegistry                       = "ghcr.io"
-	artifactURI                          = "gs://bucket/ensembler"
 	pyFuncEnsemblerJobDockerfilePath     = "engines/pyfunc-ensembler-job/app.Dockerfile"
 	pyFuncEnsemblerServiceDockerfilePath = "engines/pyfunc-ensembler-service/app.Dockerfile"
 	buildContext                         = "git://github.com/caraml-dev/turing.git#refs/heads/master"
@@ -63,8 +62,6 @@ const (
 )
 
 func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -94,7 +91,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		expected            string
 		projectName         string
 		modelName           string
-		artifactURI         string
 		modelID             models.ID
 		versionID           string
 		inputDependencies   []string
@@ -112,7 +108,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			modelName:   modelName,
 			modelID:     modelVersion,
 			versionID:   runID,
-			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -167,6 +162,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -180,7 +176,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			modelName:   modelName,
 			modelID:     modelVersion,
 			versionID:   runID,
-			artifactURI: artifactURI,
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
@@ -236,6 +231,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -249,7 +245,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			modelName:   modelName,
 			modelID:     modelVersion,
 			versionID:   runID,
-			artifactURI: artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -329,6 +324,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -371,8 +367,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 }
 
 func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -403,7 +397,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		expectedImageBuildingError string
 		projectName                string
 		modelName                  string
-		artifactURI                string
 		modelID                    models.ID
 		versionID                  string
 		inputDependencies          []string
@@ -421,7 +414,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			modelName:     modelName,
 			modelID:       modelVersion,
 			versionID:     runID,
-			artifactURI:   artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -476,6 +468,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -489,7 +482,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			modelName:     modelName,
 			modelID:       modelVersion,
 			versionID:     runID,
-			artifactURI:   artifactURI,
 			buildLabels: map[string]string{
 				"gojek.io/team": "dsp",
 			},
@@ -545,6 +537,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -558,7 +551,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			modelName:     modelName,
 			modelID:       modelVersion,
 			versionID:     runID,
-			artifactURI:   artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -638,6 +630,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.7.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -651,7 +644,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			modelName:                  modelName,
 			modelID:                    modelVersion,
 			versionID:                  runID,
-			artifactURI:                artifactURI,
 			clusterController: func() cluster.Controller {
 				ctlr := &clustermock.Controller{}
 				// First time it's called
@@ -676,6 +668,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			ensemblerFolder:     ensemblerFolder,
 			imageTag:            "3.8.*",
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -807,8 +800,6 @@ func TestParseResources(t *testing.T) {
 }
 
 func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -859,6 +850,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				State: JobStateActive,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -885,6 +877,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				State: JobStateSucceeded,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -972,6 +965,7 @@ Pod last termination message:
 CondaEnvException: Pip failed`,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1000,6 +994,7 @@ CondaEnvException: Pip failed`,
 				State: JobStateUnknown,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1023,6 +1018,7 @@ CondaEnvException: Pip failed`,
 				Message: "hello",
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1050,8 +1046,6 @@ CondaEnvException: Pip failed`,
 }
 
 func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -1102,6 +1096,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				State: JobStateActive,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1128,6 +1123,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				State: JobStateSucceeded,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1183,6 +1179,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				State: JobStateFailed,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1234,6 +1231,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				State: JobStateUnknown,
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1280,6 +1278,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				Message: "hello",
 			},
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1307,8 +1306,6 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 }
 
 func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	imageBuildingConfig := config.ImageBuildingConfig{
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
@@ -1356,6 +1353,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 			},
 			hasErr: false,
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1388,8 +1386,6 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 }
 
 func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
-	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	tests := map[string]struct {
 		clusterController   func() cluster.Controller
 		imageBuildingConfig config.ImageBuildingConfig
@@ -1436,6 +1432,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 			},
 			hasErr: false,
 			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
+				modelDependenciesURL := getHashedModelDependenciesUrl()
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
@@ -1469,7 +1466,6 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 
 func Test_imageBuilder_getHashedModelDependenciesUrl(t *testing.T) {
 	modelDependenciesURL := getHashedModelDependenciesUrl()
-
 	type args struct {
 		ctx         context.Context
 		artifactURI string
