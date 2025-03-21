@@ -18,5 +18,5 @@ RUN wget -q https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip && unzip aw
 COPY . .
 COPY ./temp-deps/sdk ./../../sdk
 
-RUN conda env create -f ./env-${PYTHON_VERSION}.yaml -n $CONDA_ENV_NAME &&  \
+RUN conda env create -f ./env.yaml -n $CONDA_ENV_NAME &&  \
     rm -rf /root/.cache
