@@ -37,7 +37,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
 
 RUN /bin/bash -c "conda env update --name ${CONDA_ENV_NAME} --file ./conda.yaml"
 
-
+# Download model artifact
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         gsutil -m cp -r ${MODEL_URL} .; \
     elif [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "s3" ]; then \
