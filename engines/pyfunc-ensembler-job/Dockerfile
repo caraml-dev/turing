@@ -91,7 +91,7 @@ COPY --chown=$UID:$GID ./temp-deps/sdk $PROJECT_DIR/../../sdk
 # Setup base conda environment
 ARG PYTHON_VERSION
 ENV CONDA_ENVIRONMENT turing-batch-ensembler
-RUN conda env create -f $PROJECT_DIR/env-${PYTHON_VERSION}.yaml -n $CONDA_ENVIRONMENT && \
+RUN conda env create -f env.yaml -n $CONDA_ENVIRONMENT && \
     rm -rf $HOME/.cache
 
 RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc
