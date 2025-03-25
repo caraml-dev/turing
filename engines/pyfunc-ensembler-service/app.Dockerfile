@@ -35,6 +35,9 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         echo "No credentials are used"; \
     fi
 
+# Update conda.yaml to add turing-sdk
+ARG TURING_DEP_CONSTRAINT
+RUN process_conda_env.sh conda.yaml "nops-pyfunc-ensembler-service" "${TURING_DEP_CONSTRAINT}"
 RUN /bin/bash -c "conda env update --name ${CONDA_ENV_NAME} --file ./conda.yaml"
 
 # Download model artifact
