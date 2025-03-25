@@ -3,4 +3,3 @@ cloudpickle==2.0.0
 orjson==3.6.8
 setuptools<75
 tornado==6.1
-file:../../sdk
