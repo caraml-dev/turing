@@ -357,7 +357,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				testArtifactURI,
 				tt.buildLabels,
 				tt.ensemblerFolder,
-				tt.imageTag,
 			}
 			actual, err := ib.BuildImage(buildImageRequest)
 			assert.Nil(t, err)
@@ -701,7 +700,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				testArtifactURI,
 				tt.buildLabels,
 				tt.ensemblerFolder,
-				tt.imageTag,
 			}
 			actual, err := ib.BuildImage(buildImageRequest)
 			if tt.expectedImageBuildingError == "" {

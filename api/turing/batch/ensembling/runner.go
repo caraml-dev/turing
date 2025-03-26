@@ -443,7 +443,6 @@ func (r *ensemblingJobRunner) buildImage(
 		ArtifactURI:     *ensemblingJob.InfraConfig.ArtifactUri,
 		BuildLabels:     buildLabels,
 		EnsemblerFolder: service.EnsemblerFolder,
-		BaseImageRefTag: baseImageTag,
 	}
 	return r.imageBuilder.BuildImage(request)
 }
