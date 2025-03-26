@@ -90,7 +90,6 @@ type BuildImageRequest struct {
 	ArtifactURI     string
 	BuildLabels     map[string]string
 	EnsemblerFolder string
-	BaseImageRefTag string
 }
 
 type EnsemblerImage struct {

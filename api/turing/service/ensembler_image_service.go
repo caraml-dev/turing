@@ -98,7 +98,6 @@ func (s *ensemblerImagesService) BuildImage(
 			},
 		),
 		EnsemblerFolder: EnsemblerFolder,
-		BaseImageRefTag: ensembler.PythonVersion,
 	}
 
 	if _, err := ib.BuildImage(request); err != nil {
