@@ -37,7 +37,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
 
 # Update conda.yaml to add turing-sdk
 ARG TURING_DEP_CONSTRAINT
-RUN process_conda_env.sh conda.yaml "naufal-pyfunc-ensembler-service-3" "${TURING_DEP_CONSTRAINT}"
+RUN process_conda_env.sh conda.yaml "pyfunc-ensembler-service" "${TURING_DEP_CONSTRAINT}"
 RUN /bin/bash -c "conda env create --name ${CONDA_ENV_NAME} --file ./conda.yaml"
 
 # Download model artifact
