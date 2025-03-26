@@ -38,7 +38,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
 # Update conda.yaml to add turing-sdk
 ARG TURING_DEP_CONSTRAINT
 RUN process_conda_env.sh conda.yaml "nops-pyfunc-ensembler-service" "${TURING_DEP_CONSTRAINT}"
-RUN /bin/bash -c "conda env update --name ${CONDA_ENV_NAME} --file ./conda.yaml"
+RUN /bin/bash -c "conda env create --name ${CONDA_ENV_NAME} --file ./conda.yaml"
 
 # Download model artifact
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
