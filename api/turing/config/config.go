@@ -181,6 +181,8 @@ type ImageBuildingConfig struct {
 	NodeSelector map[string]string
 	// Value for cluster-autoscaler.kubernetes.io/safe-to-evict annotation
 	SafeToEvict bool
+	// BaseImageRef is the image name of the base ensembler image built from the engines/pyfunc-ensembler-*/Dockerfile
+	BaseImage string
 }
 
 // Resource contains the Kubernetes resource request and limits

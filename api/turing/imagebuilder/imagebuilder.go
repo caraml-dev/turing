@@ -201,7 +201,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		}
 
 		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-			request.EnsemblerFolder, request.BaseImageRefTag, hashedModelDependenciesUrl)
+			request.EnsemblerFolder, hashedModelDependenciesUrl)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -222,7 +222,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			}
 
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-				request.EnsemblerFolder, request.BaseImageRefTag, hashedModelDependenciesUrl)
+				request.EnsemblerFolder, hashedModelDependenciesUrl)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -291,22 +291,16 @@ func (ib *imageBuilder) createKanikoJob(
 	artifactURI string,
 	buildLabels map[string]string,
 	ensemblerFolder string,
-	baseImageRefTag string,
 	hashedModelDependenciesUrl string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
 
-	baseImage, ok := ib.imageBuildingConfig.BaseImageRef[baseImageRefTag]
-	if !ok {
-		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
-	}
-
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
+		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImage),
 		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesUrl),
