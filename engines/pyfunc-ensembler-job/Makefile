@@ -47,3 +47,13 @@ build-image: version
 version:
 	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
 	@echo "turing-pyfunc-ensembler-job version:" $(VERSION)
+
+.PHONY: build
+build: version
+	@rm -rf build dist
+	@pip install "setuptools>=64,<75" "setuptools_scm>=8" "twine" "wheel"
+	@tag=$$(python -m setuptools_scm -r ../.. | sed 's/\+.*//'); \
+	sed -i -e "s|turing-sdk.*|turing-sdk==$$tag|g" ./requirements.txt; \
+	sed -i -e "s|VERSION = \".*\"|VERSION = \"$$tag\"|g" ./version.py
+	@python setup.py sdist bdist_wheel
+	@TWINE_USERNAME=$(PYPI_USERNAME) TWINE_PASSWORD=$(PYPI_PASSWORD) twine upload dist/*
