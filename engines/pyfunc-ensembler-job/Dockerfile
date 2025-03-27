@@ -1,4 +1,4 @@
-FROM apache/spark-py:v3.1.3
+FROM --platform=linux/amd64 apache/spark-py:v3.1.3
 
 # Switch to user root so we can add additional jars and configuration files.
 USER root
@@ -60,10 +60,10 @@ COPY ./entrypoint.sh /opt/entrypoint.sh
 ARG username=spark
 ARG spark_uid=185
 ARG spark_gid=100
-ENV USER $username
-ENV UID $spark_uid
-ENV GID $spark_gid
-ENV HOME /home/$USER
+ENV USER=$username
+ENV UID=$spark_uid
+ENV GID=$spark_gid
+ENV HOME=/home/$USER
 RUN adduser --disabled-password --uid $UID --gid $GID --home $HOME $USER
 
 # Switch to Spark user
@@ -71,8 +71,8 @@ USER ${USER}
 WORKDIR $HOME
 
 # Install miniconda
-ENV CONDA_DIR ${HOME}/miniconda3
-ENV PATH ${CONDA_DIR}/bin:$PATH
+ENV CONDA_DIR=${HOME}/miniconda3
+ENV PATH=${CONDA_DIR}/bin:$PATH
 ENV MINIFORGE_VERSION=23.3.1-1
 
 RUN wget --quiet https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/Miniforge3-${MINIFORGE_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
@@ -82,20 +82,13 @@ RUN wget --quiet https://github.com/conda-forge/miniforge/releases/download/${MI
     echo "source $CONDA_DIR/etc/profile.d/conda.sh" >> $HOME/.bashrc
 
 # Copy PySpark application
-ENV PROJECT_DIR $HOME/batch-ensembler
+ENV PROJECT_DIR=$HOME/batch-ensembler
 RUN mkdir -p $PROJECT_DIR
 COPY --chown=$UID:$GID . $PROJECT_DIR/
 # Hack to ensure that it's compatible with the ../../sdk stated in requirements.txt
 COPY --chown=$UID:$GID ./temp-deps/sdk $PROJECT_DIR/../../sdk
 
-# Setup base conda environment
-ARG PYTHON_VERSION
-ENV CONDA_ENVIRONMENT turing-batch-ensembler
-RUN conda env create -f env.yaml -n $CONDA_ENVIRONMENT && \
-    rm -rf $HOME/.cache
-
-RUN echo "conda activate $CONDA_ENVIRONMENT" >> $HOME/.bashrc
-
-ENV PATH $CONDA_DIR/envs/$CONDA_ENVIRONMENT/bin:$PATH
+# Copy conda env processor script
+COPY process_conda_env.sh /bin/process_conda_env.sh
 
 ENTRYPOINT ["/opt/entrypoint.sh"]

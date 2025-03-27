@@ -24,7 +24,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
        echo "No credentials are used"; \
     fi
 
-# Download and install user model dependencies
+# Download user model dependencies
 ARG MODEL_DEPENDENCIES_URL
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         gsutil cp ${MODEL_DEPENDENCIES_URL} conda.yaml; \

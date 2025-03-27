@@ -24,7 +24,7 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
        echo "No credentials are used"; \
     fi
 
-# Download and install user model dependencies
+# Download model dependencies
 ARG MODEL_DEPENDENCIES_URL
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         gsutil cp ${MODEL_DEPENDENCIES_URL} conda.yaml; \
@@ -35,7 +35,10 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
         echo "No credentials are used"; \
     fi
 
-RUN /bin/bash -c "conda env update --name ${CONDA_ENV_NAME} --file ./conda.yaml"
+# Update conda.yaml to add turing-sdk
+ARG TURING_DEP_CONSTRAINT
+RUN process_conda_env.sh conda.yaml "naufal-pyfunc-ensembler-job" "${TURING_DEP_CONSTRAINT}"
+RUN /bin/bash -c "conda env create --name ${CONDA_ENV_NAME} --file ./conda.yaml"
 
 # Download model artifact
 RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
