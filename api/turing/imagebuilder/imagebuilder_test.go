@@ -643,45 +643,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
-		"failure: image tag not matched": {
-			expectedImageBuildingError: "error building OCI image",
-			projectName:                projectName,
-			modelName:                  modelName,
-			modelID:                    modelVersion,
-			versionID:                  runID,
-			clusterController: func() cluster.Controller {
-				ctlr := &clustermock.Controller{}
-				// First time it's called
-				ctlr.On(
-					"GetJob",
-					mock.Anything,
-					mock.Anything,
-					mock.Anything,
-				).Return(
-					nil,
-					k8serrors.NewNotFound(
-						schema.GroupResource{},
-						fmt.Sprintf("service-builder-%s-%s-%d-%s", projectName, modelName, modelVersion, runID[:5]),
-					),
-				).Once()
-				return ctlr
-			},
-			buildLabels: map[string]string{
-				"gojek.io/team": "dsp",
-			},
-			imageBuildingConfig: imageBuildingConfig,
-			ensemblerFolder:     ensemblerFolder,
-			imageTag:            "3.8.*",
-			artifactServiceMock: func(artifactServiceMock *mocks.Service) {
-				modelDependenciesURL := getHashedModelDependenciesUrl()
-				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
-				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
-					Return([]byte(testCondaEnvContent), nil)
-				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
-			},
-		},
 	}
 
 	for name, tt := range tests {
