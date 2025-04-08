@@ -174,7 +174,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		return imageRef, nil
 	}
 
-	hashedModelDependenciesURL, err := ib.gethashedModelDependenciesURL(context.Background(), request.ArtifactURI)
+	hashedModelDependenciesURL, err := ib.getHashedModelDependenciesURL(context.Background(), request.ArtifactURI)
 	if err != nil {
 		log.Errorf("unable to get model dependencies url: %v", err)
 		return "", err
@@ -667,20 +667,20 @@ func parseJobConditions(jobConditions []apibatchv1.JobCondition) (string, error)
 	return jobTable, err
 }
 
-// gethashedModelDependenciesURL stores dependency to storage using it's content hashed name as filename.
+// getHashedModelDependenciesURL stores dependency to storage using it's content hashed name as filename.
 // if the artifact is recreated with different id but has the same dependency content the URL for the
 // stored dependency will still be the same. This ensure we can use Docker layer caching mechanism for
 // the built dependency even for different artifact id given the dependency content is not changed.
-func (ib *imageBuilder) gethashedModelDependenciesURL(ctx context.Context, artifactURI string) (string, error) {
+func (ib *imageBuilder) getHashedModelDependenciesURL(ctx context.Context, artifactURI string) (string, error) {
 	artifactURL, err := ib.artifactService.ParseURL(artifactURI)
 	if err != nil {
 		return "", err
 	}
 
 	urlSchema := ib.artifactService.GetURLScheme()
-	condaEnvURL := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
+	condaEnvUrl := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
 
-	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvURL)
+	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvUrl)
 	if err != nil {
 		return "", err
 	}
@@ -689,20 +689,20 @@ func (ib *imageBuilder) gethashedModelDependenciesURL(ctx context.Context, artif
 	hash.Write(condaEnv)
 	hashEnv := hash.Sum(nil)
 
-	hashedDependenciesUrl := fmt.Sprintf("%s://%s%s/%x", urlSchema, artifactURL.Bucket, modelDependenciesPath, hashEnv)
+	hashedDependenciesURL := fmt.Sprintf("%s://%s%s/%x", urlSchema, artifactURL.Bucket, modelDependenciesPath, hashEnv)
 
-	_, err = ib.artifactService.ReadArtifact(ctx, hashedDependenciesUrl)
+	_, err = ib.artifactService.ReadArtifact(ctx, hashedDependenciesURL)
 	if err == nil {
-		return hashedDependenciesUrl, nil
+		return hashedDependenciesURL, nil
 	}
 
 	if !errors.Is(err, artifact.ErrObjectNotExist) {
 		return "", err
 	}
 
-	if err := ib.artifactService.WriteArtifact(ctx, hashedDependenciesUrl, condaEnv); err != nil {
+	if err := ib.artifactService.WriteArtifact(ctx, hashedDependenciesURL, condaEnv); err != nil {
 		return "", err
 	}
 
-	return hashedDependenciesUrl, nil
+	return hashedDependenciesURL, nil
 }
