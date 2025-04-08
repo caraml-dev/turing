@@ -678,9 +678,9 @@ func (ib *imageBuilder) getHashedModelDependenciesURL(ctx context.Context, artif
 	}
 
 	urlSchema := ib.artifactService.GetURLScheme()
-	condaEnvUrl := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
+	condaEnvURL := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
 
-	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvUrl)
+	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvURL)
 	if err != nil {
 		return "", err
 	}
