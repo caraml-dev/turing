@@ -174,7 +174,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		return imageRef, nil
 	}
 
-	hashedModelDependenciesUrl, err := ib.getHashedModelDependenciesUrl(context.Background(), request.ArtifactURI)
+	hashedModelDependenciesURL, err := ib.gethashedModelDependenciesURL(context.Background(), request.ArtifactURI)
 	if err != nil {
 		log.Errorf("unable to get model dependencies url: %v", err)
 		return "", err
@@ -200,7 +200,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		}
 
 		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-			request.EnsemblerFolder, hashedModelDependenciesUrl)
+			request.EnsemblerFolder, hashedModelDependenciesURL)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -221,7 +221,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			}
 
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-				request.EnsemblerFolder, hashedModelDependenciesUrl)
+				request.EnsemblerFolder, hashedModelDependenciesURL)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -290,7 +290,7 @@ func (ib *imageBuilder) createKanikoJob(
 	artifactURI string,
 	buildLabels map[string]string,
 	ensemblerFolder string,
-	hashedModelDependenciesUrl string,
+	hashedModelDependenciesURL string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
@@ -302,7 +302,7 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImage),
 		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
-		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesUrl),
+		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesURL),
 		fmt.Sprintf("--destination=%s", imageRef),
 	}
 
@@ -667,20 +667,20 @@ func parseJobConditions(jobConditions []apibatchv1.JobCondition) (string, error)
 	return jobTable, err
 }
 
-// getHashedModelDependenciesUrl stores dependency to storage using it's content hashed name as filename.
+// gethashedModelDependenciesURL stores dependency to storage using it's content hashed name as filename.
 // if the artifact is recreated with different id but has the same dependency content the URL for the
 // stored dependency will still be the same. This ensure we can use Docker layer caching mechanism for
 // the built dependency even for different artifact id given the dependency content is not changed.
-func (ib *imageBuilder) getHashedModelDependenciesUrl(ctx context.Context, artifactURI string) (string, error) {
+func (ib *imageBuilder) gethashedModelDependenciesURL(ctx context.Context, artifactURI string) (string, error) {
 	artifactURL, err := ib.artifactService.ParseURL(artifactURI)
 	if err != nil {
 		return "", err
 	}
 
 	urlSchema := ib.artifactService.GetURLScheme()
-	condaEnvUrl := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
+	condaEnvURL := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
 
-	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvUrl)
+	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvURL)
 	if err != nil {
 		return "", err
 	}
