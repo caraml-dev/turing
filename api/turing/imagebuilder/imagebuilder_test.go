@@ -166,7 +166,8 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -235,7 +236,8 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -328,7 +330,8 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -471,7 +474,8 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -540,7 +544,8 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -633,7 +638,8 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -671,7 +677,8 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -852,7 +859,8 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -879,7 +887,8 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -967,7 +976,8 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -996,7 +1006,8 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1020,7 +1031,8 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1098,7 +1110,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1125,7 +1138,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1181,7 +1195,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1233,7 +1248,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1280,7 +1296,8 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1355,7 +1372,8 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1434,7 +1452,8 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 		},
@@ -1485,7 +1504,8 @@ func Test_imageBuilder_getHashedModelDependenciesUrl(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
 			},
 			want:    modelDependenciesURL,
@@ -1501,9 +1521,11 @@ func Test_imageBuilder_getHashedModelDependenciesUrl(t *testing.T) {
 				artifactServiceMock.On("ParseURL", fmt.Sprintf("gs%s", testArtifactURISuffix)).Return(testArtifactGsutilURL, nil)
 				artifactServiceMock.On("GetURLScheme").Return("gs")
 				artifactServiceMock.On("GetURLScheme").Return("gs")
-				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvUrlSuffix)).
+					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return(nil, artifact.ErrObjectNotExist)
-				artifactServiceMock.On("WriteArtifact", mock.Anything, modelDependenciesURL, []byte(testCondaEnvContent)).Return(nil)
+				artifactServiceMock.On("WriteArtifact", mock.Anything, modelDependenciesURL, []byte(testCondaEnvContent)).
+					Return(nil)
 			},
 			want:    modelDependenciesURL,
 			wantErr: false,
