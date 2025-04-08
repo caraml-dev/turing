@@ -50,4 +50,4 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
     fi
 
 ARG FOLDER_NAME
-RUN /bin/bash -c ". activate ${CONDA_ENVIRONMENT}"
+RUN /bin/bash -c ". activate ${CONDA_ENV_NAME}"
