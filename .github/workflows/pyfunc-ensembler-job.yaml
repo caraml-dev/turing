@@ -24,6 +24,12 @@ on:
 
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      pypi_username:
+        required: true
+      pypi_password:
+        required: true
 
 jobs:
   test:
@@ -117,3 +123,13 @@ jobs:
 
       - name: Publish Pyfunc Ensembler Job Docker Image
         run: docker push ${{ steps.build.outputs.pyfunc-ensembler-job }}
+
+      - name: Publish pyfunc-ensembler-job package
+        env:
+          TWINE_USERNAME: ${{ secrets.pypi_username }}
+          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+        working-directory: engines/pyfunc-ensembler-job
+        run: |
+          set -o pipefail
+          make build | tee output.log
+          echo "pyfunc-ensembler-job=$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)" >> $GITHUB_OUTPUT
