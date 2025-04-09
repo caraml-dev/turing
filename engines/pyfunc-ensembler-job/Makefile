@@ -56,4 +56,4 @@ build: version
 	sed -i -e "s|turing-sdk.*|turing-sdk==$$tag|g" ./requirements.txt; \
 	sed -i -e "s|VERSION = \".*\"|VERSION = \"$$tag\"|g" ./version.py
 	@python setup.py sdist bdist_wheel
-	@TWINE_USERNAME=$(PYPI_USERNAME) TWINE_PASSWORD=$(PYPI_PASSWORD) twine upload dist/*
+	@twine upload dist/*
