@@ -26,9 +26,9 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      pypi_username:
+      PYPI_USERNAME:
         required: true
-      pypi_password:
+      PYPI_API_TOKEN:
         required: true
 
 jobs:
@@ -124,8 +124,8 @@ jobs:
 
       - name: Publish pyfunc-ensembler-job package
         env:
-          TWINE_USERNAME: ${{ secrets.pypi_username }}
-          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         working-directory: engines/pyfunc-ensembler-job
         run: |
           set -o pipefail
