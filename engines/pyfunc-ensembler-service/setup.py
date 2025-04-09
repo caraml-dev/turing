@@ -27,7 +27,7 @@ with pathlib.Path("requirements.dev.txt").open() as dev_requirements_test:
     ]
 
 setuptools.setup(
-    name="pyfunc-ensembler-service",
+    name="turing-pyfunc-ensembler-service",
     version=version,
     packages=setuptools.find_packages(),
     install_requires=requirements,
