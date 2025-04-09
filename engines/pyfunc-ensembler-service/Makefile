@@ -50,4 +50,4 @@ build: version
 	sed -i -e "s|turing-sdk.*|turing-sdk==$$tag|g" ./requirements.txt; \
 	sed -i -e "s|VERSION = \".*\"|VERSION = \"$$tag\"|g" ./version.py
 	@python setup.py sdist bdist_wheel
-	@twine upload dist/*
+	@twine upload dist/* --verbose
