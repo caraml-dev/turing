@@ -24,6 +24,12 @@ on:
 
   # To make it possible to trigger e2e CI workflow for any arbitrary git ref
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      PYPI_USERNAME:
+        required: true
+      PYPI_API_TOKEN:
+        required: true
 
 jobs:
   test:
