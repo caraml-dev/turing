@@ -1,12 +1,18 @@
 import setuptools
 import pathlib
 import pkg_resources
-import imp
+import importlib.util
 import os
 
-version = imp.load_source(
+# get version from version.py
+spec = importlib.util.spec_from_file_location(
     "pyfuncserver.version", os.path.join("version.py")
-).VERSION
+)
+
+v_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(v_module)
+
+version = v_module.VERSION
 
 with pathlib.Path("requirements.txt").open() as requirements_txt:
     requirements = [
