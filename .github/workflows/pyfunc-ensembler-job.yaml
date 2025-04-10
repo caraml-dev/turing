@@ -92,9 +92,6 @@ jobs:
         || ( github.event.pull_request.head.repo.full_name == github.repository )
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
     needs:
       - release-rules
       - test
@@ -115,7 +112,6 @@ jobs:
         working-directory: engines/pyfunc-ensembler-job
         env:
           DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
-          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           set -o pipefail
           make build-image | tee output.log

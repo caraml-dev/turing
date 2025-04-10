@@ -40,7 +40,7 @@ build-image: version
 	@cp -r ../../sdk temp-deps/
 	@$(eval IMAGE_TAG = $(if $(DOCKER_REGISTRY),$(DOCKER_REGISTRY)/,)${APP_NAME}:${VERSION})
 	@echo "Building docker image: ${IMAGE_TAG}"
-	@docker build . --tag ${IMAGE_TAG} --build-arg PYTHON_VERSION=${PYTHON_VERSION}
+	@docker build . --tag ${IMAGE_TAG}
 	@rm -rf temp-deps
 
 .PHONY: version

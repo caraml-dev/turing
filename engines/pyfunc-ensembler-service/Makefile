@@ -33,8 +33,7 @@ build-image: version
 	@echo "Building docker image: ${IMAGE_TAG}"
 	@docker build . --tag ${IMAGE_TAG} \
 		--build-arg APP_NAME=${APP_NAME} \
-		--build-arg CONDA_ENV_NAME=${CONDA_ENV_NAME} \
-		--build-arg PYTHON_VERSION=${PYTHON_VERSION}
+		--build-arg CONDA_ENV_NAME=${CONDA_ENV_NAME}
 	@rm -rf temp-deps
 
 .PHONY: version
