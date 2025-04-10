@@ -6,10 +6,9 @@ CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)
 
 .PHONY: setup
-setup: 
+setup: build
 	@pip install pipenv
-	$(MAKE) build
-	@pipenv run pip install 'dist/turing_pyfunc_ensembler_service-$(VERSION)-py3-none-any.whl[dev]'
+	@pipenv run pip install 'dist/turing_pyfunc_ensembler_service-$(shell echo $(VERSION) | sed 's/^v//')-py3-none-any.whl[dev]'
 
 .PHONY: lint
 lint:
