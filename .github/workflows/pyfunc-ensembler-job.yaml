@@ -37,6 +37,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      
+      - name: Show tags
+        run: git tag -l
 
       - name: Setup Python
         uses: actions/setup-python@v5
