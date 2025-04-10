@@ -12,7 +12,7 @@ setup: build
 
 .PHONY: type-check
 type-check:
-	@pipenv run mypy --ignore-missing-imports --allow-untyped-globals --implicit-optional merlin --follow-imports silent
+	@pipenv run mypy --ignore-missing-imports --allow-untyped-globals --implicit-optional ensembler --follow-imports silent
 
 .PHONY: lint
 lint:
