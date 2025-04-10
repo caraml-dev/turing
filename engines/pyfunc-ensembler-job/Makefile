@@ -6,10 +6,10 @@ CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)
 
 .PHONY: setup
-setup: $(CONDA_ENV_NAME)
-$(CONDA_ENV_NAME):
-	@conda env update -f env-$(PYTHON_VERSION).yaml -n $(CONDA_ENV_NAME) --prune
-	$(ACTIVATE_ENV) && pip install -r requirements.dev.txt
+setup:
+	@pip install pipenv
+	$(MAKE) build
+	@pipenv run pip install 'dist/turing_pyfunc_ensembler_job-$(VERSION)-py3-none-any.whl[dev]'
 
 .PHONY: type-check
 type-check:
@@ -28,11 +28,7 @@ lint:
 
 .PHONY: test
 test: type-check
-	@$(ACTIVATE_ENV) && \
-		python -m pytest \
-		--cov=ensembler \
-		--ignore=env \
-		-W ignore
+	@pipenv run pytest -W ignore
 
 .PHONY: build-image
 build-image: version
