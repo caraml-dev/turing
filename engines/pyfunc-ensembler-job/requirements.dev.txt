@@ -5,3 +5,4 @@ mypy>=0.910
 pytest<=8.1.2
 pytest-cov
 pylint
+types-PyYAML
