@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+argparse = ">=1.4.0"
+cloudpickle = "==2.0.0"
+orjson = "==3.6.8"
+tornado = "==6.1"
+turing-sdk = "==v0.15.1"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
