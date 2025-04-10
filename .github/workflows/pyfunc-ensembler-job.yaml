@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - "pyfunc-ensembler-job/v[0-9]+.[0-9]+.[0-9]+*"
+      - "python/v[0-9]+.[0-9]+.[0-9]+*"
     branches:
       - main
     paths:
