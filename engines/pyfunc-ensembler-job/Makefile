@@ -49,11 +49,15 @@ version:
 	@echo "turing-pyfunc-ensembler-job version:" $(VERSION)
 
 .PHONY: build
-build: version
+build:
 	@rm -rf build dist
 	@pip install "setuptools>=64,<75" "setuptools_scm>=8" "twine" "wheel"
 	@tag=$$(python -m setuptools_scm -r ../.. | sed 's/\+.*//'); \
 	sed -i -e "s|turing-sdk.*|turing-sdk==$$tag|g" ./requirements.txt; \
 	sed -i -e "s|VERSION = \".*\"|VERSION = \"$$tag\"|g" ./version.py
 	@python setup.py sdist bdist_wheel
+	@twine upload dist/* --verbose
+
+.PHONY: build-and-publish
+build-and-publish: build
 	@twine upload dist/* --verbose
