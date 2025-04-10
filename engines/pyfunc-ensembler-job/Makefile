@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 PYTHON_VERSION ?= 3.8
-APP_NAME := pyfunc-ensembler-job-py$(PYTHON_VERSION)
+APP_NAME := turing-pyfunc-ensembler-job
 CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)
 
@@ -45,18 +45,16 @@ build-image: version
 
 .PHONY: version
 version:
-	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p ${APP_NAME}/)))
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p python/ -y)))
 	@echo "turing-pyfunc-ensembler-job version:" $(VERSION)
 
 .PHONY: build
-build:
+build: version
 	@rm -rf build dist
 	@pip install "setuptools>=64,<75" "setuptools_scm>=8" "twine" "wheel"
-	@tag=$$(python -m setuptools_scm -r ../.. | sed 's/\+.*//'); \
-	sed -i -e "s|turing-sdk.*|turing-sdk==$$tag|g" ./requirements.txt; \
-	sed -i -e "s|VERSION = \".*\"|VERSION = \"$$tag\"|g" ./version.py
+	@sed -i -e "s|turing-sdk.*|turing-sdk==$(VERSION)|g" ./requirements.txt
+	@sed -i -e "s|VERSION = \".*\"|VERSION = \"$(VERSION)\"|g" ./version.py
 	@python setup.py sdist bdist_wheel
-	@twine upload dist/* --verbose
 
 .PHONY: build-and-publish
 build-and-publish: build
