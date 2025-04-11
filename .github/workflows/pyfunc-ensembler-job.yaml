@@ -31,6 +31,13 @@ on:
         required: true
       PYPI_API_TOKEN:
         required: true
+  
+  # The package build by this job requires latest version of sdk,
+  # so we can only run this workflow after sdk workflow is successfully run
+  workflow_run:
+    workflows: ["sdk"]
+    types:
+      - completed
 
 jobs:
   test:
@@ -84,9 +91,10 @@ jobs:
     # Dev build can be released either from the 'main' branch or
     # by running this workflow manually with `workflow_dispatch` event.
     if: >-
-      contains('release,pre-release', needs.release-rules.outputs.release-type)
+      (contains('release,pre-release', needs.release-rules.outputs.release-type)
         || ( github.event_name != 'pull_request' )
-        || ( github.event.pull_request.head.repo.full_name == github.repository )
+        || ( github.event.pull_request.head.repo.full_name == github.repository )) &&
+        ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     runs-on: ubuntu-latest
     needs:
