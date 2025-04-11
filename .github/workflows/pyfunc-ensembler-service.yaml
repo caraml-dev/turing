@@ -118,5 +118,5 @@ jobs:
         working-directory: engines/pyfunc-ensembler-service
         run: |
           set -o pipefail
-          make build | tee output.log
+          make build-and-publish | tee output.log
           echo "pyfunc-ensembler-service=$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)" >> $GITHUB_OUTPUT
