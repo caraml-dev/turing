@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - "pyfunc-ensembler-service/v[0-9]+.[0-9]+.[0-9]+*"
+      - "python/v[0-9]+.[0-9]+.[0-9]+*"
     branches:
       - main
     paths:
@@ -41,6 +42,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
+          python-version: "3.10"
           cache-dependency-path: |
             engines/pyfunc-ensembler-service/requirements.txt
             engines/pyfunc-ensembler-service/requirements.dev.txt
