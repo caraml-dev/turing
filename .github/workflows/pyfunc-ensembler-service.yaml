@@ -1,37 +1,6 @@
 name: engines/pyfunc-ensembler-service
 
 on:
-  # Automatically run CI on Release and Pre-Release tags and main branch
-  # (only if there are changes to relevant paths)
-  push:
-    tags:
-      - "pyfunc-ensembler-service/v[0-9]+.[0-9]+.[0-9]+*"
-      - "python/v[0-9]+.[0-9]+.[0-9]+*"
-    branches:
-      - main
-    paths:
-      - ".github/workflows/pyfunc-ensembler-service.yaml"
-      - "engines/pyfunc-ensembler-service/**"
-      - "sdk/**"
-
-  # Automatically run CI on branches, that have active PR opened
-  pull_request:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/pyfunc-ensembler-service.yaml"
-      - "engines/pyfunc-ensembler-service/**"
-      - "sdk/**"
-
-  # To make it possible to trigger e2e CI workflow for any arbitrary git ref
-  workflow_dispatch:
-  workflow_call:
-    secrets:
-      PYPI_USERNAME:
-        required: true
-      PYPI_API_TOKEN:
-        required: true
-
   # The package build by this job requires latest version of sdk,
   # so we can only run this workflow after sdk workflow is successfully run
   workflow_run:
