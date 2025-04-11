@@ -8,7 +8,9 @@ ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 .PHONY: setup
 setup: build
 	@pip install pipenv
-	@pipenv run pip install 'dist/turing_pyfunc_ensembler_service-$(shell echo $(VERSION) | sed 's/^v//')-py3-none-any.whl[dev]'
+	@DIST_VERSION=$$(echo $(VERSION) | \
+		sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)(-rc([0-9]+))?/\1rc\3/'); \
+		pipenv run pip install "dist/turing_pyfunc_ensembler_service-$${DIST_VERSION}-py3-none-any.whl[dev]"
 
 .PHONY: lint
 lint:
