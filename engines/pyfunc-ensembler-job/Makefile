@@ -37,7 +37,7 @@ build-image: version
 
 .PHONY: version
 version:
-	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p python/)))
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),v$(shell ../../scripts/vertagen/vertagen.sh -p python/ -y)))
 	@echo "turing-pyfunc-ensembler-job version:" $(VERSION)
 
 .PHONY: build

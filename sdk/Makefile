@@ -13,7 +13,7 @@ gen-client:
 
 .PHONY: version
 version:
-	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../scripts/vertagen/vertagen.sh -p sdk/ -y)))
+	$(eval VERSION=$(if $(OVERWRITE_VERSION),$(OVERWRITE_VERSION),$(shell ../scripts/vertagen/vertagen.sh -p python/ -y)))
 	@echo 'VERSION = "$(VERSION)"' > turing/version.py
 	@echo "turing-sdk version:" $(VERSION)
 
