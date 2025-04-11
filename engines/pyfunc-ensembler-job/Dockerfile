@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 apache/spark-py:v3.1.3
+FROM apache/spark-py:v3.1.3
 
 # Switch to user root so we can add additional jars and configuration files.
 USER root
