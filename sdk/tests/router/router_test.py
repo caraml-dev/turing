@@ -43,3 +43,58 @@ def test_list_routers(turing_api, project, generic_routers, use_google_oauth, ac
             assert actual.status.value == expected.status.value
             assert actual.created_at == expected.created_at
             assert actual.updated_at == expected.updated_at
+            
+@pytest.mark.parametrize(
+    "actual,expected", [pytest.param("generic_router_config", create_router_0000)]
+)
+def test_create_router(
+    turing_api, project, actual, expected, use_google_oauth, request, active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+    
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        router_config = request.getfixturevalue(actual)
+
+        mock_response = MagicMock()
+        mock_response.method = "POST"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers"
+        mock_response.data = expected.encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+        
+        actual_response = turing.Router.create(router_config)
+        actual_config = actual_response.config
+
+        assert actual_config.environment_name == router_config.environment_name
+        assert actual_config.name == router_config.name
+        assert actual_config.rules == router_config.rules
+        assert actual_config.default_route_id == router_config.default_route_id
+        assert (
+            actual_config.experiment_engine.to_open_api()
+            == router_config.experiment_engine.to_open_api()
+        )
+        assert (
+            actual_config.resource_request.to_open_api()
+            == router_config.resource_request.to_open_api()
+        )
+        assert actual_config.timeout == router_config.timeout
+        assert (
+            actual_config.log_config.to_open_api() == router_config.log_config.to_open_api()
+        )
+
+        assert actual_config.enricher.image == router_config.enricher.image
+        assert (
+            actual_config.enricher.resource_request.to_open_api()
+            == router_config.enricher.resource_request.to_open_api()
+        )
+        assert actual_config.enricher.endpoint == router_config.enricher.endpoint
+        assert actual_config.enricher.timeout == router_config.enricher.timeout
+        assert actual_config.enricher.port == router_config.enricher.port
+
+        assert actual_config.ensembler.type == router_config.ensembler.type
+
