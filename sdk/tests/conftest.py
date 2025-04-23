@@ -1,6 +1,7 @@
 import json
 import random
 from unittest.mock import MagicMock, patch
+from urllib.parse import quote_plus
 import uuid
 from datetime import datetime, timedelta
 from sys import version_info
@@ -788,12 +789,11 @@ def minimal_upi_router_config():
 
 @pytest.fixture
 def active_project_magic_mock(project) -> MagicMock:
-    with patch("urllib3.PoolManager.request") as mock_request:
-        mock_response = MagicMock()
-        mock_response.method = "GET"
-        mock_response.status = 200
-        mock_response.path = f"/v1/projects?name={project.name}"
-        mock_response.data = json.dumps([project], default=tests.json_serializer).encode('utf-8')
-        mock_response.getheader.return_value = 'application/json'
-        
-        return mock_response
+    mock_response = MagicMock()
+    mock_response.method = "GET"
+    mock_response.status = 200
+    mock_response.path = f"/v1/projects?name={project.name}"
+    mock_response.data = json.dumps([project], default=tests.json_serializer).encode('utf-8')
+    mock_response.getheader.return_value = 'application/json'
+    
+    return mock_response
