@@ -98,3 +98,24 @@ def test_create_router(
 
         assert actual_config.ensembler.type == router_config.ensembler.type
 
+@pytest.mark.parametrize(
+    "actual,expected", [pytest.param(1, turing.generated.models.IdObject(id=1))]
+)
+def test_delete_router(turing_api, project, actual, expected, use_google_oauth, active_project_magic_mock):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+        
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+        
+        mock_response = MagicMock()
+        mock_response.method = "DELETE"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{actual}"
+        mock_response.data = json.dumps(expected, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        response = turing.Router.delete(1)
+        assert actual == response
