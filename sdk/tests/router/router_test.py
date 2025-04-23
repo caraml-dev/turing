@@ -203,3 +203,29 @@ def test_update_router(
         assert actual_config.enricher.port == router_config.enricher.port
 
         assert actual_config.ensembler.type == router_config.ensembler.type
+        
+def test_deploy_router(
+    turing_api, project, generic_router, use_google_oauth, active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+        
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+
+        expected = turing.generated.models.RouterIdAndVersion(router_id=1, version=1)
+
+        mock_response = MagicMock()
+        mock_response.method = "POST"
+        mock_response.status = 202
+        mock_response.path = f"/v1/projects/{project.id}/routers/{base_router.id}/deploy"
+        mock_response.data = json.dumps(expected, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        response = base_router.deploy()
+        assert base_router.id == response["router_id"]
+        assert generic_router.config.version == response["version"]
