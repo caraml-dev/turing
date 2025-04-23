@@ -256,3 +256,36 @@ def test_undeploy_router(
 
         response = base_router.undeploy()
         assert base_router.id == response["router_id"]
+        
+def test_list_versions(
+    turing_api, project, generic_router, generic_router_version, use_google_oauth, active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+
+        expected_versions = [generic_router_version for _ in range(3)]
+
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{base_router.id}/versions"
+        mock_response.data = json.dumps(expected_versions, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+        
+        actual_versions = base_router.list_versions()
+
+        assert len(actual_versions) == len(expected_versions)
+
+        for actual, expected in zip(actual_versions, expected_versions):
+            assert actual.id == generic_router_version.id
+            assert actual.monitoring_url == generic_router_version.monitoring_url
+            assert actual.status.value == generic_router_version.status.value
+            assert actual.created_at == generic_router_version.created_at
+            assert actual.updated_at == generic_router_version.updated_at
