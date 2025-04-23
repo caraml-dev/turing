@@ -13,8 +13,6 @@ import turing.batch.config
 import turing.batch.config.sink
 import turing.batch.config.source
 import turing.generated.models
-from tests.fixtures.gcs import mock_gcs
-from tests.fixtures.mlflow import mock_mlflow
 from turing.ensembler import PyFuncEnsembler
 from turing.mounted_mlp_secret import MountedMLPSecret
 from turing.router.config.autoscaling_policy import AutoscalingPolicy
