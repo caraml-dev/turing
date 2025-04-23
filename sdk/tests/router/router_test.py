@@ -119,3 +119,24 @@ def test_delete_router(turing_api, project, actual, expected, use_google_oauth, 
 
         response = turing.Router.delete(1)
         assert actual == response
+        
+def test_get_router(turing_api, project, generic_router, use_google_oauth, active_project_magic_mock):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        actual_id = 1
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{actual_id}"
+        mock_response.data = json.dumps(generic_router, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+        
+        response = turing.Router.get(actual_id)
+        assert actual_id == response.id
