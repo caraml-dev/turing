@@ -319,3 +319,45 @@ def test_get_version(
         assert actual_response.status.value == generic_router_version.status.value
         assert actual_response.created_at == generic_router_version.created_at
         assert actual_response.updated_at == generic_router_version.updated_at
+        
+def test_get_version_config(
+    turing_api, project, generic_router, generic_router_version, use_google_oauth, active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+
+        actual_version = 1
+
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{base_router.id}/versions/{actual_version}"
+        mock_response.data = json.dumps(generic_router_version, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+        
+        actual_response = base_router.get_version(actual_version).get_config()
+
+        assert actual_response.environment_name == base_router.config.environment_name
+        assert actual_response.name == base_router.config.name
+        assert actual_response.rules == base_router.config.rules
+        assert actual_response.default_route_id == base_router.config.default_route_id
+        assert (
+            actual_response.experiment_engine.to_open_api()
+            == base_router.config.experiment_engine.to_open_api()
+        )
+        assert (
+            actual_response.resource_request.to_open_api()
+            == base_router.config.resource_request.to_open_api()
+        )
+        assert actual_response.timeout == base_router.config.timeout
+        assert (
+            actual_response.log_config.to_open_api()
+            == base_router.config.log_config.to_open_api()
+        )
