@@ -2,7 +2,6 @@ import json
 import os.path
 import random
 from unittest.mock import patch, MagicMock
-from urllib.parse import quote_plus
 import google.auth.environment_vars
 
 import pandas
@@ -314,3 +313,35 @@ def test_update_ensembler_existing_job(
         expected_error_message = "There is pending ensembling job using this ensembler. Please wait for the ensembling job to be completed or terminate it, before updating the ensembler."
         actual_error_message = str(error.value)
         assert expected_error_message == actual_error_message
+        
+@patch("google.cloud.storage.Client")
+@patch("requests.Session.request")
+@patch("urllib3.PoolManager.request")
+@pytest.mark.parametrize(
+    "actual,expected", [pytest.param(1, turing.generated.models.IdObject(id=1))]
+)
+@pytest.mark.parametrize("ensembler_name", ["ensembler_1"])
+def test_delete_ensembler(
+    turing_mock_request, mlflow_mock_request, gcs_mock_request,
+    turing_api, project, use_google_oauth, actual, expected, active_project_magic_mock, ensembler_mlflow_magic_mock_sequence, ensembler_gcs_magic_mock_sequence
+):
+    turing.set_url(turing_api, use_google_oauth)
+
+    turing_mock_request.return_value = active_project_magic_mock
+    turing.set_project(project.name)
+    
+    mlflow_mock_request.side_effect = ensembler_mlflow_magic_mock_sequence
+    gcs_mock_request.side_effect = ensembler_gcs_magic_mock_sequence
+    
+    mock_response = MagicMock()
+    mock_response.method = "DELETE"
+    mock_response.status = 200
+    mock_response.path = f"/v1/projects/{project.id}/ensemblers/{actual}"
+    mock_response.data = json.dumps(expected, default=tests.json_serializer).encode('utf-8')
+    mock_response.getheader.return_value = 'application/json'
+    
+    turing_mock_request.return_value = mock_response
+
+    response = turing.PyFuncEnsembler.delete(1)
+
+    assert actual == response
