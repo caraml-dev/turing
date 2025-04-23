@@ -451,3 +451,39 @@ def test_get_events_list(
             assert actual.message == expected.message
             assert actual.created_at == expected.created_at
             assert actual.updated_at == expected.updated_at
+            
+@pytest.mark.parametrize(
+    "status,max_tries,duration,expected",
+    [pytest.param(RouterStatus.DEPLOYED, 5, 0.00001, TimeoutError)],
+)
+def test_wait_for_status(
+    turing_api,
+    project,
+    generic_router,
+    status,
+    max_tries,
+    duration,
+    expected,
+    use_google_oauth,
+    active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+        
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+        generic_router.status = turing.generated.models.RouterStatus("pending")
+
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{base_router.id}"
+        mock_response.data = json.dumps(generic_router, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        with pytest.raises(expected):
+            base_router.wait_for_status(status, max_tries=max_tries, duration=duration)
