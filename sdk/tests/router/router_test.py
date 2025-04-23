@@ -417,3 +417,37 @@ def test_deploy_version(turing_api, project, generic_router, use_google_oauth, a
         response = base_router.deploy_version(1)
         assert base_router.id == response["router_id"]
         assert generic_router.config.version == response["version"]
+        
+def test_get_events_list(
+    turing_api, project, generic_router, generic_events, use_google_oauth, active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = "/v1/projects/{project.id}/routers/{base_router.id}/events"
+        mock_response.data = json.dumps(generic_events, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        response = base_router.get_events()
+        expected_events = generic_events["events"]
+
+        assert len(response) == len(expected_events)
+
+        for actual, expected in zip(response, expected_events):
+            assert actual.id == expected.id
+            assert actual.version == expected.version
+            assert actual.event_type == expected.event_type
+            assert actual.stage == expected.stage
+            assert actual.message == expected.message
+            assert actual.created_at == expected.created_at
+            assert actual.updated_at == expected.updated_at
