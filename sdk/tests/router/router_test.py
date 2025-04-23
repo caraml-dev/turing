@@ -487,3 +487,45 @@ def test_wait_for_status(
 
         with pytest.raises(expected):
             base_router.wait_for_status(status, max_tries=max_tries, duration=duration)
+            
+@pytest.mark.parametrize(
+    "version,status,max_tries,duration,expected",
+    [pytest.param(1, RouterStatus.DEPLOYED, 5, 0.00001, TimeoutError)],
+)
+def test_wait_for_version_status(
+    turing_api,
+    project,
+    generic_router,
+    generic_router_version,
+    version,
+    status,
+    max_tries,
+    duration,
+    expected,
+    use_google_oauth,
+    active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+        
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        base_router = turing.Router.from_open_api(generic_router)
+        generic_router_version.status = turing.generated.models.RouterVersionStatus(
+            "pending"
+        )
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/routers/{base_router.id}/versions/{version}"
+        mock_response.data = json.dumps(generic_router_version, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+
+        mock_request.return_value = mock_response
+
+        with pytest.raises(expected):
+            base_router.wait_for_version_status(
+                status, version=version, max_tries=max_tries, duration=duration
+            )
