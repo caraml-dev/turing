@@ -191,3 +191,64 @@ def test_update_ensembler(
     )
     
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
+    
+@pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
+def test_update_ensembler_existing_router_version(
+    turing_api,
+    project,
+    generic_ensemblers,
+    pyfunc_ensembler,
+    use_google_oauth,
+    generic_router_version,
+    active_project_magic_mock
+):
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+
+        page = turing.generated.models.EnsemblersPaginatedResults(
+            results=generic_ensemblers,
+            paging=turing.generated.models.PaginationPaging(total=1, page=1, pages=1),
+        )
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/ensemblers"
+        mock_response.data = json.dumps(page, default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        actual, *rest = turing.PyFuncEnsembler.list()
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/router-versions"
+        mock_response.data = json.dumps([generic_router_version], default=tests.json_serializer).encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
+
+        with pytest.raises(ValueError) as error:
+            actual.update(
+                name=pyfunc_ensembler.name,
+                ensembler_instance=tests.MyTestEnsembler(0.06),
+                conda_env={
+                    "channels": ["defaults"],
+                    "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
+                },
+                code_dir=[
+                    os.path.join(
+                        os.path.dirname(os.path.realpath(__file__)),
+                        "..",
+                        "samples/quickstart",
+                    )
+                ],
+            )
+        expected_error_message = "There is pending router version using this ensembler. Please wait for the router version to be deployed or undeploy it, before updating the ensembler."
+        actual_error_message = str(error.value)
+        assert expected_error_message == actual_error_message
