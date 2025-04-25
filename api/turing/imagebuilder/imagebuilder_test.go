@@ -167,6 +167,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success: existing job is running": {
@@ -237,6 +238,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success: existing job failed": {
@@ -331,6 +333,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -345,7 +348,6 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 			ib, err := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			assert.Nil(t, err)
@@ -473,6 +475,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success: existing job is running": {
@@ -543,6 +546,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success: existing job failed": {
@@ -637,6 +641,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -651,7 +656,6 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 			ib, err := NewEnsemblerServiceImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			assert.Nil(t, err)
@@ -817,6 +821,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | succeeded": {
@@ -845,6 +850,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | Failed": {
@@ -934,6 +940,7 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | Unknown": {
@@ -964,6 +971,7 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"failure | Unknown": {
@@ -989,6 +997,7 @@ CondaEnvException: Pip failed`,
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -1001,7 +1010,6 @@ CondaEnvException: Pip failed`,
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			status := ib.GetImageBuildingJobStatus(projectName, modelName, models.ID(1), runID)
@@ -1066,6 +1074,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | succeeded": {
@@ -1094,6 +1103,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | Failed": {
@@ -1149,6 +1159,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"success | Unknown": {
@@ -1200,6 +1211,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 		"failure | Unknown": {
@@ -1246,6 +1258,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -1258,7 +1271,6 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 			ib, _ := NewEnsemblerServiceImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			status := ib.GetImageBuildingJobStatus("", "", models.ID(1), runID)
@@ -1320,6 +1332,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -1332,7 +1345,6 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
@@ -1398,6 +1410,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 		},
 	}
@@ -1410,7 +1423,6 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 			ib, _ := NewEnsemblerJobImageBuilder(
 				clusterController,
 				tt.imageBuildingConfig,
-				googleCloudStorageArtifactServiceType,
 				artifactServiceMock,
 			)
 			err := ib.DeleteImageBuildingJob("", "", models.ID(1), runID)
@@ -1450,6 +1462,7 @@ func Test_imageBuilder_getHashedModelDependenciesURL(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, fmt.Sprintf("gs%s", testCondaEnvURLSuffix)).
 					Return([]byte(testCondaEnvContent), nil)
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return([]byte(testCondaEnvContent), nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 			want:    modelDependenciesURL,
 			wantErr: false,
@@ -1469,6 +1482,7 @@ func Test_imageBuilder_getHashedModelDependenciesURL(t *testing.T) {
 				artifactServiceMock.On("ReadArtifact", mock.Anything, modelDependenciesURL).Return(nil, artifact.ErrObjectNotExist)
 				artifactServiceMock.On("WriteArtifact", mock.Anything, modelDependenciesURL, []byte(testCondaEnvContent)).
 					Return(nil)
+				artifactServiceMock.On("GetType").Return(googleCloudStorageArtifactServiceType)
 			},
 			want:    modelDependenciesURL,
 			wantErr: false,

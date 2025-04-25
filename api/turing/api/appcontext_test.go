@@ -308,7 +308,6 @@ func TestNewAppContext(t *testing.T) {
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
 		*testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
-		testCfg.MlflowConfig.ArtifactServiceType,
 		artifactService,
 	)
 	assert.Nil(t, err)
@@ -343,7 +342,6 @@ func TestNewAppContext(t *testing.T) {
 	ensemblerImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
 		nil,
 		*testCfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
-		testCfg.MlflowConfig.ArtifactServiceType,
 		artifactService,
 	)
 
