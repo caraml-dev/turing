@@ -96,6 +96,9 @@ func NewAppContext(
 	ensemblersService := service.NewEnsemblersService(db)
 
 	artifactService, err := initArtifactService(cfg)
+	if err != nil {
+		return nil, errors.Wrapf(err, "Failed initializing artifact service")
+	}
 
 	if cfg.BatchEnsemblingConfig.Enabled {
 		if cfg.BatchEnsemblingConfig.JobConfig == nil {
