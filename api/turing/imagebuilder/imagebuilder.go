@@ -132,7 +132,6 @@ type imageBuilder struct {
 	imageBuildingConfig config.ImageBuildingConfig
 	nameGenerator       nameGenerator
 	runnerType          models.EnsemblerRunnerType
-	artifactServiceType string
 	artifactService     artifact.Service
 }
 
@@ -142,7 +141,6 @@ func newImageBuilder(
 	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
 	runnerType models.EnsemblerRunnerType,
-	artifactServiceType string,
 	artifactService artifact.Service,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
@@ -155,7 +153,6 @@ func newImageBuilder(
 		imageBuildingConfig: imageBuildingConfig,
 		nameGenerator:       nameGenerator,
 		runnerType:          runnerType,
-		artifactServiceType: artifactServiceType,
 		artifactService:     artifactService,
 	}, nil
 }
@@ -300,7 +297,7 @@ func (ib *imageBuilder) createKanikoJob(
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
 		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImage),
-		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
+		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactService.GetType()),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
 		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesURL),
 		fmt.Sprintf("--destination=%s", imageRef),
@@ -386,7 +383,7 @@ func (ib *imageBuilder) createKanikoJob(
 
 func (ib *imageBuilder) configureKanikoArgsToAddCredentials(kanikoArgs []string) []string {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			kanikoArgs = append(kanikoArgs,
 				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s/%s",
@@ -401,7 +398,7 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 	volumeMounts []cluster.VolumeMount,
 ) ([]cluster.SecretVolume, []cluster.VolumeMount) {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		// If kaniko service account is not set, use kaniko secret
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			volumes = append(volumes, cluster.SecretVolume{
@@ -429,7 +426,7 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 
 func (ib *imageBuilder) configureEnvVarsToAddCredentials(envVar []cluster.Env) []cluster.Env {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			envVar = append(envVar, cluster.Env{
 				Name:  googleApplicationEnvVarName,

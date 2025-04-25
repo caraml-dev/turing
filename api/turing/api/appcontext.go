@@ -130,7 +130,6 @@ func NewAppContext(
 		ensemblingImageBuilder, err = imagebuilder.NewEnsemblerJobImageBuilder(
 			imageBuildingController,
 			*cfg.BatchEnsemblingConfig.ImageBuildingConfig,
-			cfg.MlflowConfig.ArtifactServiceType,
 			artifactService,
 		)
 		if err != nil {
@@ -166,7 +165,6 @@ func NewAppContext(
 	ensemblerServiceImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
 		clusterControllers[cfg.EnsemblerServiceBuilderConfig.ClusterName],
 		*cfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
-		cfg.MlflowConfig.ArtifactServiceType,
 		artifactService,
 	)
 	if err != nil {
