@@ -66,9 +66,7 @@ func TestBuildPyFuncEnsemblerJobImage(t *testing.T) {
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
-		BaseImageRef: map[string]string{
-			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-		},
+		BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
 			DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
@@ -373,9 +371,7 @@ func TestBuildPyFuncEnsemblerServiceImage(t *testing.T) {
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
-		BaseImageRef: map[string]string{
-			"3.7.*": pyFuncEnsemblerServiceBaseImageRef,
-		},
+		BaseImage:            pyFuncEnsemblerServiceBaseImageRef,
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
 			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -770,9 +766,7 @@ func TestGetEnsemblerJobImageBuildingJobStatus(t *testing.T) {
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
-		BaseImageRef: map[string]string{
-			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-		},
+		BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
 			DockerfileFilePath: pyFuncEnsemblerJobDockerfilePath,
@@ -1021,9 +1015,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
-		BaseImageRef: map[string]string{
-			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-		},
+		BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
 			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -1109,9 +1101,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildNamespace:       buildNamespace,
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
+				BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
 					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -1166,9 +1156,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildNamespace:       buildNamespace,
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
+				BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
 					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -1219,9 +1207,7 @@ func TestGetEnsemblerServiceImageBuildingJobStatus(t *testing.T) {
 				BuildNamespace:       buildNamespace,
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
+				BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
 					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -1286,9 +1272,7 @@ func TestDeleteEnsemblerJobImageBuildingJob(t *testing.T) {
 		BuildNamespace:       buildNamespace,
 		BuildTimeoutDuration: timeout,
 		DestinationRegistry:  dockerRegistry,
-		BaseImageRef: map[string]string{
-			"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-		},
+		BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 		KanikoConfig: config.KanikoConfig{
 			BuildContextURI:    buildContext,
 			DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,
@@ -1374,9 +1358,7 @@ func TestDeleteEnsemblerServiceImageBuildingJob(t *testing.T) {
 				BuildNamespace:       buildNamespace,
 				BuildTimeoutDuration: timeout,
 				DestinationRegistry:  dockerRegistry,
-				BaseImageRef: map[string]string{
-					"3.7.*": pyFuncEnsemblerJobBaseImageRef,
-				},
+				BaseImage:            pyFuncEnsemblerJobBaseImageRef,
 				KanikoConfig: config.KanikoConfig{
 					BuildContextURI:    buildContext,
 					DockerfileFilePath: pyFuncEnsemblerServiceDockerfilePath,

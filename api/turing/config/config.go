@@ -169,10 +169,6 @@ type ImageBuildingConfig struct {
 	BuildTimeoutDuration time.Duration `validate:"required"`
 	// DestinationRegistry is the registry of the newly built ensembler image.
 	DestinationRegistry string `validate:"required"`
-	// BaseImageRef is the image name of the base ensembler image built from the
-	// engines/pyfunc-ensembler-*/Dockerfile. It's a map of image names, per
-	// minor python version supported by the SDK.
-	BaseImageRef map[string]string `validate:"required"`
 	// KanikoConfig contains the configuration related to the kaniko executor image builder.
 	KanikoConfig KanikoConfig `validate:"required"`
 	// TolerationName allow the scheduler to schedule image building jobs with the matching name
