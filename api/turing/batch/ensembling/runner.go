@@ -287,28 +287,9 @@ func (r *ensemblingJobRunner) processOneEnsemblingJob(ensemblingJob *models.Ense
 		return
 	}
 
-	// Get ensembler
-	ensembler, err := r.ensemblersService.FindByID(
-		ensemblingJob.EnsemblerID,
-		service.EnsemblersFindByIDOptions{ProjectID: &ensemblingJob.ProjectID},
-	)
-	if err != nil {
-		r.saveStatusOrTerminate(ensemblingJob, mlpProject, models.JobPending, err.Error(), true)
-		return
-	}
-
-	// Get base image tag
-	var baseImageTag string
-	if pyfuncEnsembler, ok := ensembler.(*models.PyFuncEnsembler); ok {
-		baseImageTag = pyfuncEnsembler.PythonVersion
-	} else {
-		r.saveStatusOrTerminate(ensemblingJob, mlpProject, models.JobPending, err.Error(), true)
-		return
-	}
-
 	// Build Image
 	labels := r.buildLabels(ensemblingJob, mlpProject)
-	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels, baseImageTag)
+	imageRef, imageBuildErr := r.buildImage(ensemblingJob, mlpProject, labels)
 
 	if imageBuildErr != nil {
 		// Here unfortunately we have to wait till the image building process has
@@ -433,7 +414,6 @@ func (r *ensemblingJobRunner) buildImage(
 	ensemblingJob *models.EnsemblingJob,
 	mlpProject *mlp.Project,
 	buildLabels map[string]string,
-	baseImageTag string,
 ) (string, error) {
 	request := imagebuilder.BuildImageRequest{
 		ProjectName:     mlpProject.Name,
@@ -443,7 +423,6 @@ func (r *ensemblingJobRunner) buildImage(
 		ArtifactURI:     *ensemblingJob.InfraConfig.ArtifactUri,
 		BuildLabels:     buildLabels,
 		EnsemblerFolder: service.EnsemblerFolder,
-		BaseImageRefTag: baseImageTag,
 	}
 	return r.imageBuilder.BuildImage(request)
 }
