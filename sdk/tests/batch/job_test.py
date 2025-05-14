@@ -1,12 +1,14 @@
+import json
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
 from tests import utc_date
+import tests
 import turing
 import turing.batch
 import turing.batch.config
-from urllib3_mock import Responses
 
-responses = Responses("requests.packages.urllib3")
 data_dir = os.path.join(os.path.dirname(__file__), "../testdata/api_responses")
 
 with open(os.path.join(data_dir, "list_jobs_0000.json")) as f:
@@ -18,13 +20,6 @@ with open(os.path.join(data_dir, "submit_job_0000.json")) as f:
 with open(os.path.join(data_dir, "get_job_0000.json")) as f:
     get_job_0000 = f.read()
 
-
-@pytest.fixture(scope="module", name="responses")
-def _responses():
-    return responses
-
-
-@responses.activate
 @pytest.mark.parametrize(
     "api_response, expected",
     [
@@ -62,36 +57,37 @@ def _responses():
     ],
 )
 def test_list_jobs(
-    turing_api, active_project, api_response, expected, use_google_oauth
+    turing_api, project, api_response, expected, use_google_oauth, active_project_magic_mock
 ):
-    turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(active_project.name)
-
-    responses.add(
-        method="GET",
-        url=f"/v1/projects/{active_project.id}/jobs?"
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
+        
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/jobs?"
         f"status={turing.batch.EnsemblingJobStatus.PENDING.value}&"
-        f"status={turing.batch.EnsemblingJobStatus.RUNNING.value}",
-        body=api_response,
-        match_querystring=True,
-        status=200,
-        content_type="application/json",
-    )
+        f"status={turing.batch.EnsemblingJobStatus.RUNNING.value}"
+        mock_response.data = api_response.encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
 
-    actual = turing.batch.EnsemblingJob.list(
-        status=[
-            turing.batch.EnsemblingJobStatus.PENDING,
-            turing.batch.EnsemblingJobStatus.RUNNING,
-        ]
-    )
+        actual = turing.batch.EnsemblingJob.list(
+            status=[
+                turing.batch.EnsemblingJobStatus.PENDING,
+                turing.batch.EnsemblingJobStatus.RUNNING,
+            ]
+        )
 
-    assert len(actual) == len(expected)
+        assert len(actual) == len(expected)
 
-    for actual, expected in zip(actual, expected):
-        assert actual == expected
-
-
-@responses.activate
+        for actual, expected in zip(actual, expected):
+            assert actual == expected
+            
 @pytest.mark.parametrize(
     "api_response, expected",
     [
@@ -112,31 +108,34 @@ def test_list_jobs(
 )
 def test_submit_job(
     turing_api,
-    active_project,
+    project,
     ensembling_job_config,
     api_response,
     expected,
     use_google_oauth,
+    active_project_magic_mock
 ):
-    turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(active_project.name)
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
 
-    responses.add(
-        method="POST",
-        url=f"/v1/projects/{active_project.id}/jobs",
-        body=api_response,
-        status=201,
-        content_type="application/json",
-    )
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
+        
+        mock_response = MagicMock()
+        mock_response.method = "POST"
+        mock_response.status = 201
+        mock_response.path = f"/v1/projects/{project.id}/jobs"
+        mock_response.data = api_response.encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
 
-    actual = turing.batch.job.EnsemblingJob.submit(
-        ensembler_id=2,
-        config=ensembling_job_config,
-    )
-    assert actual == expected
+        mock_request.return_value = mock_response
 
+        actual = turing.batch.job.EnsemblingJob.submit(
+            ensembler_id=2,
+            config=ensembling_job_config,
+        )
+        assert actual == expected
 
-@responses.activate
 @pytest.mark.parametrize(
     "api_response_get, expected, api_response_refresh, updated",
     [
@@ -168,43 +167,46 @@ def test_submit_job(
 )
 def test_fetch_job(
     turing_api,
-    active_project,
+    project,
     api_response_get,
     expected,
     api_response_refresh,
     updated,
     use_google_oauth,
+    active_project_magic_mock
 ):
-    turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(active_project.name)
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
 
-    responses.add(
-        method="GET",
-        url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
-        body=api_response_get,
-        status=200,
-        content_type="application/json",
-    )
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
 
-    job = turing.batch.EnsemblingJob.get_by_id(expected.id)
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/jobs/{expected.id}"
+        mock_response.data = api_response_get.encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
 
-    assert job == expected
+        job = turing.batch.EnsemblingJob.get_by_id(expected.id)
 
-    responses.reset()
-    responses.add(
-        method="GET",
-        url=f"/v1/projects/{active_project.id}/jobs/{expected.id}",
-        body=api_response_refresh,
-        status=200,
-        content_type="application/json",
-    )
+        assert job == expected
+        
+        mock_response = MagicMock()
+        mock_response.method = "GET"
+        mock_response.status = 200
+        mock_response.path = f"/v1/projects/{project.id}/jobs/{expected.id}"
+        mock_response.data = api_response_refresh.encode('utf-8')
+        mock_response.getheader.return_value = 'application/json'
+        
+        mock_request.return_value = mock_response
 
-    job.refresh()
+        job.refresh()
 
-    assert job == updated
-
-
-@responses.activate
+        assert job == updated
+        
 @pytest.mark.parametrize(
     "job, api_response_delete, api_response_get, expected",
     [
@@ -236,34 +238,38 @@ def test_fetch_job(
 )
 def test_terminate_job(
     turing_api,
-    active_project,
+    project,
     job,
     api_response_delete,
     api_response_get,
     expected,
     use_google_oauth,
+    active_project_magic_mock
 ):
-    turing.set_url(turing_api, use_google_oauth)
-    turing.set_project(active_project.name)
+    with patch("urllib3.PoolManager.request") as mock_request:
+        turing.set_url(turing_api, use_google_oauth)
 
-    responses.add(
-        method="DELETE",
-        url=f"/v1/projects/{active_project.id}/jobs/{job.id}",
-        body=api_response_delete,
-        status=201,
-        content_type="application/json",
-    )
+        mock_request.return_value = active_project_magic_mock
+        turing.set_project(project.name)
 
-    responses.add(
-        method="GET",
-        url=f"/v1/projects/{active_project.id}/jobs/{job.id}",
-        body=api_response_get,
-        status=200,
-        content_type="application/json",
-    )
+        mock_response_1 = MagicMock()
+        mock_response_1.method = "DELETE"
+        mock_response_1.status = 201
+        mock_response_1.path = f"/v1/projects/{project.id}/jobs/{job.id}"
+        mock_response_1.data = api_response_delete.encode('utf-8')
+        mock_response_1.getheader.return_value = 'application/json'
+        
+        mock_response_2 = MagicMock()
+        mock_response_2.method = "get"
+        mock_response_2.status = 200
+        mock_response_2.path = f"/v1/projects/{project.id}/jobs/{job.id}"
+        mock_response_2.data = api_response_get.encode('utf-8')
+        mock_response_2.getheader.return_value = 'application/json'
+        
+        mock_request.side_effect = [mock_response_1, mock_response_2]
 
-    assert job != expected
+        assert job != expected
 
-    job.terminate()
+        job.terminate()
 
-    assert job == expected
+        assert job == expected

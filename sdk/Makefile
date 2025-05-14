@@ -1,6 +1,7 @@
 .PHONY: setup
 setup:
-	pip install -r requirements.txt -r requirements.dev.txt
+	@pip install "setuptools>=64,<75" "wheel"
+	@pip install -r requirements.txt -r requirements.dev.txt
 
 .PHONY: gen-client
 gen-client:
