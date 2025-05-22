@@ -1,16 +1,15 @@
 SHELL := /bin/bash
 
-PYTHON_VERSION ?= 3.8
 APP_NAME := turing-pyfunc-ensembler-service
 CONDA_ENV_NAME ?= $(APP_NAME)
 ACTIVATE_ENV = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate $(CONDA_ENV_NAME)
 
 .PHONY: setup
 setup: build
-	@pip install pipenv
+	@conda env update -f env.yaml -n $(CONDA_ENV_NAME) --prune
 	@DIST_VERSION=$$(echo $(VERSION) | \
 		sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)(-rc([0-9]+))?/\1rc\3/'); \
-		pipenv run pip install "dist/turing_pyfunc_ensembler_service-$${DIST_VERSION}-py3-none-any.whl[dev]"
+		$(ACTIVATE_ENV) && pip install "dist/turing_pyfunc_ensembler_service-$${DIST_VERSION}-py3-none-any.whl[dev]"
 
 .PHONY: lint
 lint:
