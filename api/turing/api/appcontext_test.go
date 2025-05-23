@@ -70,10 +70,8 @@ func TestNewAppContext(t *testing.T) {
 				MaxRetryCount:                  3,
 			},
 			ImageBuildingConfig: &config.ImageBuildingConfig{
-				DestinationRegistry: "ghcr.io",
-				BaseImageRef: map[string]string{
-					"3.7.*": "ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
-				},
+				DestinationRegistry:  "ghcr.io",
+				BaseImage:            "ghcr.io/caraml-dev/turing/pyfunc-ensembler-job:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
@@ -97,10 +95,8 @@ func TestNewAppContext(t *testing.T) {
 		EnsemblerServiceBuilderConfig: config.EnsemblerServiceBuilderConfig{
 			ClusterName: defaultEnvironment,
 			ImageBuildingConfig: &config.ImageBuildingConfig{
-				DestinationRegistry: "ghcr.io",
-				BaseImageRef: map[string]string{
-					"3.7.*": "ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
-				},
+				DestinationRegistry:  "ghcr.io",
+				BaseImage:            "ghcr.io/caraml-dev/turing/pyfunc-ensembler-service:0.0.0-build.1-98b071d",
 				BuildNamespace:       "default",
 				BuildTimeoutDuration: 10 * time.Minute,
 				KanikoConfig: config.KanikoConfig{
@@ -306,10 +302,13 @@ func TestNewAppContext(t *testing.T) {
 	alertService, err := service.NewGitlabOpsAlertService(nil, *testCfg.AlertConfig)
 	assert.NoError(t, err)
 
+	artifactService, err := initArtifactService(testCfg)
+	assert.NoError(t, err)
+
 	ensemblingImageBuilder, err := imagebuilder.NewEnsemblerJobImageBuilder(
 		nil,
 		*testCfg.BatchEnsemblingConfig.ImageBuildingConfig,
-		testCfg.MlflowConfig.ArtifactServiceType,
+		artifactService,
 	)
 	assert.Nil(t, err)
 
@@ -343,7 +342,7 @@ func TestNewAppContext(t *testing.T) {
 	ensemblerImageBuilder, err := imagebuilder.NewEnsemblerServiceImageBuilder(
 		nil,
 		*testCfg.EnsemblerServiceBuilderConfig.ImageBuildingConfig,
-		testCfg.MlflowConfig.ArtifactServiceType,
+		artifactService,
 	)
 
 	assert.NoError(t, err)
