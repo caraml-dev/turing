@@ -3,6 +3,7 @@ package imagebuilder
 import (
 	"fmt"
 
+	"github.com/caraml-dev/mlp/api/pkg/artifact"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/models"
@@ -12,14 +13,14 @@ import (
 func NewEnsemblerJobImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
-	artifactServiceType string,
+	artifactService artifact.Service,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,
 		imageBuildingConfig,
 		&ensemblerJobNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
 		models.EnsemblerRunnerTypeJob,
-		artifactServiceType,
+		artifactService,
 	)
 }
 
@@ -50,14 +51,14 @@ func (n *ensemblerJobNameGenerator) generateDockerImageName(projectName string, 
 func NewEnsemblerServiceImageBuilder(
 	clusterController cluster.Controller,
 	imageBuildingConfig config.ImageBuildingConfig,
-	artifactServiceType string,
+	artifactService artifact.Service,
 ) (ImageBuilder, error) {
 	return newImageBuilder(
 		clusterController,
 		imageBuildingConfig,
 		&ensemblerServiceNameGenerator{registry: imageBuildingConfig.DestinationRegistry},
 		models.EnsemblerRunnerTypeService,
-		artifactServiceType,
+		artifactService,
 	)
 }
 

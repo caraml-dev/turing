@@ -2,6 +2,7 @@ package imagebuilder
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,6 +23,7 @@ import (
 
 	"github.com/caraml-dev/merlin/utils"
 	mlp "github.com/caraml-dev/mlp/api/client"
+	"github.com/caraml-dev/mlp/api/pkg/artifact"
 	"github.com/caraml-dev/turing/api/turing/cluster"
 	"github.com/caraml-dev/turing/api/turing/config"
 	"github.com/caraml-dev/turing/api/turing/log"
@@ -44,6 +46,7 @@ const (
 	kanikoSecretFileName                  = "kaniko-secret.json"
 	kanikoSecretMountpath                 = "/secret"
 	kanikoDockerCredentialConfigPath      = "/kaniko/.docker"
+	modelDependenciesPath                 = "/turing/model_dependencies"
 )
 
 // JobStatus is the current status of the image building job.
@@ -87,7 +90,6 @@ type BuildImageRequest struct {
 	ArtifactURI     string
 	BuildLabels     map[string]string
 	EnsemblerFolder string
-	BaseImageRefTag string
 }
 
 type EnsemblerImage struct {
@@ -130,7 +132,7 @@ type imageBuilder struct {
 	imageBuildingConfig config.ImageBuildingConfig
 	nameGenerator       nameGenerator
 	runnerType          models.EnsemblerRunnerType
-	artifactServiceType string
+	artifactService     artifact.Service
 }
 
 // NewImageBuilder creates a new ImageBuilder
@@ -139,7 +141,7 @@ func newImageBuilder(
 	imageBuildingConfig config.ImageBuildingConfig,
 	nameGenerator nameGenerator,
 	runnerType models.EnsemblerRunnerType,
-	artifactServiceType string,
+	artifactService artifact.Service,
 ) (ImageBuilder, error) {
 	err := checkParseResources(imageBuildingConfig.KanikoConfig.ResourceRequestsLimits)
 	if err != nil {
@@ -151,7 +153,7 @@ func newImageBuilder(
 		imageBuildingConfig: imageBuildingConfig,
 		nameGenerator:       nameGenerator,
 		runnerType:          runnerType,
-		artifactServiceType: artifactServiceType,
+		artifactService:     artifactService,
 	}, nil
 }
 
@@ -167,6 +169,12 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 	if imageExists {
 		log.Infof("Image %s already exists. Skipping build.", imageName)
 		return imageRef, nil
+	}
+
+	hashedModelDependenciesURL, err := ib.getHashedModelDependenciesURL(context.Background(), request.ArtifactURI)
+	if err != nil {
+		log.Errorf("unable to get model dependencies url: %v", err)
+		return "", err
 	}
 
 	// Check if there is an existing build job
@@ -189,7 +197,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 		}
 
 		job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-			request.EnsemblerFolder, request.BaseImageRefTag)
+			request.EnsemblerFolder, hashedModelDependenciesURL)
 		if err != nil {
 			log.Errorf("unable to build image %s, error: %v", imageRef, err)
 			return "", ErrUnableToBuildImage
@@ -210,7 +218,7 @@ func (ib *imageBuilder) BuildImage(request BuildImageRequest) (string, error) {
 			}
 
 			job, err = ib.createKanikoJob(kanikoJobName, imageRef, request.ArtifactURI, request.BuildLabels,
-				request.EnsemblerFolder, request.BaseImageRefTag)
+				request.EnsemblerFolder, hashedModelDependenciesURL)
 			if err != nil {
 				log.Errorf("unable to build image %s, error: %v", imageRef, err)
 				return "", ErrUnableToBuildImage
@@ -279,26 +287,20 @@ func (ib *imageBuilder) createKanikoJob(
 	artifactURI string,
 	buildLabels map[string]string,
 	ensemblerFolder string,
-	baseImageRefTag string,
+	hashedModelDependenciesURL string,
 ) (*apibatchv1.Job, error) {
 	splitURI := strings.Split(artifactURI, "/")
 	folderName := fmt.Sprintf("%s/%s", splitURI[len(splitURI)-1], ensemblerFolder)
-
-	baseImage, ok := ib.imageBuildingConfig.BaseImageRef[baseImageRefTag]
-	if !ok {
-		return nil, fmt.Errorf("No matching base image for tag %s", baseImageRefTag)
-	}
 
 	kanikoArgs := []string{
 		fmt.Sprintf("--dockerfile=%s", ib.imageBuildingConfig.KanikoConfig.DockerfileFilePath),
 		fmt.Sprintf("--context=%s", ib.imageBuildingConfig.KanikoConfig.BuildContextURI),
 		fmt.Sprintf("--build-arg=MODEL_URL=%s", artifactURI),
-		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", baseImage),
-		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactServiceType),
+		fmt.Sprintf("--build-arg=BASE_IMAGE=%s", ib.imageBuildingConfig.BaseImage),
+		fmt.Sprintf("--build-arg=MLFLOW_ARTIFACT_STORAGE_TYPE=%s", ib.artifactService.GetType()),
 		fmt.Sprintf("--build-arg=FOLDER_NAME=%s", folderName),
+		fmt.Sprintf("--build-arg=MODEL_DEPENDENCIES_URL=%s", hashedModelDependenciesURL),
 		fmt.Sprintf("--destination=%s", imageRef),
-		"--cache=true",
-		"--single-snapshot",
 	}
 
 	kanikoArgs = append(kanikoArgs, ib.imageBuildingConfig.KanikoConfig.AdditionalArgs...)
@@ -381,7 +383,7 @@ func (ib *imageBuilder) createKanikoJob(
 
 func (ib *imageBuilder) configureKanikoArgsToAddCredentials(kanikoArgs []string) []string {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			kanikoArgs = append(kanikoArgs,
 				fmt.Sprintf("--build-arg=GOOGLE_APPLICATION_CREDENTIALS=%s/%s",
@@ -396,7 +398,7 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 	volumeMounts []cluster.VolumeMount,
 ) ([]cluster.SecretVolume, []cluster.VolumeMount) {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		// If kaniko service account is not set, use kaniko secret
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			volumes = append(volumes, cluster.SecretVolume{
@@ -424,7 +426,7 @@ func (ib *imageBuilder) configureVolumesAndVolumeMountsToAddCredentials(
 
 func (ib *imageBuilder) configureEnvVarsToAddCredentials(envVar []cluster.Env) []cluster.Env {
 	if ib.imageBuildingConfig.KanikoConfig.PushRegistryType == googleCloudRegistryPushRegistryType ||
-		ib.artifactServiceType == googleCloudStorageArtifactServiceType {
+		ib.artifactService.GetType() == googleCloudStorageArtifactServiceType {
 		if ib.imageBuildingConfig.KanikoConfig.ServiceAccount == "" {
 			envVar = append(envVar, cluster.Env{
 				Name:  googleApplicationEnvVarName,
@@ -660,4 +662,44 @@ func parseJobConditions(jobConditions []apibatchv1.JobCondition) (string, error)
 
 	jobTable := utils.LogTable(jobConditionHeaders, jobConditionRows)
 	return jobTable, err
+}
+
+// getHashedModelDependenciesURL stores dependency to storage using it's content hashed name as filename.
+// if the artifact is recreated with different id but has the same dependency content the URL for the
+// stored dependency will still be the same. This ensure we can use Docker layer caching mechanism for
+// the built dependency even for different artifact id given the dependency content is not changed.
+func (ib *imageBuilder) getHashedModelDependenciesURL(ctx context.Context, artifactURI string) (string, error) {
+	artifactURL, err := ib.artifactService.ParseURL(artifactURI)
+	if err != nil {
+		return "", err
+	}
+
+	urlSchema := ib.artifactService.GetURLScheme()
+	condaEnvURL := fmt.Sprintf("%s://%s/%s/ensembler/conda.yaml", urlSchema, artifactURL.Bucket, artifactURL.Object)
+
+	condaEnv, err := ib.artifactService.ReadArtifact(ctx, condaEnvURL)
+	if err != nil {
+		return "", err
+	}
+
+	hash := sha256.New()
+	hash.Write(condaEnv)
+	hashEnv := hash.Sum(nil)
+
+	hashedDependenciesURL := fmt.Sprintf("%s://%s%s/%x", urlSchema, artifactURL.Bucket, modelDependenciesPath, hashEnv)
+
+	_, err = ib.artifactService.ReadArtifact(ctx, hashedDependenciesURL)
+	if err == nil {
+		return hashedDependenciesURL, nil
+	}
+
+	if !errors.Is(err, artifact.ErrObjectNotExist) {
+		return "", err
+	}
+
+	if err := ib.artifactService.WriteArtifact(ctx, hashedDependenciesURL, condaEnv); err != nil {
+		return "", err
+	}
+
+	return hashedDependenciesURL, nil
 }

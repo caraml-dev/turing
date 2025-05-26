@@ -1,29 +1,12 @@
 name: engines/pyfunc-ensembler-job
 
 on:
-  # Automatically run CI on Release and Pre-Release tags and main branch
-  # (only if there are changes to relevant paths)
-  push:
-    tags:
-      - "pyfunc-ensembler-job/v[0-9]+.[0-9]+.[0-9]+*"
-    branches:
-      - main
-    paths:
-      - ".github/workflows/pyfunc-ensembler-job.yaml"
-      - "engines/pyfunc-ensembler-job/**"
-      - "sdk/**"
-
-  # Automatically run CI on branches, that have active PR opened
-  pull_request:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/pyfunc-ensembler-job.yaml"
-      - "engines/pyfunc-ensembler-job/**"
-      - "sdk/**"
-
-  # To make it possible to trigger e2e CI workflow for any arbitrary git ref
-  workflow_dispatch:
+  # The package build by this job requires latest version of sdk,
+  # so we can only run this workflow after sdk workflow is successfully run
+  workflow_run:
+    workflows: ["sdk"]
+    types:
+      - completed
 
 jobs:
   test:
@@ -31,7 +14,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
-    
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +22,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache-dependency-path: |
-            engines/pyfunc-ensembler-job/env-${{ matrix.python-version }}.yaml
             engines/pyfunc-ensembler-job/requirements.txt
             engines/pyfunc-ensembler-job/requirements.dev.txt
 
@@ -70,7 +51,7 @@ jobs:
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
-          prefix: pyfunc-ensembler-job/
+          prefix: python/
 
   publish:
     # Automatically publish release and pre-release artifacts.
@@ -81,14 +62,12 @@ jobs:
     # Dev build can be released either from the 'main' branch or
     # by running this workflow manually with `workflow_dispatch` event.
     if: >-
-      contains('release,pre-release', needs.release-rules.outputs.release-type)
+      (contains('release,pre-release', needs.release-rules.outputs.release-type)
         || ( github.event_name != 'pull_request' )
-        || ( github.event.pull_request.head.repo.full_name == github.repository )
+        || ( github.event.pull_request.head.repo.full_name == github.repository )) &&
+        ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
     needs:
       - release-rules
       - test
@@ -109,7 +88,6 @@ jobs:
         working-directory: engines/pyfunc-ensembler-job
         env:
           DOCKER_REGISTRY: ghcr.io/${{ github.repository }}
-          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           set -o pipefail
           make build-image | tee output.log
@@ -117,3 +95,13 @@ jobs:
 
       - name: Publish Pyfunc Ensembler Job Docker Image
         run: docker push ${{ steps.build.outputs.pyfunc-ensembler-job }}
+
+      - name: Publish pyfunc-ensembler-job package
+        env:
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        working-directory: engines/pyfunc-ensembler-job
+        run: |
+          set -o pipefail
+          make build-and-publish | tee output.log
+          echo "pyfunc-ensembler-job=$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)" >> $GITHUB_OUTPUT
