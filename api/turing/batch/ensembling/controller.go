@@ -315,7 +315,7 @@ func (c *ensemblingController) getMLPSecrets(
 		}
 		secretMap[cluster.ServiceAccountFileName] = secretString
 	}
-	
+
 	// Retrieve user-configured secrets from MLP
 	if ensemblingJob.InfraConfig.Secrets != nil {
 		for _, secret := range *ensemblingJob.InfraConfig.Secrets {
