@@ -303,19 +303,22 @@ func (c *ensemblingController) getMLPSecrets(
 ) (map[string]string, error) {
 	secretMap := make(map[string]string)
 	// Retrieve Google Service Account secret from MLP
-	secretString, err := c.mlpService.GetSecret(
-		ensemblingJob.ProjectID,
-		ensemblingJob.InfraConfig.GetServiceAccountName(),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("service account %s is not found within %s project: %w",
-			ensemblingJob.InfraConfig.GetServiceAccountName(), namespace, err)
+	if ensemblingJob.InfraConfig.GetServiceAccountName() != "" {
+		secretString, err := c.mlpService.GetSecret(
+			ensemblingJob.ProjectID,
+			ensemblingJob.InfraConfig.GetServiceAccountName(),
+		)
+		if err != nil {
+			return nil, fmt.Errorf("service account %s is not found within %s project: %w",
+				ensemblingJob.InfraConfig.GetServiceAccountName(), namespace, err)
+		}
+		secretMap[cluster.ServiceAccountFileName] = secretString
 	}
-	secretMap[cluster.ServiceAccountFileName] = secretString
+
 	// Retrieve user-configured secrets from MLP
 	if ensemblingJob.InfraConfig.Secrets != nil {
 		for _, secret := range *ensemblingJob.InfraConfig.Secrets {
-			secretString, err = c.mlpService.GetSecret(
+			secretString, err := c.mlpService.GetSecret(
 				ensemblingJob.ProjectID,
 				secret.GetMlpSecretName(),
 			)
