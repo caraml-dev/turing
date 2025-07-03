@@ -303,7 +303,6 @@ func (c *ensemblingController) getMLPSecrets(
 ) (map[string]string, error) {
 	secretMap := make(map[string]string)
 	// Retrieve Google Service Account secret from MLP
-	// Retrieve Google Service Account secret from MLP
 	if ensemblingJob.InfraConfig.GetServiceAccountName() != "" {
 		secretString, err := c.mlpService.GetSecret(
 			ensemblingJob.ProjectID,
