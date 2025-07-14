@@ -502,13 +502,6 @@ jobs:
         || ( github.event.pull_request.head.repo.full_name == github.repository )
     needs:
       - build-router
-      - build-api
-      - build-ui
-      - release-rules
-      - test-e2e
-      - test-api
-      - test-engines-router
-      - test-engines-experiment
     uses: ./.github/workflows/turing-publish.yaml
     with:
       api_version: ${{ needs.build-api.outputs.api-version }}
