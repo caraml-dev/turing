@@ -310,7 +310,6 @@ func (mc *missionControl) Ensemble(
 		return nil, httpErr
 	}
 
-	fmt.Println("the payload from makeensemblerpayload", payload)
 	// Make HTTP request
 	resp, httpErr := mc.doPost(ctx, mc.ensemblerEndpoint,
 		header, payload, mc.ensemblerTimeout, "ensemble")
