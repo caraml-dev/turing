@@ -190,6 +190,7 @@ type CombinedResponse struct {
 	// List of responses from each treatment
 	RouteResponses []RouteResponse `json:"route_responses"`
 	// Configuration / Error response from experiment engine
-	Experiment       experiment.Response `json:"experiment"`
-	EnricherResponse json.RawMessage     `json:"enricher_response"`
+	Experiment experiment.Response `json:"experiment"`
+	// enricher response
+	EnricherResponse json.RawMessage `json:"enricher_response"`
 }

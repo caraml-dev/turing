@@ -93,10 +93,8 @@ func (h *httpHandler) getPrediction(
 
 	payload := requestBody
 	var enricherResponse []byte
-	fmt.Println("is enricher enabled", h.IsEnricherEnabled())
 	if h.IsEnricherEnabled() {
 		resp, httpErr := h.Enrich(ctx, req.Header, payload)
-		fmt.Println("resp is", resp.Body())
 		// Send enricher response/error for logging
 		h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Enricher, resp, httpErr)
 		// Check error
@@ -109,14 +107,12 @@ func (h *httpHandler) getPrediction(
 		}
 		// No error, copy response body
 		payload = resp.Body()
-		fmt.Println("payload from enricher ", payload)
 		enricherResponse = payload
 	}
 
 	// Route
 	var expResp *experiment.Response
 	expResp, resp, httpErr := h.Route(ctx, postEnrichmentResponseHeader, payload)
-	fmt.Println("response from router is", expResp, resp, httpErr)
 	if expResp != nil {
 		var expErr *errors.TuringError
 		if expResp.Error != "" {
