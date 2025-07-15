@@ -78,6 +78,7 @@ func (mc *BaseMockMissionControl) Ensemble(
 	header http.Header,
 	_ []byte,
 	routerResponse []byte,
+	_ []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	mc.Called(header)
 	return modifyRequestBody(routerResponse, map[string]string{}, "Ensemble")
@@ -130,6 +131,7 @@ type MockMissionControlBadEnsemble struct {
 func (mc *MockMissionControlBadEnsemble) Ensemble(
 	_ context.Context,
 	_ http.Header,
+	_ []byte,
 	_ []byte,
 	_ []byte,
 ) (mchttp.Response, *errors.TuringError) {
