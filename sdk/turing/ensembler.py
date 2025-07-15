@@ -24,6 +24,7 @@ class EnsemblerBase(abc.ABC):
         input: Union[pandas.Series, Dict[str, Any]],
         predictions: Union[pandas.Series, Dict[str, Any]],
         treatment_config: Optional[Union[pandas.Series, Dict[str, Any]]],
+        enricher_response: Union[pandas.Series, Dict[str, Any]],
         **kwargs: Optional[Dict[str, Any]],
     ) -> Any:
         """
@@ -117,10 +118,11 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
                 input=request_body["request"],
                 predictions=routes_to_response,
                 treatment_config=request_body["response"]["experiment"],
+                enricher_response=request_body["response"]["enricher_response"],
                 headers=model_input["headers"],
             )
         except TypeError as e:
-            if "got an unexpected keyword argument 'headers'" in str(e):
+            if "got an unexpected keyword argument 'enricher_response'" in str(e):
                 logging.warn(
                     "ensemble() uses a deprecated signature, please refer to samples."
                 )
@@ -130,6 +132,7 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
                     input=request_body["request"],
                     predictions=routes_to_response,
                     treatment_config=request_body["response"]["experiment"],
+                    headers=model_input["headers"],
                 )
             else:
                 raise e
