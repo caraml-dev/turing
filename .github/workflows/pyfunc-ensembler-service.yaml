@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -40,6 +42,8 @@ jobs:
       release-type: ${{ steps.release-rules.outputs.release-type }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: release-rules
         uses: ./.github/actions/release-rules
         with:
