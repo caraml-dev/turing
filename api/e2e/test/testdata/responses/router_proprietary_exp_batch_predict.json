@@ -22,7 +22,12 @@
             "is_default": false,
             "route": "control"
           }
-        ]
+        ],
+        "enricher_response": {
+          "client": {
+            "id": 4
+          }
+        }
       }
     }
   },
@@ -49,7 +54,12 @@
             "is_default": false,
             "route": "control"
           }
-        ]
+        ],
+        "enricher_response": {
+          "client": {
+            "id": 7
+          }
+        }
       }
     }
   }
