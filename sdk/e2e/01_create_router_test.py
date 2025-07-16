@@ -140,6 +140,7 @@ def test_create_router():
     )
     assert response.status_code == 200
     expected_response = {
+        "enricher_response": {"client": {"id": 4}},
         "experiment": {
             "configuration": {"foo": "foo", "route_name": "control"},
         },
@@ -166,6 +167,7 @@ def test_create_router():
             "data": {
                 "request": {"client": {"id": 4}},
                 "response": {
+                    "enricher_response": {"client": {"id": 4}},
                     "experiment": {
                         "configuration": {"foo": "foo", "route_name": "control"},
                     },
