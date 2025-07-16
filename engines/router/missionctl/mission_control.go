@@ -325,7 +325,8 @@ func (mc *missionControl) IsEnsemblerEnabled() bool {
 }
 
 // the makeEnsemblerPayload appends the enricher response to the combined turing router response
-// The turing router response holds treatment and experiment responses. The routerResp is unmarshalled and enricher response is appended here
+// The turing router resp (routerResp) holds treatment and experiment responses.
+// The routerResp is unmarshalled and enricher response is appended here
 func makeEnsemblerPayload(reqBody []byte, routerResp []byte, enricherResponse []byte) ([]byte, error) {
 	var combinedRouterResp fiberapi.CombinedResponse
 	err := json.Unmarshal(routerResp, &combinedRouterResp)
