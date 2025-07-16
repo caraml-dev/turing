@@ -186,7 +186,7 @@ def test_create_router():
             "data": {
                 "request": {"client": {"id": 7}},
                 "response": {
-                    "enricher_response": {"client": {"id": 4}},
+                    "enricher_response": {"client": {"id": 7}},
                     "experiment": {
                         "configuration": {"bar": "bar", "route_name": "treatment-a"},
                     },
