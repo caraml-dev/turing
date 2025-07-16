@@ -139,6 +139,7 @@ var _ = DeployedRouterContext("testdata/create_router_nop_logger_proprietary_exp
 					})
 				})
 			})
+
 		})
 
 		ginkgo.Describe("1.4. Undeploying router", func() {

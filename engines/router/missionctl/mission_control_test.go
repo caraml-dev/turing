@@ -115,9 +115,14 @@ func TestMakeEnsemblerPayload(t *testing.T) {
 	assert.Nil(t, err)
 	assert.JSONEq(t,
 		`{
-			"request": {"key1": "data1"},
-			"response": {"enricher_response":{"key3": "data3"},
-			"experiment": {}, "route_responses": null}
+			"request": {
+				"key1": "data1"
+			},
+			"response": {
+				"enricher_response":{"key3": "data3"},
+				"experiment": {},
+				"route_responses": null
+			}
 		}`,
 		string(combinedPayload),
 	)
