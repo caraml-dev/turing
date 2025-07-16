@@ -92,6 +92,7 @@ func (h *httpHandler) getPrediction(
 	postEnrichmentResponseHeader := req.Header.Clone()
 
 	payload := requestBody
+	var enricherResponse []byte
 	if h.IsEnricherEnabled() {
 		resp, httpErr := h.Enrich(ctx, req.Header, payload)
 		// Send enricher response/error for logging
@@ -106,6 +107,7 @@ func (h *httpHandler) getPrediction(
 		}
 		// No error, copy response body
 		payload = resp.Body()
+		enricherResponse = payload
 	}
 
 	// Route
@@ -128,7 +130,7 @@ func (h *httpHandler) getPrediction(
 
 	// Ensemble
 	if h.IsEnsemblerEnabled() {
-		resp, httpErr = h.Ensemble(ctx, postEnrichmentResponseHeader, requestBody, payload)
+		resp, httpErr = h.Ensemble(ctx, postEnrichmentResponseHeader, requestBody, payload, enricherResponse)
 		h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Ensembler, resp, httpErr)
 		if httpErr != nil {
 			return nil, httpErr

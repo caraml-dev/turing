@@ -138,6 +138,7 @@ func TestEnsemblingFanInAggregate(t *testing.T) {
 		"success": {
 			fanIn: efi,
 			expectedResponse: string(`{
+				"enricher_response": null,
 				"experiment": {
 					"configuration": {
 						"test_config": "placeholder"
@@ -161,6 +162,7 @@ func TestEnsemblingFanInAggregate(t *testing.T) {
 		"experiment timeout greater": {
 			fanIn: efiExpTimeout,
 			expectedResponse: string(`{
+				"enricher_response": null,
 				"experiment": {},
 				"route_responses": [
 					{  

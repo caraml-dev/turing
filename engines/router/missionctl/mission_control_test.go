@@ -105,15 +105,25 @@ func TestMissionControlEnrich(t *testing.T) {
 
 func TestMakeEnsemblerPayload(t *testing.T) {
 	payload1 := []byte(`{"key1": "data1"}`)
-	payload2 := []byte(`{"key2": "data2"}`)
+	payload2 := []byte(`{"experiment": {}}`)
+	payload3 := []byte(`{"key3": "data3"}`)
 
 	// Make the combined response
-	combinedPayload, err := makeEnsemblerPayload(payload1, payload2)
+	combinedPayload, err := makeEnsemblerPayload(payload1, payload2, payload3)
 
 	// Test success
 	assert.Nil(t, err)
 	assert.JSONEq(t,
-		`{"request": {"key1": "data1"}, "response": {"key2": "data2"}}`,
+		`{
+			"request": {
+				"key1": "data1"
+			},
+			"response": {
+				"enricher_response":{"key3": "data3"},
+				"experiment": {},
+				"route_responses": null
+			}
+		}`,
 		string(combinedPayload),
 	)
 }
@@ -134,7 +144,7 @@ func TestMissionControlEnsemble(t *testing.T) {
 
 	// Ensemble
 	resp, httpErr := missionCtl.Ensemble(context.Background(),
-		http.Header{}, []byte(``), []byte(``))
+		http.Header{}, []byte(``), []byte(`null`), []byte(`null`))
 
 	// Check that the error is nil
 	assert.Nil(t, httpErr)

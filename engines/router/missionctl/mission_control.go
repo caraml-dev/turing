@@ -44,6 +44,7 @@ type MissionControl interface {
 		header http.Header,
 		requestBody []byte,
 		routerResponse []byte,
+		enricherResponse []byte,
 	) (mchttp.Response, *errors.TuringError)
 	IsEnricherEnabled() bool
 	IsEnsemblerEnabled() bool
@@ -270,6 +271,7 @@ func (mc *missionControl) Ensemble(
 	header http.Header,
 	requestBody []byte,
 	routerResponse []byte,
+	enricherResponse []byte,
 ) (mchttp.Response, *errors.TuringError) {
 	var httpErr *errors.TuringError
 	// Measure execution time for Ensemble
@@ -301,7 +303,7 @@ func (mc *missionControl) Ensemble(
 			"traffic_rule": func() string { return "" },
 		},
 	)
-	payload, err := makeEnsemblerPayload(requestBody, routerResponse)
+	payload, err := makeEnsemblerPayload(requestBody, routerResponse, enricherResponse)
 	timer()
 	if err != nil {
 		httpErr = errors.NewTuringError(err, fiberProtocol.HTTP)
@@ -322,7 +324,21 @@ func (mc *missionControl) IsEnsemblerEnabled() bool {
 	return mc.ensemblerEndpoint != ""
 }
 
-func makeEnsemblerPayload(reqBody []byte, routerResp []byte) ([]byte, error) {
+// the makeEnsemblerPayload appends the enricher response to the combined turing router response
+// The turing router resp (routerResp) holds treatment and experiment responses.
+// The routerResp is unmarshalled and enricher response is appended here
+func makeEnsemblerPayload(reqBody []byte, routerResp []byte, enricherResponse []byte) ([]byte, error) {
+	var combinedRouterResp fiberapi.CombinedResponse
+	err := json.Unmarshal(routerResp, &combinedRouterResp)
+	if err != nil {
+		return nil, err
+	}
+	combinedRouterResp.EnricherResponse = enricherResponse
+	routerResp, err = json.Marshal(combinedRouterResp)
+	if err != nil {
+		return nil, err
+	}
+
 	payload := ensemblerPayload{
 		Request:  reqBody,
 		Response: routerResp,
