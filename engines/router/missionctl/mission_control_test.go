@@ -123,33 +123,33 @@ func TestMakeEnsemblerPayload(t *testing.T) {
 	)
 }
 
-// func TestMissionControlEnsemble(t *testing.T) {
-// 	missionCtl, err := NewMissionControl(
-// 		nil,
-// 		testCfg.EnrichmentConfig,
-// 		testCfg.RouterConfig,
-// 		testCfg.EnsemblerConfig,
-// 		testCfg.AppConfig,
-// 	)
-// 	tu.FailOnError(t, err)
+func TestMissionControlEnsemble(t *testing.T) {
+	missionCtl, err := NewMissionControl(
+		nil,
+		testCfg.EnrichmentConfig,
+		testCfg.RouterConfig,
+		testCfg.EnsemblerConfig,
+		testCfg.AppConfig,
+	)
+	tu.FailOnError(t, err)
 
-// 	// Set up Test HTTP Server
-// 	stopServer := startTestHTTPServer(t, testHTTPServerAddr)
-// 	defer stopServer()
+	// Set up Test HTTP Server
+	stopServer := startTestHTTPServer(t, testHTTPServerAddr)
+	defer stopServer()
 
-// 	// Ensemble
-// 	resp, httpErr := missionCtl.Ensemble(context.Background(),
-// 		http.Header{}, []byte(``), []byte(`{}`), []byte(``))
+	// Ensemble
+	resp, httpErr := missionCtl.Ensemble(context.Background(),
+		http.Header{}, []byte(``), []byte(`null`), []byte(`null`))
 
-// 	// Check that the error is nil
-// 	assert.Nil(t, httpErr)
-// 	assert.NotNil(t, resp)
+	// Check that the error is nil
+	assert.Nil(t, httpErr)
+	assert.NotNil(t, resp)
 
-// 	// Check that the response body is expected
-// 	data, err := tu.ReadFile(filepath.Join("testdata", "ensembler_response.json"))
-// 	tu.FailOnError(t, err)
-// 	assert.JSONEq(t, string(data), string(resp.Body()))
-// }
+	// Check that the response body is expected
+	data, err := tu.ReadFile(filepath.Join("testdata", "ensembler_response.json"))
+	tu.FailOnError(t, err)
+	assert.JSONEq(t, string(data), string(resp.Body()))
+}
 
 func TestMissionControlRoute(t *testing.T) {
 	if testing.Short() {
