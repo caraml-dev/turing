@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from dateutil.tz import tzutc
+from typing import Optional, Union, Any, Dict
 from turing import generated as client
 import turing.ensembler
 
@@ -17,9 +18,8 @@ def utc_date(date_str: str):
     return datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=tzutc())
 
 
-class MyTestEnsembler(turing.ensembler.PyFunc):
+class MyTestEnsemblerJob(turing.ensembler.PyFunc):
     import pandas
-    from typing import Any, Optional
 
     def __init__(self, default: float):
         self._default = default
@@ -29,11 +29,26 @@ class MyTestEnsembler(turing.ensembler.PyFunc):
 
     def ensemble(
         self,
-        input: pandas.Series,
-        predictions: pandas.Series,
-        treatment_config: Optional[dict],
+        input: Union[pandas.Series, Dict[str, Any]],
+        predictions: Union[pandas.Series, Dict[str, Any]],
+        **kwargs,
     ) -> Any:
         if input["treatment"] in predictions:
             return predictions[input["treatment"]]
         else:
             return self._default
+
+
+class MyTestEnsemblerService(turing.ensembler.PyFunc):
+    def __init__(self, default: float):
+        self._default = default
+
+    def initialize(self, artifacts: dict):
+        pass
+
+    def ensemble(
+        self,
+        enricher_response,
+        **kwargs,
+    ) -> Any:
+        return enricher_response

@@ -16,9 +16,10 @@ data_dir = os.path.join(os.path.dirname(__file__), "./testdata/api_responses")
 with open(os.path.join(data_dir, "list_jobs_0000.json")) as f:
     list_jobs_0000 = f.read()
 
-def test_predict():
+
+def test_ensemble_job_predict():
     default_value = random.random()
-    ensembler = tests.MyTestEnsembler(default_value)
+    ensembler = tests.MyTestEnsemblerJob(default_value)
 
     model_input = pandas.DataFrame(
         data={
@@ -42,6 +43,98 @@ def test_predict():
     from pandas._testing import assert_series_equal
 
     assert_series_equal(expected, result)
+
+
+def test_ensemble_service_predict_with_enricher_response():
+    default_value = random.random()
+    ensembler = tests.MyTestEnsemblerService(default_value)
+
+    model_input = {
+        "headers": {
+            "Host": "example.com",
+            "Referer": "https://example.com/",
+        },
+        "body": {
+          # original request payload unmodified
+            "request": {
+                "dummy": "dummy"
+            },
+            "response": {
+                "route_responses": [
+                    {
+                        "route": "control",
+                        "data": {
+                            "abc": 1,
+                        },
+                    },
+                    {
+                        "route": "xgboost-ordinal",
+                        "data": {
+                            "def": 2,
+                        }
+                    },
+                ],
+                "experiment": {
+                    "configuration": {
+                        "output": "xyz",
+                    },
+                },
+                "enricher_response": {
+                    "output": "meow"
+                }
+            },
+        },
+    }
+
+    expected = {"output": "meow"}
+    result = ensembler.predict(context=None, model_input=model_input)
+
+    assert expected == result
+
+
+def test_ensemble_service_predict_without_enricher_response():
+    default_value = random.random()
+    ensembler = tests.MyTestEnsemblerService(default_value)
+
+    model_input = {
+        "headers": {
+            "Host": "example.com",
+            "Referer": "https://example.com/",
+        },
+        "body": {
+          # original request payload unmodified
+            "request": {
+                "dummy": "dummy"
+            },
+            "response": {
+                "route_responses": [
+                    {
+                        "route": "control",
+                        "data": {
+                            "abc": 1,
+                        },
+                    },
+                    {
+                        "route": "xgboost-ordinal",
+                        "data": {
+                            "def": 2,
+                        }
+                    },
+                ],
+                "experiment": {
+                    "configuration": {
+                        "output": "xyz",
+                    },
+                },
+            },
+        },
+    }
+
+    expected = None
+    result = ensembler.predict(context=None, model_input=model_input)
+
+    assert expected == result
+
 
 @pytest.mark.parametrize("num_ensemblers", [6])
 def test_list_ensemblers(
@@ -72,6 +165,7 @@ def test_list_ensemblers(
 
         for actual, expected in zip(actual, generic_ensemblers):
             assert actual == turing.PyFuncEnsembler.from_open_api(expected)
+
 
 @patch("google.cloud.storage.Client")
 @patch("requests.Session.request")
@@ -111,7 +205,8 @@ def test_create_ensembler(
     )
     
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
-    
+
+
 @pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
 @patch("google.cloud.storage.Client")
 @patch("requests.Session.request")
@@ -190,7 +285,8 @@ def test_update_ensembler(
     )
     
     assert actual == turing.PyFuncEnsembler.from_open_api(pyfunc_ensembler)
-    
+
+
 @pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
 def test_update_ensembler_existing_router_version(
     turing_api,
@@ -251,7 +347,8 @@ def test_update_ensembler_existing_router_version(
         expected_error_message = "There is pending router version using this ensembler. Please wait for the router version to be deployed or undeploy it, before updating the ensembler."
         actual_error_message = str(error.value)
         assert expected_error_message == actual_error_message
-        
+
+
 @pytest.mark.parametrize(("num_ensemblers", "ensembler_name"), [(3, "updated")])
 def test_update_ensembler_existing_job(
     turing_api, project, generic_ensemblers, pyfunc_ensembler, use_google_oauth, active_project_magic_mock
@@ -313,7 +410,8 @@ def test_update_ensembler_existing_job(
         expected_error_message = "There is pending ensembling job using this ensembler. Please wait for the ensembling job to be completed or terminate it, before updating the ensembler."
         actual_error_message = str(error.value)
         assert expected_error_message == actual_error_message
-        
+
+
 @patch("google.cloud.storage.Client")
 @patch("requests.Session.request")
 @patch("urllib3.PoolManager.request")
