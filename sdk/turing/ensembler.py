@@ -113,12 +113,17 @@ class PyFunc(EnsemblerBase, mlflow.pyfunc.PythonModel, abc.ABC):
             # Deletes route from the dictionary as it is a duplicate of the key
             del routes_to_response[prediction["route"]]["route"]
 
+        # This is for older Turing routers which do not pass the enricher_response to the ensembler
+        enricher_response = None
+        if "enricher_response" in request_body["response"]:
+            enricher_response = request_body["response"]["enricher_response"]
+
         try:
             return self.ensemble(
                 input=request_body["request"],
                 predictions=routes_to_response,
                 treatment_config=request_body["response"]["experiment"],
-                enricher_response=request_body["response"]["enricher_response"],
+                enricher_response=enricher_response,
                 headers=model_input["headers"],
             )
         except TypeError as e:
