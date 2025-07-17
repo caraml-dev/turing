@@ -197,7 +197,7 @@ def test_create_ensembler(
 
     actual = turing.PyFuncEnsembler.create(
         name=pyfunc_ensembler.name,
-        ensembler_instance=tests.MyTestEnsembler(0.01),
+        ensembler_instance=tests.MyTestEnsemblerJob(0.01),
         conda_env={
             "channels": ["defaults"],
             "dependencies": ["python=3.9.0", {"pip": ["test-lib==0.0.1"]}],
@@ -272,7 +272,7 @@ def test_update_ensembler(
 
     actual.update(
         name=pyfunc_ensembler.name,
-        ensembler_instance=tests.MyTestEnsembler(0.06),
+        ensembler_instance=tests.MyTestEnsemblerJob(0.06),
         conda_env={
             "channels": ["defaults"],
             "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
@@ -331,7 +331,7 @@ def test_update_ensembler_existing_router_version(
         with pytest.raises(ValueError) as error:
             actual.update(
                 name=pyfunc_ensembler.name,
-                ensembler_instance=tests.MyTestEnsembler(0.06),
+                ensembler_instance=tests.MyTestEnsemblerJob(0.06),
                 conda_env={
                     "channels": ["defaults"],
                     "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
@@ -394,7 +394,7 @@ def test_update_ensembler_existing_job(
         with pytest.raises(ValueError) as error:
             actual.update(
                 name=pyfunc_ensembler.name,
-                ensembler_instance=tests.MyTestEnsembler(0.06),
+                ensembler_instance=tests.MyTestEnsemblerJob(0.06),
                 conda_env={
                     "channels": ["defaults"],
                     "dependencies": ["python>=3.8.0", {"pip": ["test-lib==0.0.1"]}],
