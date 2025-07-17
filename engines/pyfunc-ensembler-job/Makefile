@@ -10,6 +10,7 @@ setup: build
 	@DIST_VERSION=$$(echo $(VERSION) | \
 		sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)(-rc([0-9]+))?/\1rc\3/'); \
 		$(ACTIVATE_ENV) && pip install "dist/turing_pyfunc_ensembler_job-$${DIST_VERSION}-py3-none-any.whl[dev]"
+	@pip install pipenv
 
 .PHONY: type-check
 type-check:
