@@ -10,11 +10,15 @@ setup: build
 	@DIST_VERSION=$$(echo $(VERSION) | \
 		sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)(-rc([0-9]+))?/\1rc\3/'); \
 		$(ACTIVATE_ENV) && pip install "dist/turing_pyfunc_ensembler_job-$${DIST_VERSION}-py3-none-any.whl[dev]"
-	@pip install pipenv
 
 .PHONY: type-check
 type-check:
-	@pipenv run mypy --ignore-missing-imports --allow-untyped-globals --implicit-optional ensembler --follow-imports silent
+	@$(ACTIVATE_ENV) && mypy \
+		--install-types \
+		--non-interactive \
+		--ignore-missing-imports \
+		--allow-untyped-globals \
+		ensembler
 
 .PHONY: lint
 lint:
@@ -24,7 +28,11 @@ lint:
 
 .PHONY: test
 test: type-check
-	@pipenv run pytest -W ignore
+	@$(ACTIVATE_ENV) && \
+		python -m pytest \
+		--cov=ensembler \
+		--ignore=env \
+		-W ignore
 
 .PHONY: build-image
 build-image: version
