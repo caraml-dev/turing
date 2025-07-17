@@ -1,6 +1,7 @@
 import argparse
 import logging
 import traceback
+import os
 
 import tornado.ioloop
 
@@ -32,10 +33,10 @@ parser.add_argument(
 )
 
 args, _ = parser.parse_known_args()
-
+log_level = os.getenv("LOG_LEVEL_ENV", args.log_level)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=args.log_level)
+    logging.basicConfig(level=log_level)
     logging.info(
         "Called with arguments:\n%s\n",
         "\n".join([f"{k}: {v}" for k, v in vars(args).items()]),
