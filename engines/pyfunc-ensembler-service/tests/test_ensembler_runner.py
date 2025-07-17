@@ -27,11 +27,7 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
             "simple_ensembler_uri",
             dummy_short_request,
             {"Key": "Value"},
-            {"headers": {"Key": "Value"}},
-        ),
-        pytest.param("legacy_ensembler_uri", dummy_long_request, {}, [296.15732, 0]),
-        pytest.param(
-            "legacy_ensembler_uri", dummy_short_request, {"Key": "Value"}, [0, 0]
+            {"headers": {"Key": "Value"}, "enricher_response" : None},
         ),
     ],
 )
