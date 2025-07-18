@@ -25,7 +25,7 @@ parser.add_argument(
 )
 
 args, _ = parser.parse_known_args()
-log_level = os.getenv("LOG_LEVEL_ENV", logging.WARNING)
+log_level = os.getenv("LOG_LEVEL", logging.WARNING)
 
 if __name__ == "__main__":
     logging.basicConfig(level=log_level)
