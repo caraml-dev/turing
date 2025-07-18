@@ -27,7 +27,7 @@ with open(os.path.join(data_dir, "request_invalid.json")) as f:
             "simple_ensembler_uri",
             dummy_short_request,
             {"Key": "Value"},
-            {"headers": {"Key": "Value"}, "enricher_response" : None},
+            {"headers": {"Key": "Value"}, "enricher_response": None},
         ),
     ],
 )

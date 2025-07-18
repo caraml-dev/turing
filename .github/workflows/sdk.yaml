@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - ".github/workflows/sdk.yaml"
+      - "engines/pyfunc-ensembler-service/**"
       - "sdk/**"
 
   # Automatically run CI on branches, that have active PR opened
@@ -19,6 +20,7 @@ on:
       - main
     paths:
       - ".github/workflows/sdk.yaml"
+      - "engines/pyfunc-ensembler-service/**"
       - "sdk/**"
 
 jobs:

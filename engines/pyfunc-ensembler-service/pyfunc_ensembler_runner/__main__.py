@@ -1,6 +1,7 @@
 import argparse
 import logging
 import traceback
+import os
 
 import tornado.ioloop
 
@@ -22,20 +23,12 @@ parser.add_argument(
     help="Dry run pyfunc ensembler by loading the specified ensembler "
     "in --mlflow_ensembler_dir without starting webserver",
 )
-parser.add_argument(
-    "-l",
-    "--log-level",
-    dest="log_level",
-    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-    help="Set the logging level",
-    default=logging.DEBUG,
-)
 
 args, _ = parser.parse_known_args()
-
+log_level = os.getenv("LOG_LEVEL", logging.WARNING)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=args.log_level)
+    logging.basicConfig(level=log_level)
     logging.info(
         "Called with arguments:\n%s\n",
         "\n".join([f"{k}: {v}" for k, v in vars(args).items()]),
