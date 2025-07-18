@@ -59,6 +59,12 @@ export const appConfig = {
     batchSize: 500,
     // Default number of tail log entries to be fetched
     defaultTailLines: 1000,
+    urlTemplates: {
+      // Available values `{{cluster_name}}` `{{namespace_name}}` `{{pod_prefix_name}}` `{{start_time}}`
+      turingUrl: "",
+      // Available values `{{cluster_name}}` `{{namespace_name}}` `{{job_name}}` `{{start_time}}` `{{end_time}}`
+      imageBuilderUrl: "",
+    },
   },
   imagebuilder: {
     cluster:  process.env.REACT_APP_IMAGE_BUILDER_CLUSTER,

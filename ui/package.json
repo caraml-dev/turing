@@ -17,6 +17,7 @@
     "js-yaml": "^4.1.0",
     "mitt": "^3.0.1",
     "moment": "^2.30.1",
+    "mustache": "^4.2.0",
     "object-assign-deep": "^0.4.0",
     "proper-url-join": "2.1.1",
     "query-string": "^9.0.0",

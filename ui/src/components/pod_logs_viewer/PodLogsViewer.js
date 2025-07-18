@@ -18,7 +18,7 @@ export const PodLogsViewer = ({
   query,
   onQueryChange,
   batchSize,
-  stackdriverUrls,
+  podLogUrls,
 }) => {
   const filters = useMemo(
     () => [
@@ -114,15 +114,15 @@ export const PodLogsViewer = ({
   return (
     <>
       {
-        Object.keys(stackdriverUrls).length !== 0 &&
+        Object.keys(podLogUrls).length !== 0 &&
         (
           <>
             <EuiPanel>
               <EuiFlexGroup direction="row" alignItems="center">
                 <EuiFlexItem style={{marginTop:0, marginBottom:0}} grow={false}>
-                  <EuiText  style={{ fontSize: '14px', fontWeight:"bold"}}>Stackdriver Logs</EuiText>
+                  <EuiText  style={{ fontSize: '14px', fontWeight:"bold"}}>Pod Logs</EuiText>
                 </EuiFlexItem>
-                {Object.entries(stackdriverUrls).map(([component,url])=> (
+                {Object.entries(podLogUrls).map(([component,url])=> (
                   <EuiFlexItem style={{marginTop:0, marginBottom:0, paddingLeft:"10px", textTransform: "capitalize"}} key={component} grow={false}>
                     <EuiText size="xs" >
                       <EuiLink href={url} target="_blank" external>{component.replace(new RegExp("_", "g"), " ")}</EuiLink>
