@@ -157,8 +157,8 @@ export const RouterLogsView = ({ router }) => {
             // using new url
             urls["ensembler_image_builder"] = createLogImageBuilderUrl(
                 imageBuilderUrl,
-                environment.cluster,
-                currentProject.name,
+                appConfig.imagebuilder.cluster,
+                appConfig.imagebuilder.namespace,
                 "service-" + currentProject.name + "-" + ensembler.name,
                 ensembler.updated_at,
             )
@@ -174,7 +174,7 @@ export const RouterLogsView = ({ router }) => {
         setPodLogUrls(urls);
       }
     },
-    [currentProject, ensembler, environment, router, appConfig.podLogs.urlTemplates]
+    [currentProject, ensembler, environment, router, appConfig.podLogs.urlTemplates, appConfig.imagebuilder]
   );
 
   return (
