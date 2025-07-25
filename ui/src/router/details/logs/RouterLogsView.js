@@ -28,6 +28,7 @@ const components = [
 
 export const RouterLogsView = ({ router }) => {
   const { appConfig } = useConfig();
+  const { imageBuilderUrl, turingUrl } = appConfig.podLogs.urlTemplates
 
   const { currentProject } = useContext(ProjectsContext);
 
@@ -78,7 +79,6 @@ export const RouterLogsView = ({ router }) => {
   useEffect(
     () => {
       let urls = {}
-      const {imageBuilderUrl, turingUrl} = appConfig.podLogs.urlTemplates
       if (
           environment &&
           currentProject
@@ -174,7 +174,7 @@ export const RouterLogsView = ({ router }) => {
         setPodLogUrls(urls);
       }
     },
-    [currentProject, ensembler, environment, router, appConfig.podLogs.urlTemplates, appConfig.imagebuilder]
+    [currentProject, ensembler, environment, router, appConfig.imagebuilder, turingUrl, imageBuilderUrl]
   );
 
   return (
