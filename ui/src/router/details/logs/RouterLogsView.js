@@ -9,6 +9,7 @@ import { useLogsEmitter } from "../../../components/pod_logs_viewer/hooks/useLog
 import { createStackdriverUrl } from "../../../utils/createStackdriverUrl";
 import EnsemblersContext from "../../../providers/ensemblers/context";
 import EnvironmentsContext from "../../../providers/environments/context";
+import {createLogImageBuilderUrl, createLogUrl} from "../../../utils/createLogUrl";
 
 const components = [
   {
@@ -27,6 +28,7 @@ const components = [
 
 export const RouterLogsView = ({ router }) => {
   const { appConfig } = useConfig();
+  const { imageBuilderUrl, turingUrl } = appConfig.podLogs.urlTemplates
 
   const { currentProject } = useContext(ProjectsContext);
 
@@ -38,7 +40,7 @@ export const RouterLogsView = ({ router }) => {
   const environment = Object.values(environments)
       .find((value) => value.name === router?.environment_name)
 
-  const [stackdriverUrls, setStackdriverUrls] = useState({});
+  const [podLogUrls, setPodLogUrls] = useState({});
 
   useEffect(() => {
     replaceBreadcrumbs([
@@ -78,54 +80,101 @@ export const RouterLogsView = ({ router }) => {
     () => {
       let urls = {}
       if (
-          appConfig.imagebuilder.cluster &&
-          appConfig.imagebuilder.gcp_project &&
-          appConfig.imagebuilder.namespace &&
+          environment &&
           currentProject
       ) {
-        // set router url
-        urls["router"] = createStackdriverUrl({
-          gcp_project: environment.gcp_project,
-          cluster: environment.cluster,
-          namespace: currentProject.name,
-          pod_name: router.name + "-turing-router-"  + router.config.version,
-          start_time: router.updated_at,
-        }, "router")
+        if (turingUrl) {
+          // using new url
 
-        // set enricher url
-        if (router.config.enricher.type === "docker") {
-          urls["enricher"] = createStackdriverUrl({
+          // set router url
+          urls["router"] = createLogUrl(
+              turingUrl,
+              environment.cluster,
+              currentProject.name,
+              router.name + "-turing-router-"  + router.config.version,
+              router.updated_at,
+          )
+
+          // set enricher url
+          if (router.config.enricher.type === "docker") {
+            urls["enricher"] = createLogUrl(
+                turingUrl,
+                environment.cluster,
+                currentProject.name,
+                router.name + "-turing-enricher-"  + router.config.version,
+                router.updated_at,
+            )
+          }
+
+          // set ensembler url
+          if (router.config.ensembler.type === "docker" || router.config.ensembler.type === "pyfunc") {
+            urls["ensembler"] = createLogUrl(
+                turingUrl,
+                environment.cluster,
+                currentProject.name,
+                router.name + "-turing-ensembler-"  + router.config.version,
+                router.updated_at,
+            )
+          }
+        } else {
+          // fallback to old url
+
+          // set router url
+          urls["router"] = createStackdriverUrl({
             gcp_project: environment.gcp_project,
             cluster: environment.cluster,
             namespace: currentProject.name,
-            pod_name: router.name + "-turing-enricher-" + router.config.version,
+            pod_name: router.name + "-turing-router-"  + router.config.version,
             start_time: router.updated_at,
-          }, "enricher")
-        }
+          }, "router")
 
-        // set ensembler url
-        if (router.config.ensembler.type === "docker" || router.config.ensembler.type === "pyfunc") {
-          urls["ensembler"] = createStackdriverUrl({
-            gcp_project: environment.gcp_project,
-            cluster: environment.cluster,
-            namespace: currentProject.name,
-            pod_name: router.name + "-turing-ensembler-" + router.config.version,
-            start_time: router.updated_at,
-          }, "ensembler")
+          // set enricher url
+          if (router.config.enricher.type === "docker") {
+            urls["enricher"] = createStackdriverUrl({
+              gcp_project: environment.gcp_project,
+              cluster: environment.cluster,
+              namespace: currentProject.name,
+              pod_name: router.name + "-turing-enricher-" + router.config.version,
+              start_time: router.updated_at,
+            }, "enricher")
+          }
+
+          // set ensembler url
+          if (router.config.ensembler.type === "docker" || router.config.ensembler.type === "pyfunc") {
+            urls["ensembler"] = createStackdriverUrl({
+              gcp_project: environment.gcp_project,
+              cluster: environment.cluster,
+              namespace: currentProject.name,
+              pod_name: router.name + "-turing-ensembler-" + router.config.version,
+              start_time: router.updated_at,
+            }, "ensembler")
+          }
         }
 
         // set image builder url
         if (router.config.ensembler.type === "pyfunc" && ensembler) {
-          urls["ensembler_image_builder"] = createStackdriverUrl({
-            job_name: "service-" + currentProject.name + "-" + ensembler.name,
-            start_time: ensembler.updated_at,
-          }, "ensembler_image_builder")
+          if (imageBuilderUrl) {
+            // using new url
+            urls["ensembler_image_builder"] = createLogImageBuilderUrl(
+                imageBuilderUrl,
+                appConfig.imagebuilder.cluster,
+                appConfig.imagebuilder.namespace,
+                "service-" + currentProject.name + "-" + ensembler.name,
+                ensembler.updated_at,
+            )
+          } else {
+            // fallback to old url
+            urls["ensembler_image_builder"] = createStackdriverUrl({
+              job_name: "service-" + currentProject.name + "-" + ensembler.name,
+              start_time: ensembler.updated_at,
+            }, "ensembler_image_builder")
+          }
         }
 
-        setStackdriverUrls(urls);
+        setPodLogUrls(urls);
       }
     },
-    [currentProject, ensembler, environment, router, appConfig.imagebuilder]
+    [currentProject, ensembler, environment, router, appConfig.imagebuilder, turingUrl, imageBuilderUrl]
   );
 
   return (
@@ -136,7 +185,7 @@ export const RouterLogsView = ({ router }) => {
         query={query}
         onQueryChange={setQuery}
         batchSize={appConfig.podLogs.batchSize}
-        stackdriverUrls={stackdriverUrls}
+        podLogUrls={podLogUrls}
       />
     </ConfigSection>
   );
