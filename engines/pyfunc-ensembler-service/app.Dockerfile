@@ -52,4 +52,4 @@ RUN if [ "${MLFLOW_ARTIFACT_STORAGE_TYPE}" = "gcs" ]; then  \
 ENV FOLDER_NAME=$FOLDER_NAME
 SHELL ["/bin/bash", "-c"]
 ENTRYPOINT . activate ${CONDA_ENV_NAME} && \
-  python -m pyfunc_ensembler_runner --mlflow_ensembler_dir ./${FOLDER_NAME} -l INFO
+  python -m pyfunc_ensembler_runner --mlflow_ensembler_dir ./${FOLDER_NAME}
