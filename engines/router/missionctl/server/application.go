@@ -137,7 +137,7 @@ func initInstrumentation(cfg *config.Config) func() {
 	}
 
 	// Init tracing client
-	tracingShutdown, err := tracing.InitGlobalTracer(cfg.AppConfig.Name, cfg.AppConfig.Jaeger)
+	tracingShutdown, err := tracing.InitGlobalTracer(cfg.AppConfig.Name, cfg.AppConfig.Jaeger, cfg.AppConfig.Otel)
 	if err != nil {
 		log.Glob().Fatalf("Failed initializing Tracer: %v", err)
 	}

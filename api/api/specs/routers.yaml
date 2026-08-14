@@ -573,6 +573,11 @@ components:
               type: "boolean"
             jaeger_enabled:
               type: "boolean"
+              description: >-
+                Deprecated: use otel_enabled instead. Will be removed in a
+                future release.
+            otel_enabled:
+              type: "boolean"
             pyroscope_enabled:
               type: "boolean"
             result_logger_type:

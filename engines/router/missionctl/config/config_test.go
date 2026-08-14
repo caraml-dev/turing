@@ -59,8 +59,12 @@ var optionalEnvs = map[string]string{
 	"APP_KAFKA_TOPIC":                "kafka_topic",
 	"APP_KAFKA_SERIALIZATION_FORMAT": "json",
 	"APP_JAEGER_ENABLED":             "true",
-	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:5000",
-	"APP_JAEGER_SAMPLING_RATIO":      "0.8",
+	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:14268/api/traces",
+	"APP_JAEGER_REPORTER_HOST":       "localhost",
+	"APP_JAEGER_REPORTER_PORT":       "6831",
+	"APP_OTEL_ENABLED":               "true",
+	"APP_OTEL_COLLECTOR_ENDPOINT":    "http://localhost:5000",
+	"APP_OTEL_SAMPLING_RATIO":        "0.8",
 	"APP_PYROSCOPE_ENABLED":          "true",
 	"APP_PYROSCOPE_SERVER_ADDRESS":   "http://localhost:4040",
 	"APP_SENTRY_ENABLED":             "true",
@@ -119,6 +123,12 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 			},
 			CustomMetrics: false,
 			Jaeger: &JaegerConfig{
+				Enabled:           false,
+				CollectorEndpoint: "",
+				ReporterAgentHost: "",
+				ReporterAgentPort: 0,
+			},
+			Otel: &OtelConfig{
 				Enabled:           false,
 				CollectorEndpoint: "",
 				SamplingRatio:     1,
@@ -186,6 +196,12 @@ func TestInitConfigEnv(t *testing.T) {
 			},
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
+				Enabled:           true,
+				CollectorEndpoint: "http://localhost:14268/api/traces",
+				ReporterAgentHost: "localhost",
+				ReporterAgentPort: 6831,
+			},
+			Otel: &OtelConfig{
 				Enabled:           true,
 				CollectorEndpoint: "http://localhost:5000",
 				SamplingRatio:     0.8,
@@ -353,15 +369,19 @@ func TestSerializationFormatDecode(t *testing.T) {
 	}
 }
 
-func TestInitConfigEnv_JaegerAndPyroscope(t *testing.T) {
+func TestInitConfigEnv_JaegerOtelAndPyroscope(t *testing.T) {
 	env := map[string]string{
 		"PORT":                          "8080",
 		"ROUTER_CONFIG_FILE":            "config.yaml",
 		"APP_NAME":                      "test-router",
 		"APP_ENVIRONMENT":               "dev",
 		"APP_JAEGER_ENABLED":            "true",
-		"APP_JAEGER_COLLECTOR_ENDPOINT": "http://otel-collector:4318",
-		"APP_JAEGER_SAMPLING_RATIO":     "0.5",
+		"APP_JAEGER_COLLECTOR_ENDPOINT": "http://localhost:14268/api/traces",
+		"APP_JAEGER_REPORTER_HOST":      "localhost",
+		"APP_JAEGER_REPORTER_PORT":      "6831",
+		"APP_OTEL_ENABLED":              "true",
+		"APP_OTEL_COLLECTOR_ENDPOINT":   "http://otel-collector:4318",
+		"APP_OTEL_SAMPLING_RATIO":       "0.5",
 		"APP_PYROSCOPE_ENABLED":         "true",
 		"APP_PYROSCOPE_SERVER_ADDRESS":  "http://pyroscope:4040",
 		"APP_PYROSCOPE_HTTP_HEADERS":    "Authorization:Bearer token,X-Scope-OrgID:tenant1",
@@ -372,8 +392,12 @@ func TestInitConfigEnv_JaegerAndPyroscope(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, true, cfg.AppConfig.Jaeger.Enabled)
-	assert.Equal(t, "http://otel-collector:4318", cfg.AppConfig.Jaeger.CollectorEndpoint)
-	assert.Equal(t, 0.5, cfg.AppConfig.Jaeger.SamplingRatio)
+	assert.Equal(t, "http://localhost:14268/api/traces", cfg.AppConfig.Jaeger.CollectorEndpoint)
+	assert.Equal(t, "localhost", cfg.AppConfig.Jaeger.ReporterAgentHost)
+	assert.Equal(t, 6831, cfg.AppConfig.Jaeger.ReporterAgentPort)
+	assert.Equal(t, true, cfg.AppConfig.Otel.Enabled)
+	assert.Equal(t, "http://otel-collector:4318", cfg.AppConfig.Otel.CollectorEndpoint)
+	assert.Equal(t, 0.5, cfg.AppConfig.Otel.SamplingRatio)
 	assert.Equal(t, true, cfg.AppConfig.Pyroscope.Enabled)
 	assert.Equal(t, "http://pyroscope:4040", cfg.AppConfig.Pyroscope.ServerAddress)
 	assert.Equal(t, map[string]string{

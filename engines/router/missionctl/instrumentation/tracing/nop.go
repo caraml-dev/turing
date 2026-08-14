@@ -5,17 +5,10 @@ import (
 	"net/http"
 
 	"go.opentelemetry.io/otel/trace"
-
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 // NopTracer implements the Tracer interface with dummy methods
 type NopTracer struct{}
-
-// InitGlobalTracer satisfies the Tracer interface and returns a no-op shutdown func
-func (*NopTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (ShutdownFunc, error) {
-	return func(context.Context) error { return nil }, nil
-}
 
 // IsEnabled satisfies the Tracer interface, always returning false
 func (*NopTracer) IsEnabled() bool {

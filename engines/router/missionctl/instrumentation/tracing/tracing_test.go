@@ -27,39 +27,74 @@ func TestSetGlob(t *testing.T) {
 	assert.Equal(t, tr, globalTracer)
 }
 
-func TestInitGlobalTracerNop(t *testing.T) {
+func TestInitGlobalTracer_Nop(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	_, err := InitGlobalTracer("test", &config.JaegerConfig{})
+	_, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{})
 	assert.NoError(t, err)
 	assert.Equal(t, false, globalTracer.IsEnabled())
 }
 
-func TestInitGlobalTracerOtel(t *testing.T) {
+func TestInitGlobalTracer_OtelOnly(t *testing.T) {
+	tempTracer := globalTracer
+	defer func() { globalTracer = tempTracer }()
+
+	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{
+		Enabled:           true,
+		CollectorEndpoint: "http://localhost:4318",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, true, globalTracer.IsEnabled())
+	assert.IsType(t, &OtelTracer{}, globalTracer)
+	assert.NoError(t, shutdown(context.Background()))
+}
+
+// TestInitGlobalTracer_JaegerOnly relies on the classic Jaeger client's UDP agent
+// reporter not dialling eagerly -- InitGlobalTracer succeeds even with no agent
+// listening at the configured host:port, exactly like the OTel exporter today (see
+// TestNewOtelTracer in otel_test.go).
+func TestInitGlobalTracer_JaegerOnly(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
 	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{
 		Enabled:           true,
-		CollectorEndpoint: "http://localhost:4318",
-	})
-	assert.NoError(t, err)
+		ReporterAgentHost: "localhost",
+		ReporterAgentPort: 6831,
+	}, &config.OtelConfig{})
+	require.NoError(t, err)
 	assert.Equal(t, true, globalTracer.IsEnabled())
+	assert.IsType(t, &JaegerTracer{}, globalTracer)
 	assert.NoError(t, shutdown(context.Background()))
 }
 
-// TestInitGlobalTracerOtel_ErrorReturnsNonNilShutdown ensures that even when tracer
-// initialisation fails (e.g. an invalid CollectorEndpoint), callers get back a safe,
-// callable no-op ShutdownFunc rather than nil. Package-level InitGlobalTracer is called
-// from application.go, which currently relies on log.Glob().Fatalf to exit the process on
-// error, but the contract shouldn't depend on that -- a nil ShutdownFunc would panic any
-// caller that unconditionally defers it.
-func TestInitGlobalTracerOtel_ErrorReturnsNonNilShutdown(t *testing.T) {
+func TestInitGlobalTracer_Multi(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{
+	shutdown, err := InitGlobalTracer("test",
+		&config.JaegerConfig{
+			Enabled:           true,
+			ReporterAgentHost: "localhost",
+			ReporterAgentPort: 6831,
+		},
+		&config.OtelConfig{
+			Enabled:           true,
+			CollectorEndpoint: "http://localhost:4318",
+		},
+	)
+	require.NoError(t, err)
+	assert.Equal(t, true, globalTracer.IsEnabled())
+	assert.IsType(t, &MultiTracer{}, globalTracer)
+	assert.NoError(t, shutdown(context.Background()))
+}
+
+func TestInitGlobalTracer_OtelError_ReturnsNonNilShutdown(t *testing.T) {
+	tempTracer := globalTracer
+	defer func() { globalTracer = tempTracer }()
+
+	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "",
 	})

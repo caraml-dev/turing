@@ -26,18 +26,22 @@ import (
 
 // Define env var names for the router
 const (
-	envAppName                         = "APP_NAME"
-	envAppEnvironment                  = "APP_ENVIRONMENT"
-	envRouterTimeout                   = "ROUTER_TIMEOUT"
-	envEnricherEndpoint                = "ENRICHER_ENDPOINT"
-	envEnricherTimeout                 = "ENRICHER_TIMEOUT"
-	envEnsemblerEndpoint               = "ENSEMBLER_ENDPOINT"
-	envEnsemblerTimeout                = "ENSEMBLER_TIMEOUT"
-	envLogLevel                        = "APP_LOGLEVEL"
-	envFiberDebugLog                   = "APP_FIBER_DEBUG_LOG"
-	envCustomMetrics                   = "APP_CUSTOM_METRICS"
-	envJaegerEnabled                   = "APP_JAEGER_ENABLED"
+	envAppName           = "APP_NAME"
+	envAppEnvironment    = "APP_ENVIRONMENT"
+	envRouterTimeout     = "ROUTER_TIMEOUT"
+	envEnricherEndpoint  = "ENRICHER_ENDPOINT"
+	envEnricherTimeout   = "ENRICHER_TIMEOUT"
+	envEnsemblerEndpoint = "ENSEMBLER_ENDPOINT"
+	envEnsemblerTimeout  = "ENSEMBLER_TIMEOUT"
+	envLogLevel          = "APP_LOGLEVEL"
+	envFiberDebugLog     = "APP_FIBER_DEBUG_LOG"
+	envCustomMetrics     = "APP_CUSTOM_METRICS"
+	// Deprecated: use envOtel* instead.
+	envJaegerEnabled = "APP_JAEGER_ENABLED"
+	// Deprecated: use envOtel* instead.
 	envJaegerEndpoint                  = "APP_JAEGER_COLLECTOR_ENDPOINT"
+	envOtelEnabled                     = "APP_OTEL_ENABLED"
+	envOtelEndpoint                    = "APP_OTEL_COLLECTOR_ENDPOINT"
 	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
 	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
 	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
@@ -233,13 +237,14 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 ) ([]corev1.EnvVar, error) {
 	envs := sb.getEnvVars(ver.ResourceRequest, nil, nil, "")
 
-	// Add app name, router timeout, jaeger collector
+	// Add app name, router timeout, jaeger collector (deprecated) and otel collector
 	envs = mergeEnvVars(envs,
 		[]corev1.EnvVar{
 			{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
 			{Name: envAppEnvironment, Value: environmentType},
 			{Name: envRouterTimeout, Value: ver.Timeout},
 			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
+			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
 			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
 			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
 			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
@@ -283,6 +288,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		{Name: envLogLevel, Value: string(logConfig.LogLevel)},
 		{Name: envCustomMetrics, Value: strconv.FormatBool(logConfig.CustomMetricsEnabled)},
 		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)},
+		{Name: envOtelEnabled, Value: strconv.FormatBool(logConfig.OtelEnabled)},
 		{Name: envPyroscopeEnabled, Value: strconv.FormatBool(logConfig.PyroscopeEnabled)},
 		{Name: envResultLogger, Value: string(logConfig.ResultLoggerType)},
 		{Name: envFiberDebugLog, Value: strconv.FormatBool(logConfig.FiberDebugLogEnabled)},

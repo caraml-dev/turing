@@ -110,8 +110,23 @@ type KafkaConfig struct {
 	CompressionType     string              `split_words:"true" default:"none"`
 }
 
-// JaegerConfig captures the settings for tracing using OpenTelemetry, exported via OTLP HTTP
+// JaegerConfig captures the settings for tracing using the classic Jaeger client
+// (OpenTracing API, Thrift transport over a UDP agent or an HTTP collector).
+//
+// Deprecated: Jaeger's native Thrift ingestion is being phased out; use OtelConfig
+// instead unless a specific downstream backend still requires Thrift. This config,
+// and the tracer backend it configures, will be removed in a future release.
 type JaegerConfig struct {
+	Enabled bool
+	// CollectorEndpoint is a Thrift-over-HTTP Jaeger collector endpoint,
+	// e.g. http://jaeger-collector:14268/api/traces
+	CollectorEndpoint string `split_words:"true"`
+	ReporterAgentHost string `envconfig:"REPORTER_HOST" split_words:"true"`
+	ReporterAgentPort int    `envconfig:"REPORTER_PORT" split_words:"true"`
+}
+
+// OtelConfig captures the settings for tracing using OpenTelemetry, exported via OTLP HTTP.
+type OtelConfig struct {
 	Enabled bool
 	// CollectorEndpoint is the OTLP HTTP endpoint spans are exported to,
 	// e.g. http://otel-collector:4318
@@ -144,7 +159,8 @@ type AppConfig struct {
 	BigQuery      *BQConfig    `envconfig:"BQ"`
 	Fluentd       *FluentdConfig
 	Kafka         *KafkaConfig
-	Jaeger        *JaegerConfig
+	Jaeger        *JaegerConfig // Deprecated: see JaegerConfig.
+	Otel          *OtelConfig
 	Pyroscope     *PyroscopeConfig
 	Sentry        sentry.Config
 }

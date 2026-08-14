@@ -148,8 +148,13 @@ RouterDefaults:
   Image: ghcr.io/caraml-dev/turing:latest
   FiberDebugLogEnabled: false
   CustomMetricsEnabled: false
+  # Deprecated: Jaeger's native Thrift ingestion is being phased out; use
+  # OtelEnabled/OtelCollectorEndpoint instead unless a specific downstream
+  # backend still requires Thrift.
   JaegerEnabled: false
-  JaegerCollectorEndpoint: http://otel-collector.example.com:4318
+  JaegerCollectorEndpoint: http://jaeger-collector.example.com:14268/api/traces
+  OtelEnabled: false
+  OtelCollectorEndpoint: http://otel-collector.example.com:4318
   PyroscopeEnabled: false
   PyroscopeServerAddress: http://pyroscope.example.com:4040
   # HTTP headers attached to every profile push request routers make to

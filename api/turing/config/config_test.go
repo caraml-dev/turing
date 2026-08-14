@@ -307,7 +307,9 @@ func TestLoad(t *testing.T) {
 					// viper lowercases YAML map keys, so header names configured this way
 					// always come out lowercase (harmless: HTTP header names are
 					// case-insensitive).
-					PyroscopeHTTPHeaders: map[string]string{"authorization": "Bearer token"},
+					PyroscopeHTTPHeaders:  map[string]string{"authorization": "Bearer token"},
+					OtelEnabled:           true,
+					OtelCollectorEndpoint: "http://otel-collector.example.com:4318",
 				},
 				Otel: config.OtelConfig{SamplingRatio: 1},
 				Sentry: sentry.Config{
@@ -477,7 +479,9 @@ func TestLoad(t *testing.T) {
 					// viper lowercases YAML map keys, so header names configured this way
 					// always come out lowercase (harmless: HTTP header names are
 					// case-insensitive).
-					PyroscopeHTTPHeaders: map[string]string{"authorization": "Bearer token"},
+					PyroscopeHTTPHeaders:  map[string]string{"authorization": "Bearer token"},
+					OtelEnabled:           true,
+					OtelCollectorEndpoint: "http://otel-collector.example.com:4318",
 				},
 				Otel: config.OtelConfig{SamplingRatio: 1},
 				Sentry: sentry.Config{
@@ -665,7 +669,9 @@ func TestLoad(t *testing.T) {
 					// viper lowercases YAML map keys, so header names configured this way
 					// always come out lowercase (harmless: HTTP header names are
 					// case-insensitive).
-					PyroscopeHTTPHeaders: map[string]string{"authorization": "Bearer token"},
+					PyroscopeHTTPHeaders:  map[string]string{"authorization": "Bearer token"},
+					OtelEnabled:           true,
+					OtelCollectorEndpoint: "http://otel-collector.example.com:4318",
 				},
 				Otel: config.OtelConfig{SamplingRatio: 1},
 				Sentry: sentry.Config{
@@ -772,6 +778,8 @@ func TestLoad_OtelAndPyroscope(t *testing.T) {
 	assert.Equal(t, true, cfg.RouterDefaults.PyroscopeEnabled)
 	assert.Equal(t, "http://pyroscope.example.com:4040", cfg.RouterDefaults.PyroscopeServerAddress)
 	assert.Equal(t, map[string]string{"authorization": "Bearer token"}, cfg.RouterDefaults.PyroscopeHTTPHeaders)
+	assert.Equal(t, true, cfg.RouterDefaults.OtelEnabled)
+	assert.Equal(t, "http://otel-collector.example.com:4318", cfg.RouterDefaults.OtelCollectorEndpoint)
 }
 
 // Reference:
@@ -1117,6 +1125,14 @@ func TestConfigValidate(t *testing.T) {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.RouterDefaults.PyroscopeEnabled = true
 				validConfig.RouterDefaults.PyroscopeServerAddress = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"router defaults otel enabled but missing OtelCollectorEndpoint": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.RouterDefaults.OtelEnabled = true
+				validConfig.RouterDefaults.OtelCollectorEndpoint = ""
 				return validConfig
 			},
 			wantErr: true,

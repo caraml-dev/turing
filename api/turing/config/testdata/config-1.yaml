@@ -59,6 +59,8 @@ RouterDefaults:
   PyroscopeServerAddress: http://pyroscope.example.com:4040
   PyroscopeHTTPHeaders:
     Authorization: Bearer token
+  OtelEnabled: true
+  OtelCollectorEndpoint: http://otel-collector.example.com:4318
 Sentry:
   Enabled: true
   Labels:

@@ -11,38 +11,37 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
-func TestOtelTracer_IsEnabled(t *testing.T) {
-	tr := newOtelTracer()
+func TestNewOtelTracer_IsEnabled(t *testing.T) {
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
+		Enabled:           true,
+		CollectorEndpoint: "http://localhost:4318",
+	})
+	require.NoError(t, err)
+	defer func() { _ = shutdown(context.Background()) }()
+
 	assert.Equal(t, true, tr.IsEnabled())
 }
 
-func TestOtelTracer_InitGlobalTracer(t *testing.T) {
-	tr := newOtelTracer()
-
-	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+func TestNewOtelTracer(t *testing.T) {
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "http://localhost:4318",
 		SamplingRatio:     0.5,
 	})
 	require.NoError(t, err)
+	require.NotNil(t, tr)
 	require.NotNil(t, shutdown)
 
 	defer func() { _ = shutdown(context.Background()) }()
 }
 
-func TestOtelTracer_InitGlobalTracer_HTTPS(t *testing.T) {
-	tr := newOtelTracer()
-
-	// CollectorEndpoint using the https scheme should still construct a valid
-	// exporter/tracer without error.
-	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+func TestNewOtelTracer_HTTPS(t *testing.T) {
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "https://localhost:4318",
 		SamplingRatio:     0.5,
 	})
 	require.NoError(t, err)
-	require.NotNil(t, shutdown)
-
 	defer func() { _ = shutdown(context.Background()) }()
 
 	span, ctx := tr.StartSpanFromContext(context.Background(), "test-op")
@@ -52,8 +51,7 @@ func TestOtelTracer_InitGlobalTracer_HTTPS(t *testing.T) {
 }
 
 func TestOtelTracer_StartSpanFromContext(t *testing.T) {
-	tr := newOtelTracer()
-	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "http://localhost:4318",
 	})
@@ -67,8 +65,7 @@ func TestOtelTracer_StartSpanFromContext(t *testing.T) {
 }
 
 func TestOtelTracer_StartSpanFromRequestHeader(t *testing.T) {
-	tr := newOtelTracer()
-	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "http://localhost:4318",
 	})
@@ -87,12 +84,9 @@ func TestOtelTracer_StartSpanFromRequestHeader(t *testing.T) {
 
 // TestOtelTracer_StartSpanFromRequestHeader_B3 confirms that inbound requests carrying B3
 // trace-context headers (Istio/Knative's default propagation format) are joined into the
-// same trace, rather than silently producing a disconnected root span. This is the
-// counterpart of TestOtelTracer_StartSpanFromRequestHeader, which covers the W3C
-// traceparent format.
+// same trace, rather than silently producing a disconnected root span.
 func TestOtelTracer_StartSpanFromRequestHeader_B3(t *testing.T) {
-	tr := newOtelTracer()
-	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "http://localhost:4318",
 	})
@@ -112,10 +106,8 @@ func TestOtelTracer_StartSpanFromRequestHeader_B3(t *testing.T) {
 	span.End()
 }
 
-func TestOtelTracer_InitGlobalTracer_MissingHost(t *testing.T) {
-	tr := newOtelTracer()
-
-	_, err := tr.InitGlobalTracer("test", &config.JaegerConfig{
+func TestNewOtelTracer_MissingHost(t *testing.T) {
+	_, _, err := newOtelTracer("test", &config.OtelConfig{
 		Enabled:           true,
 		CollectorEndpoint: "",
 	})

@@ -26,6 +26,7 @@ func TestLogConfigValue(t *testing.T) {
 				"custom_metrics_enabled": true,
 				"fiber_debug_log_enabled": false,
 				"jaeger_enabled": false,
+				"otel_enabled": false,
 				"pyroscope_enabled": false,
 				"result_logger_type": "nop"
 			}`),
@@ -45,6 +46,7 @@ func TestLogConfigValue(t *testing.T) {
 				"custom_metrics_enabled": false,
 				"fiber_debug_log_enabled": false,
 				"jaeger_enabled": false,
+				"otel_enabled": false,
 				"pyroscope_enabled": false,
 				"result_logger_type": "bigquery",
 				"bigquery_config": {
@@ -69,6 +71,7 @@ func TestLogConfigValue(t *testing.T) {
 				"custom_metrics_enabled": false,
 				"fiber_debug_log_enabled": false,
 				"jaeger_enabled": false,
+				"otel_enabled": false,
 				"pyroscope_enabled": false,
 				"result_logger_type": "kafka",
 				"kafka_config": {

@@ -19,7 +19,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -116,9 +115,6 @@ func (t *mockTracer) StartSpanFromContext(
 ) (trace.Span, context.Context) {
 	t.Called(ctx, name)
 	return nil, ctx
-}
-func (*mockTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (tracing.ShutdownFunc, error) {
-	return func(context.Context) error { return nil }, nil
 }
 
 // Test that a startTimeKey has been associated to the context

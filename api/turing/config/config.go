@@ -326,10 +326,21 @@ type RouterDefaults struct {
 	// Enable router custom metrics
 	CustomMetricsEnabled bool
 	// Enable Jaeger Tracing
+	//
+	// Deprecated: Jaeger's native Thrift ingestion is being phased out; use
+	// OtelEnabled instead unless a specific downstream backend still requires
+	// Thrift. This field will be removed in a future release.
 	JaegerEnabled bool
-	// Jaeger collector endpoint. If JaegerEnabled is true, this value
-	// must be set.
+	// Jaeger collector endpoint (Thrift-over-HTTP). If JaegerEnabled is true, this
+	// value must be set.
+	//
+	// Deprecated: use OtelCollectorEndpoint instead.
 	JaegerCollectorEndpoint string
+	// Enable router tracing via OpenTelemetry, exported over OTLP HTTP
+	OtelEnabled bool
+	// OTLP HTTP endpoint routers should export traces to. If OtelEnabled is true,
+	// this value must be set.
+	OtelCollectorEndpoint string `validate:"required_if=OtelEnabled True"`
 	// Enable Pyroscope profiling for routers deployed by this instance of the Turing API
 	PyroscopeEnabled bool
 	// Pyroscope server address routers should report profiles to. If PyroscopeEnabled is
@@ -641,6 +652,8 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::CustomMetricsEnabled", "false")
 	v.SetDefault("RouterDefaults::JaegerEnabled", "false")
 	v.SetDefault("RouterDefaults::JaegerCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults::OtelEnabled", "false")
+	v.SetDefault("RouterDefaults::OtelCollectorEndpoint", "")
 	v.SetDefault("RouterDefaults::PyroscopeEnabled", "false")
 	v.SetDefault("RouterDefaults::PyroscopeServerAddress", "")
 	v.SetDefault("RouterDefaults::LogLevel", "INFO")

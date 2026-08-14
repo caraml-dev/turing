@@ -2112,6 +2112,7 @@ components:
         error: error
         version: 5
         log_config:
+          otel_enabled: true
           custom_metrics_enabled: true
           bigquery_config:
             batch_load: true
@@ -3705,6 +3706,7 @@ components:
       type: object
     RouterVersion_log_config:
       example:
+        otel_enabled: true
         custom_metrics_enabled: true
         bigquery_config:
           batch_load: true
@@ -3725,6 +3727,10 @@ components:
         fiber_debug_log_enabled:
           type: boolean
         jaeger_enabled:
+          description: 'Deprecated: use otel_enabled instead. Will be removed in a
+            future release.'
+          type: boolean
+        otel_enabled:
           type: boolean
         pyroscope_enabled:
           type: boolean
