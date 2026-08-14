@@ -2,30 +2,27 @@ package tracing
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
 func TestNopMethods(t *testing.T) {
 	tr := newNopTracer()
 
-	// Create test context
-	testCtx := context.Background()
-
-	// Test methods with return values
+	shutdown, err := tr.InitGlobalTracer("test", &config.JaegerConfig{})
+	assert.NoError(t, err)
+	assert.NoError(t, shutdown(context.Background()))
 	assert.Equal(t, false, tr.IsEnabled())
 
-	closer, err := tr.InitGlobalTracer("", nil)
-	assert.NoError(t, err)
-	err = closer.Close()
-	assert.NoError(t, err)
+	sp, ctx := tr.StartSpanFromRequestHeader(context.Background(), "test", http.Header{})
+	assert.NotNil(t, sp)
+	assert.NotNil(t, ctx)
 
-	sp, ctx := tr.StartSpanFromRequestHeader(testCtx, "", nil)
-	assert.Nil(t, sp)
-	assert.Equal(t, testCtx, ctx)
-
-	sp, ctx = tr.StartSpanFromContext(testCtx, "")
-	assert.Nil(t, sp)
-	assert.Equal(t, testCtx, ctx)
+	sp, ctx = tr.StartSpanFromContext(context.Background(), "test")
+	assert.NotNil(t, sp)
+	assert.NotNil(t, ctx)
 }

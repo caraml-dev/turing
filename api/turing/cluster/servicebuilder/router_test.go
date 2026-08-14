@@ -124,6 +124,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -131,6 +133,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -227,6 +230,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -234,6 +239,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -329,6 +335,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -340,6 +348,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -438,6 +447,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -445,6 +456,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -539,6 +551,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -546,6 +560,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -640,6 +655,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -647,6 +664,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -741,6 +759,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -748,6 +768,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -842,6 +863,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -851,6 +874,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "nop"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 					},
@@ -972,6 +996,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
@@ -979,6 +1005,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "nop"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 					},
@@ -1048,6 +1075,7 @@ func TestNewRouterService(t *testing.T) {
 				data.expRawConfig,
 				&config.RouterDefaults{
 					JaegerCollectorEndpoint: "jaeger-endpoint",
+					PyroscopeServerAddress:  "pyroscope-address",
 					FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 				},
 				true,
@@ -1138,6 +1166,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				environmentType: "dev",
 				routerDefaults: &config.RouterDefaults{
 					JaegerCollectorEndpoint: "",
+					PyroscopeServerAddress:  "http://pyroscope.example.com:4040",
 					FluentdConfig:           &config.FluentdConfig{Tag: ""},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 123,
@@ -1171,6 +1200,8 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_ENVIRONMENT", Value: "dev"},
 				{Name: "ROUTER_TIMEOUT", Value: "10s"},
 				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "http://pyroscope.example.com:4040"},
+				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 				{Name: "APP_SENTRY_ENABLED", Value: "false"},
@@ -1178,6 +1209,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_LOGLEVEL", Value: "DEBUG"},
 				{Name: "APP_CUSTOM_METRICS", Value: "false"},
 				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 				{Name: "APP_RESULT_LOGGER", Value: "kafka"},
 				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 				{Name: "APP_KAFKA_BROKERS", Value: "1.1.1.1:1111"},
@@ -1216,6 +1248,8 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_ENVIRONMENT", Value: ""},
 				{Name: "ROUTER_TIMEOUT", Value: ""},
 				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: ""},
+				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
 				{Name: "APP_SENTRY_ENABLED", Value: "false"},
@@ -1223,6 +1257,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_LOGLEVEL", Value: ""},
 				{Name: "APP_CUSTOM_METRICS", Value: "false"},
 				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 				{Name: "APP_RESULT_LOGGER", Value: "upi"},
 				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 				{Name: "APP_KAFKA_BROKERS", Value: "broker"},
@@ -1247,6 +1282,48 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				tt.args.sentryDSN,
 				tt.args.ver)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFormatHTTPHeaders(t *testing.T) {
+	tests := []struct {
+		name    string
+		headers map[string]string
+		want    string
+	}{
+		{
+			name:    "nil",
+			headers: nil,
+			want:    "",
+		},
+		{
+			name:    "empty",
+			headers: map[string]string{},
+			want:    "",
+		},
+		{
+			name:    "single header",
+			headers: map[string]string{"Authorization": "Bearer token"},
+			want:    "Authorization:Bearer token",
+		},
+		{
+			name: "multiple headers sorted by key regardless of map order",
+			headers: map[string]string{
+				"X-Scope-OrgID": "tenant1",
+				"Authorization": "Bearer token",
+				"X-Custom":      "value",
+			},
+			want: "Authorization:Bearer token,X-Custom:value,X-Scope-OrgID:tenant1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Run repeatedly since Go map iteration order is randomized per run,
+			// to catch any accidental reliance on iteration order.
+			for i := 0; i < 5; i++ {
+				assert.Equal(t, tt.want, formatHTTPHeaders(tt.headers))
+			}
 		})
 	}
 }

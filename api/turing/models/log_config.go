@@ -65,6 +65,8 @@ type LogConfig struct {
 	FiberDebugLogEnabled bool `json:"fiber_debug_log_enabled"`
 	// Enable Jaeger tracing.
 	JaegerEnabled bool `json:"jaeger_enabled"`
+	// Enable Pyroscope profiling.
+	PyroscopeEnabled bool `json:"pyroscope_enabled"`
 	// Result Logger type. The associated config must not be null.
 	ResultLoggerType ResultLogger `json:"result_logger_type"`
 	// Configuration necessary to log results to BigQuery. Cannot be empty if

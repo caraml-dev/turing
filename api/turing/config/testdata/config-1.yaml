@@ -55,6 +55,10 @@ RouterDefaults:
   FluentdConfig:
     FlushIntervalSeconds: 60
     WorkerCount: 2
+  PyroscopeEnabled: true
+  PyroscopeServerAddress: http://pyroscope.example.com:4040
+  PyroscopeHTTPHeaders:
+    Authorization: Bearer token
 Sentry:
   Enabled: true
   Labels:

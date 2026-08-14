@@ -2,10 +2,9 @@ package tracing
 
 import (
 	"context"
-	"io"
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
@@ -13,9 +12,9 @@ import (
 // NopTracer implements the Tracer interface with dummy methods
 type NopTracer struct{}
 
-// InitGlobalTracer satisfies the Tracer interface and returns a Nop closer
-func (*NopTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (io.Closer, error) {
-	return io.NopCloser(nil), nil
+// InitGlobalTracer satisfies the Tracer interface and returns a no-op shutdown func
+func (*NopTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (ShutdownFunc, error) {
+	return func(context.Context) error { return nil }, nil
 }
 
 // IsEnabled satisfies the Tracer interface, always returning false
@@ -24,22 +23,22 @@ func (*NopTracer) IsEnabled() bool {
 }
 
 // StartSpanFromRequestHeader satisfies the Tracer interface, returning the context as
-// is and an empty span
+// is and a no-op span
 func (*NopTracer) StartSpanFromRequestHeader(
 	ctx context.Context,
 	_ string,
 	_ http.Header,
-) (opentracing.Span, context.Context) {
-	return nil, ctx
+) (trace.Span, context.Context) {
+	return trace.SpanFromContext(ctx), ctx
 }
 
 // StartSpanFromContext satisfies the Tracer interface, returning the context as is
-// and an empty span
+// and a no-op span
 func (*NopTracer) StartSpanFromContext(
 	ctx context.Context,
 	_ string,
-) (opentracing.Span, context.Context) {
-	return nil, ctx
+) (trace.Span, context.Context) {
+	return trace.SpanFromContext(ctx), ctx
 }
 
 func newNopTracer() Tracer {

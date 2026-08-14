@@ -573,6 +573,8 @@ components:
               type: "boolean"
             jaeger_enabled:
               type: "boolean"
+            pyroscope_enabled:
+              type: "boolean"
             result_logger_type:
               $ref: "#/components/schemas/ResultLoggerType"
             bigquery_config:

@@ -87,6 +87,7 @@ class RouterVersionLogConfig(ModelNormal):
             'custom_metrics_enabled': (bool,),  # noqa: E501
             'fiber_debug_log_enabled': (bool,),  # noqa: E501
             'jaeger_enabled': (bool,),  # noqa: E501
+            'pyroscope_enabled': (bool,),  # noqa: E501
             'result_logger_type': (ResultLoggerType,),  # noqa: E501
             'bigquery_config': (BigQueryConfig,),  # noqa: E501
             'kafka_config': (KafkaConfig,),  # noqa: E501
@@ -102,6 +103,7 @@ class RouterVersionLogConfig(ModelNormal):
         'custom_metrics_enabled': 'custom_metrics_enabled',  # noqa: E501
         'fiber_debug_log_enabled': 'fiber_debug_log_enabled',  # noqa: E501
         'jaeger_enabled': 'jaeger_enabled',  # noqa: E501
+        'pyroscope_enabled': 'pyroscope_enabled',  # noqa: E501
         'result_logger_type': 'result_logger_type',  # noqa: E501
         'bigquery_config': 'bigquery_config',  # noqa: E501
         'kafka_config': 'kafka_config',  # noqa: E501
@@ -157,6 +159,7 @@ class RouterVersionLogConfig(ModelNormal):
             custom_metrics_enabled (bool): [optional]  # noqa: E501
             fiber_debug_log_enabled (bool): [optional]  # noqa: E501
             jaeger_enabled (bool): [optional]  # noqa: E501
+            pyroscope_enabled (bool): [optional]  # noqa: E501
             result_logger_type (ResultLoggerType): [optional]  # noqa: E501
             bigquery_config (BigQueryConfig): [optional]  # noqa: E501
             kafka_config (KafkaConfig): [optional]  # noqa: E501

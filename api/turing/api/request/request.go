@@ -159,6 +159,7 @@ func (r RouterConfig) BuildRouterVersion(
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
 			FiberDebugLogEnabled: defaults.FiberDebugLogEnabled,
 			JaegerEnabled:        defaults.JaegerEnabled,
+			PyroscopeEnabled:     defaults.PyroscopeEnabled,
 			ResultLoggerType:     r.LogConfig.ResultLoggerType,
 		},
 	}

@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	fiberProtocol "github.com/gojek/fiber/protocol"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
@@ -69,10 +69,10 @@ func (h *batchHTTPHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	ctxLogger.Debugf("Received batch request for %v", turingReqID)
 
 	if tracing.Glob().IsEnabled() {
-		var sp opentracing.Span
+		var sp trace.Span
 		ctx, sp = h.enableTracingSpan(ctx, req, batchHTTPHandlerID)
 		if sp != nil {
-			defer sp.Finish()
+			defer sp.End()
 		}
 	}
 

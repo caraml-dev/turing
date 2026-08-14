@@ -110,13 +110,23 @@ type KafkaConfig struct {
 	CompressionType     string              `split_words:"true" default:"none"`
 }
 
-// JaegerConfig captures the settings for tracing using Jaeger client
-// Ref: https://pkg.go.dev/github.com/uber/jaeger-client-go/config
+// JaegerConfig captures the settings for tracing using OpenTelemetry, exported via OTLP HTTP
 type JaegerConfig struct {
-	Enabled           bool
+	Enabled bool
+	// CollectorEndpoint is the OTLP HTTP endpoint spans are exported to,
+	// e.g. http://otel-collector:4318
 	CollectorEndpoint string `split_words:"true"`
-	ReporterAgentHost string `envconfig:"REPORTER_HOST" split_words:"true"`
-	ReporterAgentPort int    `envconfig:"REPORTER_PORT" split_words:"true"`
+	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 1 (sample all).
+	SamplingRatio float64 `split_words:"true" default:"1"`
+}
+
+// PyroscopeConfig captures the settings for continuous profiling using Pyroscope
+type PyroscopeConfig struct {
+	Enabled       bool
+	ServerAddress string `split_words:"true"`
+	// HTTPHeaders are attached to every profile push request, e.g. for auth
+	// (Authorization, X-Scope-OrgID, ...). Optional.
+	HTTPHeaders map[string]string `split_words:"true"`
 }
 
 // AppConfig is the structure used to the parse the environment configs that correspond
@@ -135,6 +145,7 @@ type AppConfig struct {
 	Fluentd       *FluentdConfig
 	Kafka         *KafkaConfig
 	Jaeger        *JaegerConfig
+	Pyroscope     *PyroscopeConfig
 	Sentry        sentry.Config
 }
 

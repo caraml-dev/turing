@@ -2117,6 +2117,7 @@ components:
             batch_load: true
             table: table
             service_account_secret: service_account_secret
+          pyroscope_enabled: true
           kafka_config:
             brokers: brokers
             topic: topic
@@ -3709,6 +3710,7 @@ components:
           batch_load: true
           table: table
           service_account_secret: service_account_secret
+        pyroscope_enabled: true
         kafka_config:
           brokers: brokers
           topic: topic
@@ -3723,6 +3725,8 @@ components:
         fiber_debug_log_enabled:
           type: boolean
         jaeger_enabled:
+          type: boolean
+        pyroscope_enabled:
           type: boolean
         result_logger_type:
           $ref: '#/components/schemas/ResultLoggerType'

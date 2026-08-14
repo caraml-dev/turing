@@ -149,7 +149,15 @@ RouterDefaults:
   FiberDebugLogEnabled: false
   CustomMetricsEnabled: false
   JaegerEnabled: false
-  JaegerCollectorEndpoint: http://jaeger-tracing-collector.example.com:14268/api/traces
+  JaegerCollectorEndpoint: http://otel-collector.example.com:4318
+  PyroscopeEnabled: false
+  PyroscopeServerAddress: http://pyroscope.example.com:4040
+  # HTTP headers attached to every profile push request routers make to
+  # PyroscopeServerAddress, e.g. for auth. Optional, omit entirely if the server
+  # doesn't require auth. Note: header names are lowercased by the config
+  # loader; this is harmless since HTTP header names are case-insensitive.
+  PyroscopeHTTPHeaders:
+    Authorization: <e.g. "Basic <base64 user:pass>" or "Bearer <token>">
   LogLevel: INFO
 
   # Fluentd log forwarder configuration that can be used in Turing router
@@ -170,6 +178,23 @@ RouterDefaults:
 
   # Note that {{.ProjectName}}, {{.ClusterName}}, {{.RouterName}} and {{.Version}} is required
   MonitoringURLFormat: "https://www.example.com/{{.ClusterName}}/{{.ProjectName}}/{{.RouterName}}/{{.Version}}"
+
+# OpenTelemetry (OTEL) tracing configuration
+Otel:
+  Enabled: false
+  OtlpEndpoint: http://otel-collector.example.com:4318
+  SamplingRatio: 1
+
+# Pyroscope profiling service configuration
+Pyroscope:
+  Enabled: false
+  ServerAddress: http://pyroscope.example.com:4040
+  # HTTP headers attached to every profile push request, e.g. for auth. Optional,
+  # omit entirely if the server doesn't require auth. Note: header names are
+  # lowercased by the config loader; this is harmless since HTTP header names
+  # are case-insensitive.
+  HTTPHeaders:
+    Authorization: <e.g. "Basic <base64 user:pass>" or "Bearer <token>">
 
 # Sentry application monitoring service configuration
 # https://docs.sentry.io/product/sentry-basics/dsn-explainer/

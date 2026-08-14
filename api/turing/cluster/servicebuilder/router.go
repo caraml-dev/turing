@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -37,6 +38,9 @@ const (
 	envCustomMetrics                   = "APP_CUSTOM_METRICS"
 	envJaegerEnabled                   = "APP_JAEGER_ENABLED"
 	envJaegerEndpoint                  = "APP_JAEGER_COLLECTOR_ENDPOINT"
+	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
+	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
+	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
 	envSentryEnabled                   = "APP_SENTRY_ENABLED"
 	envSentryDSN                       = "APP_SENTRY_DSN"
 	envResultLogger                    = "APP_RESULT_LOGGER"
@@ -202,6 +206,23 @@ func (sb *clusterSvcBuilder) GetRouterServiceName(routerVersion *models.RouterVe
 	return GetComponentName(routerVersion, ComponentTypes.Router)
 }
 
+// formatHTTPHeaders serializes headers into the "Key1:Val1,Key2:Val2" format
+// expected by the router's envconfig-based map decoding, with keys sorted for
+// deterministic output.
+func formatHTTPHeaders(headers map[string]string) string {
+	keys := make([]string, 0, len(headers))
+	for k := range headers {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	pairs := make([]string, 0, len(keys))
+	for _, k := range keys {
+		pairs = append(pairs, fmt.Sprintf("%s:%s", k, headers[k]))
+	}
+	return strings.Join(pairs, ",")
+}
+
 func (sb *clusterSvcBuilder) buildRouterEnvs(
 	namespace string,
 	environmentType string,
@@ -219,6 +240,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envAppEnvironment, Value: environmentType},
 			{Name: envRouterTimeout, Value: ver.Timeout},
 			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
+			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
+			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
 			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
 			{Name: envRouterProtocol, Value: string(ver.Protocol)},
 			{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
@@ -260,6 +283,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 		{Name: envLogLevel, Value: string(logConfig.LogLevel)},
 		{Name: envCustomMetrics, Value: strconv.FormatBool(logConfig.CustomMetricsEnabled)},
 		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)},
+		{Name: envPyroscopeEnabled, Value: strconv.FormatBool(logConfig.PyroscopeEnabled)},
 		{Name: envResultLogger, Value: string(logConfig.ResultLoggerType)},
 		{Name: envFiberDebugLog, Value: strconv.FormatBool(logConfig.FiberDebugLogEnabled)},
 	})

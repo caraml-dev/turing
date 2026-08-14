@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
@@ -59,8 +60,9 @@ var optionalEnvs = map[string]string{
 	"APP_KAFKA_SERIALIZATION_FORMAT": "json",
 	"APP_JAEGER_ENABLED":             "true",
 	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:5000",
-	"APP_JAEGER_REPORTER_HOST":       "localhost",
-	"APP_JAEGER_REPORTER_PORT":       "5001",
+	"APP_JAEGER_SAMPLING_RATIO":      "0.8",
+	"APP_PYROSCOPE_ENABLED":          "true",
+	"APP_PYROSCOPE_SERVER_ADDRESS":   "http://localhost:4040",
 	"APP_SENTRY_ENABLED":             "true",
 	"APP_SENTRY_DSN":                 "test:dsn",
 	"APP_SENTRY_LABELS":              "sentry_key1:value1,sentry_key2:value2",
@@ -119,8 +121,11 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 			Jaeger: &JaegerConfig{
 				Enabled:           false,
 				CollectorEndpoint: "",
-				ReporterAgentHost: "",
-				ReporterAgentPort: 0,
+				SamplingRatio:     1,
+			},
+			Pyroscope: &PyroscopeConfig{
+				Enabled:       false,
+				ServerAddress: "",
 			},
 			Sentry: sentry.Config{
 				Enabled: false,
@@ -183,8 +188,11 @@ func TestInitConfigEnv(t *testing.T) {
 			Jaeger: &JaegerConfig{
 				Enabled:           true,
 				CollectorEndpoint: "http://localhost:5000",
-				ReporterAgentHost: "localhost",
-				ReporterAgentPort: 5001,
+				SamplingRatio:     0.8,
+			},
+			Pyroscope: &PyroscopeConfig{
+				Enabled:       true,
+				ServerAddress: "http://localhost:4040",
 			},
 			Sentry: sentry.Config{
 				Enabled: true,
@@ -343,6 +351,35 @@ func TestSerializationFormatDecode(t *testing.T) {
 			assert.Equal(t, data.success, err == nil)
 		})
 	}
+}
+
+func TestInitConfigEnv_JaegerAndPyroscope(t *testing.T) {
+	env := map[string]string{
+		"PORT":                          "8080",
+		"ROUTER_CONFIG_FILE":            "config.yaml",
+		"APP_NAME":                      "test-router",
+		"APP_ENVIRONMENT":               "dev",
+		"APP_JAEGER_ENABLED":            "true",
+		"APP_JAEGER_COLLECTOR_ENDPOINT": "http://otel-collector:4318",
+		"APP_JAEGER_SAMPLING_RATIO":     "0.5",
+		"APP_PYROSCOPE_ENABLED":         "true",
+		"APP_PYROSCOPE_SERVER_ADDRESS":  "http://pyroscope:4040",
+		"APP_PYROSCOPE_HTTP_HEADERS":    "Authorization:Bearer token,X-Scope-OrgID:tenant1",
+	}
+	setupNewEnv(env)
+
+	cfg, err := InitConfigEnv()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, cfg.AppConfig.Jaeger.Enabled)
+	assert.Equal(t, "http://otel-collector:4318", cfg.AppConfig.Jaeger.CollectorEndpoint)
+	assert.Equal(t, 0.5, cfg.AppConfig.Jaeger.SamplingRatio)
+	assert.Equal(t, true, cfg.AppConfig.Pyroscope.Enabled)
+	assert.Equal(t, "http://pyroscope:4040", cfg.AppConfig.Pyroscope.ServerAddress)
+	assert.Equal(t, map[string]string{
+		"Authorization": "Bearer token",
+		"X-Scope-OrgID": "tenant1",
+	}, cfg.AppConfig.Pyroscope.HTTPHeaders)
 }
 
 func setupNewEnv(envMaps ...map[string]string) {
