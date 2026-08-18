@@ -2,7 +2,6 @@ package errors
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -89,7 +88,7 @@ func TestGetHTTPErrorCode(t *testing.T) {
 
 func TestNewHTTPErrorMessage(t *testing.T) {
 	message := "Test Error Message"
-	err := fmt.Errorf(message)
+	err := errors.New(message)
 	httpErr := NewTuringError(err, fiberProtocol.HTTP)
 	assert.Equal(t, message, httpErr.Error())
 }
@@ -114,7 +113,7 @@ func TestNewHTTPErrorStatus(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// Create new error
 			message := "Test Error"
-			err := fmt.Errorf(message)
+			err := errors.New(message)
 			// Create new HTTP error
 			httpErr := NewTuringError(err, fiberProtocol.HTTP, data.codes...)
 			// Validate

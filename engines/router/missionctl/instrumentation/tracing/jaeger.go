@@ -50,7 +50,7 @@ type JaegerTracer struct {
 // elsewhere in this codebase), and returns a Tracer that adapts it to the
 // trace.Tracer/trace.Span API, alongside a ShutdownFunc that closes the underlying
 // Jaeger reporter.
-func newJaegerTracer(name string, cfg *config.JaegerConfig) (Tracer, ShutdownFunc, error) {
+func newJaegerTracer(name string, cfg *config.JaegerConfig) (Tracer, ShutdownFunc, error) { //nolint:staticcheck
 	jCfg := jaegercfg.Configuration{
 		ServiceName: name,
 		Disabled:    !cfg.Enabled,

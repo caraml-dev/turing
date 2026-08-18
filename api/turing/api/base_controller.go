@@ -49,7 +49,7 @@ func (c BaseController) ParseVars(dst interface{}, vars RequestVars) error {
 	return nil
 }
 
-func (c BaseController) getProjectFromRequestVars(vars RequestVars) (project *mlp.Project, error *Response) {
+func (c BaseController) getProjectFromRequestVars(vars RequestVars) (project *mlp.Project, errResponse *Response) {
 	id, err := getIDFromVars(vars, "project_id")
 	if err != nil {
 		return nil, BadRequest("invalid project id", err.Error())
@@ -61,7 +61,7 @@ func (c BaseController) getProjectFromRequestVars(vars RequestVars) (project *ml
 	return project, nil
 }
 
-func (c BaseController) getRouterFromRequestVars(vars RequestVars) (router *models.Router, error *Response) {
+func (c BaseController) getRouterFromRequestVars(vars RequestVars) (router *models.Router, errResponse *Response) {
 	id, err := getIDFromVars(vars, "router_id")
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())
@@ -75,7 +75,7 @@ func (c BaseController) getRouterFromRequestVars(vars RequestVars) (router *mode
 
 func (c BaseController) getRouterVersionFromRequestVars(
 	vars RequestVars,
-) (routerVersion *models.RouterVersion, error *Response) {
+) (routerVersion *models.RouterVersion, errResponse *Response) {
 	routerID, err := getIDFromVars(vars, "router_id")
 	if err != nil {
 		return nil, BadRequest("invalid router id", err.Error())

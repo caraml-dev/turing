@@ -28,7 +28,7 @@ type Tracer interface {
 }
 
 // globalTracer is initialised to a Nop tracer, calling InitGlobalTracer will reset this
-var globalTracer Tracer = newNopTracer()
+var globalTracer = newNopTracer()
 
 // InitGlobalTracer initialises whichever of jaegerCfg/otelCfg are enabled, and sets the
 // global tracer to: the Nop tracer if neither is enabled, that single backend's tracer
@@ -37,7 +37,7 @@ var globalTracer Tracer = newNopTracer()
 // error is also returned, so callers can unconditionally defer it.
 func InitGlobalTracer(
 	name string,
-	jaegerCfg *config.JaegerConfig,
+	jaegerCfg *config.JaegerConfig, //nolint:staticcheck
 	otelCfg *config.OtelConfig,
 ) (ShutdownFunc, error) {
 	var tracers []Tracer

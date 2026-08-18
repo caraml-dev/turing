@@ -249,7 +249,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
 			{Name: envAppEnvironment, Value: environmentType},
 			{Name: envRouterTimeout, Value: ver.Timeout},
-			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
+			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint}, //nolint:staticcheck
 			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
 			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
 			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
@@ -306,7 +306,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	envs = mergeEnvVars(envs, []corev1.EnvVar{
 		{Name: envLogLevel, Value: string(logConfig.LogLevel)},
 		{Name: envCustomMetrics, Value: strconv.FormatBool(logConfig.CustomMetricsEnabled)},
-		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)},
+		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)}, //nolint:staticcheck
 		{Name: envOtelEnabled, Value: strconv.FormatBool(logConfig.OtelEnabled)},
 		{Name: envPyroscopeEnabled, Value: strconv.FormatBool(logConfig.PyroscopeEnabled)},
 		{Name: envResultLogger, Value: string(logConfig.ResultLoggerType)},
@@ -656,8 +656,7 @@ func buildFiberConfigMap(
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {
-		if ver.Ensembler.StandardConfig.ExperimentMappings != nil &&
-			len(ver.Ensembler.StandardConfig.ExperimentMappings) != 0 {
+		if len(ver.Ensembler.StandardConfig.ExperimentMappings) != 0 {
 			propsMap["experiment_mappings"] = ver.Ensembler.StandardConfig.ExperimentMappings
 		}
 		if ver.Ensembler.StandardConfig.RouteNamePath != "" {
@@ -680,7 +679,7 @@ func buildFiberConfigMap(
 	// if the version is configured with traffic splitting rules on it,
 	// then define root-level fiber component as a lazy router with
 	// a traffic-splitting strategy based on these rules
-	if ver.TrafficRules != nil && len(ver.TrafficRules) > 0 {
+	if len(ver.TrafficRules) > 0 {
 		// TrafficRule struct used requires the name and conditions field to be specified. But
 		// Default Traffic Rule has no name and a hardcoded name can be used instead since
 		// the name field is not used for traffic splitting strategy. Likewise, an empty slice

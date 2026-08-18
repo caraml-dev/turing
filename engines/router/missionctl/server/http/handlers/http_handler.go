@@ -116,7 +116,7 @@ func (h *httpHandler) getPrediction(
 	if expResp != nil {
 		var expErr *errors.TuringError
 		if expResp.Error != "" {
-			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), fiberProtocol.HTTP)
+			expErr = errors.NewTuringError(fmt.Errorf("%s", expResp.Error), fiberProtocol.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
 			h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)

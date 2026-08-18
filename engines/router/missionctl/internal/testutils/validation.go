@@ -13,7 +13,7 @@ import (
 // If the object types have unexported fields, a custom marshaler is required to be defined.
 func CompareObjects(actual interface{}, expected interface{}) error {
 	allowUnexportedOn := actual
-	if reflect.TypeOf(allowUnexportedOn).Kind() == reflect.Ptr {
+	if reflect.TypeOf(allowUnexportedOn).Kind() == reflect.Pointer {
 		allowUnexportedOn = reflect.ValueOf(actual).Elem().Interface()
 	}
 	if !cmp.Equal(actual, expected, cmp.AllowUnexported(allowUnexportedOn)) {

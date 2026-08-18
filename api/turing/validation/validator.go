@@ -377,7 +377,7 @@ func validateRouterConfig(sl validator.StructLevel) {
 	}
 
 	// Validate dangling routes and traffic rules orthogonality checks
-	if router.TrafficRules != nil && len(router.TrafficRules) > 0 {
+	if len(router.TrafficRules) > 0 {
 		checkDanglingRoutes(sl, "Routes", router.Routes, allRuleRoutesSet)
 		validateConditionOrthogonality(sl, "TrafficRules", router.TrafficRules)
 	}

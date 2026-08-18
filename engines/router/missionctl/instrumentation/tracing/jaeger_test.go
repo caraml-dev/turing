@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewJaegerTracer_IsEnabled(t *testing.T) {
-	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{ //nolint:staticcheck
 		Enabled:           true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6831,
@@ -24,7 +24,7 @@ func TestNewJaegerTracer_IsEnabled(t *testing.T) {
 }
 
 func TestNewJaegerTracer_StartSpanFromContext(t *testing.T) {
-	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{ //nolint:staticcheck
 		Enabled:           true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6831,
@@ -39,7 +39,7 @@ func TestNewJaegerTracer_StartSpanFromContext(t *testing.T) {
 }
 
 func TestNewJaegerTracer_NestedSpans_ShareTraceID(t *testing.T) {
-	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{ //nolint:staticcheck
 		Enabled:           true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6831,
@@ -56,7 +56,7 @@ func TestNewJaegerTracer_NestedSpans_ShareTraceID(t *testing.T) {
 }
 
 func TestNewJaegerTracer_StartSpanFromRequestHeader(t *testing.T) {
-	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{
+	tr, shutdown, err := newJaegerTracer("test", &config.JaegerConfig{ //nolint:staticcheck
 		Enabled:           true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6831,

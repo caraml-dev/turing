@@ -158,7 +158,7 @@ func (r RouterConfig) BuildRouterVersion(
 			LogLevel:             routerConfig.LogLevel(defaults.LogLevel),
 			CustomMetricsEnabled: defaults.CustomMetricsEnabled,
 			FiberDebugLogEnabled: defaults.FiberDebugLogEnabled,
-			JaegerEnabled:        defaults.JaegerEnabled,
+			JaegerEnabled:        defaults.JaegerEnabled, //nolint:staticcheck
 			OtelEnabled:          defaults.OtelEnabled,
 			PyroscopeEnabled:     defaults.PyroscopeEnabled,
 			ResultLoggerType:     r.LogConfig.ResultLoggerType,

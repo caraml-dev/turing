@@ -31,7 +31,7 @@ func TestInitGlobalTracer_Nop(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	_, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{})
+	_, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{}) //nolint:staticcheck
 	assert.NoError(t, err)
 	assert.Equal(t, false, globalTracer.IsEnabled())
 }
@@ -40,7 +40,7 @@ func TestInitGlobalTracer_OtelOnly(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{
+	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{ //nolint:staticcheck
 		Enabled:           true,
 		CollectorEndpoint: "http://localhost:4318",
 	})
@@ -58,7 +58,7 @@ func TestInitGlobalTracer_JaegerOnly(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{
+	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{ //nolint:staticcheck
 		Enabled:           true,
 		ReporterAgentHost: "localhost",
 		ReporterAgentPort: 6831,
@@ -74,7 +74,7 @@ func TestInitGlobalTracer_Multi(t *testing.T) {
 	defer func() { globalTracer = tempTracer }()
 
 	shutdown, err := InitGlobalTracer("test",
-		&config.JaegerConfig{
+		&config.JaegerConfig{ //nolint:staticcheck
 			Enabled:           true,
 			ReporterAgentHost: "localhost",
 			ReporterAgentPort: 6831,
@@ -94,7 +94,7 @@ func TestInitGlobalTracer_OtelError_ReturnsNonNilShutdown(t *testing.T) {
 	tempTracer := globalTracer
 	defer func() { globalTracer = tempTracer }()
 
-	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{
+	shutdown, err := InitGlobalTracer("test", &config.JaegerConfig{}, &config.OtelConfig{ //nolint:staticcheck
 		Enabled:           true,
 		CollectorEndpoint: "",
 	})
