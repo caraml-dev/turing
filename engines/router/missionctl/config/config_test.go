@@ -134,8 +134,9 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				SamplingRatio:     1,
 			},
 			Pyroscope: &PyroscopeConfig{
-				Enabled:       false,
-				ServerAddress: "",
+				Enabled:        false,
+				ServerAddress:  "",
+				IncludePodTags: true,
 			},
 			Sentry: sentry.Config{
 				Enabled: false,
@@ -207,8 +208,9 @@ func TestInitConfigEnv(t *testing.T) {
 				SamplingRatio:     0.8,
 			},
 			Pyroscope: &PyroscopeConfig{
-				Enabled:       true,
-				ServerAddress: "http://localhost:4040",
+				Enabled:        true,
+				ServerAddress:  "http://localhost:4040",
+				IncludePodTags: true,
 			},
 			Sentry: sentry.Config{
 				Enabled: true,
@@ -371,20 +373,21 @@ func TestSerializationFormatDecode(t *testing.T) {
 
 func TestInitConfigEnv_JaegerOtelAndPyroscope(t *testing.T) {
 	env := map[string]string{
-		"PORT":                          "8080",
-		"ROUTER_CONFIG_FILE":            "config.yaml",
-		"APP_NAME":                      "test-router",
-		"APP_ENVIRONMENT":               "dev",
-		"APP_JAEGER_ENABLED":            "true",
-		"APP_JAEGER_COLLECTOR_ENDPOINT": "http://localhost:14268/api/traces",
-		"APP_JAEGER_REPORTER_HOST":      "localhost",
-		"APP_JAEGER_REPORTER_PORT":      "6831",
-		"APP_OTEL_ENABLED":              "true",
-		"APP_OTEL_COLLECTOR_ENDPOINT":   "http://otel-collector:4318",
-		"APP_OTEL_SAMPLING_RATIO":       "0.5",
-		"APP_PYROSCOPE_ENABLED":         "true",
-		"APP_PYROSCOPE_SERVER_ADDRESS":  "http://pyroscope:4040",
-		"APP_PYROSCOPE_HTTP_HEADERS":    "Authorization:Bearer token,X-Scope-OrgID:tenant1",
+		"PORT":                           "8080",
+		"ROUTER_CONFIG_FILE":             "config.yaml",
+		"APP_NAME":                       "test-router",
+		"APP_ENVIRONMENT":                "dev",
+		"APP_JAEGER_ENABLED":             "true",
+		"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:14268/api/traces",
+		"APP_JAEGER_REPORTER_HOST":       "localhost",
+		"APP_JAEGER_REPORTER_PORT":       "6831",
+		"APP_OTEL_ENABLED":               "true",
+		"APP_OTEL_COLLECTOR_ENDPOINT":    "http://otel-collector:4318",
+		"APP_OTEL_SAMPLING_RATIO":        "0.5",
+		"APP_PYROSCOPE_ENABLED":          "true",
+		"APP_PYROSCOPE_SERVER_ADDRESS":   "http://pyroscope:4040",
+		"APP_PYROSCOPE_HTTP_HEADERS":     "Authorization:Bearer token,X-Scope-OrgID:tenant1",
+		"APP_PYROSCOPE_INCLUDE_POD_TAGS": "false",
 	}
 	setupNewEnv(env)
 
@@ -404,6 +407,7 @@ func TestInitConfigEnv_JaegerOtelAndPyroscope(t *testing.T) {
 		"Authorization": "Bearer token",
 		"X-Scope-OrgID": "tenant1",
 	}, cfg.AppConfig.Pyroscope.HTTPHeaders)
+	assert.Equal(t, false, cfg.AppConfig.Pyroscope.IncludePodTags)
 }
 
 func setupNewEnv(envMaps ...map[string]string) {

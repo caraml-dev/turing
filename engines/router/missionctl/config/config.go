@@ -142,6 +142,10 @@ type PyroscopeConfig struct {
 	// HTTPHeaders are attached to every profile push request, e.g. for auth
 	// (Authorization, X-Scope-OrgID, ...). Optional.
 	HTTPHeaders map[string]string `split_words:"true"`
+	// IncludePodTags controls whether profiles are additionally tagged with pod_name/
+	// pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), on top of the
+	// always-present router_name tag. Defaults to true.
+	IncludePodTags bool `split_words:"true" default:"true"`
 }
 
 // AppConfig is the structure used to the parse the environment configs that correspond

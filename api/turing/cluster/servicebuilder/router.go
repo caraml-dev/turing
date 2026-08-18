@@ -45,6 +45,7 @@ const (
 	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
 	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
 	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
+	envPyroscopeIncludePodTags         = "APP_PYROSCOPE_INCLUDE_POD_TAGS"
 	envSentryEnabled                   = "APP_SENTRY_ENABLED"
 	envSentryDSN                       = "APP_SENTRY_DSN"
 	envResultLogger                    = "APP_RESULT_LOGGER"
@@ -66,6 +67,11 @@ const (
 	envExpGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS_EXPERIMENT_ENGINE"
 	envPluginName                      = "PLUGIN_NAME"
 	envPluginsDir                      = "PLUGINS_DIR"
+	// envPodName and envPodNamespace are set via the Kubernetes downward API so the router
+	// can tag its Pyroscope profiles with the identity of the individual pod, since a router
+	// deployment can run multiple replicas behind the same APP_NAME.
+	envPodName      = "POD_NAME"
+	envPodNamespace = "POD_NAMESPACE"
 )
 
 // Router service constants
@@ -247,10 +253,23 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
 			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
 			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
+			{Name: envPyroscopeIncludePodTags, Value: strconv.FormatBool(routerDefaults.PyroscopeIncludePodTags)},
 			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
 			{Name: envRouterProtocol, Value: string(ver.Protocol)},
 			{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
 			{Name: envSentryDSN, Value: sentryDSN},
+			{
+				Name: envPodName,
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+				},
+			},
+			{
+				Name: envPodNamespace,
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+				},
+			},
 		})
 
 	// Add enricher / ensembler related env vars, if enabled

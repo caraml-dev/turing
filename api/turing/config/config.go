@@ -349,6 +349,11 @@ type RouterDefaults struct {
 	// HTTP headers routers should attach to every profile push request they make to
 	// PyroscopeServerAddress, e.g. for auth (Authorization, X-Scope-OrgID, ...). Optional.
 	PyroscopeHTTPHeaders map[string]string
+	// PyroscopeIncludePodTags controls whether routers tag their Pyroscope profiles with
+	// pod_name/pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), in
+	// addition to the always-present router_name tag. Defaults to true; set to false to opt
+	// out deployment-wide, e.g. if per-pod cardinality is undesirable in Pyroscope.
+	PyroscopeIncludePodTags bool
 	// Router log level
 	LogLevel string `validate:"required"`
 	// Fluentd config for the router
@@ -656,6 +661,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::OtelCollectorEndpoint", "")
 	v.SetDefault("RouterDefaults::PyroscopeEnabled", "false")
 	v.SetDefault("RouterDefaults::PyroscopeServerAddress", "")
+	v.SetDefault("RouterDefaults::PyroscopeIncludePodTags", "true")
 	v.SetDefault("RouterDefaults::LogLevel", "INFO")
 	v.SetDefault("RouterDefaults::FluentdConfig::Image", "")
 	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")

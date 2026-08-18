@@ -163,6 +163,10 @@ RouterDefaults:
   # loader; this is harmless since HTTP header names are case-insensitive.
   PyroscopeHTTPHeaders:
     Authorization: <e.g. "Basic <base64 user:pass>" or "Bearer <token>">
+  # Tag Pyroscope profiles with pod_name/pod_namespace (in addition to the always-present
+  # router_name tag), so individual pods of a multi-replica router deployment can be told
+  # apart. Defaults to true; set to false to opt out deployment-wide.
+  PyroscopeIncludePodTags: true
   LogLevel: INFO
 
   # Fluentd log forwarder configuration that can be used in Turing router
