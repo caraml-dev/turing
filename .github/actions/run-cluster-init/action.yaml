@@ -34,6 +34,10 @@ runs:
       uses: AbsaOSS/k3d-action@v2.3.0
       with:
         cluster-name: ${{ inputs.cluster_name }}
+        # k3d-action's default (v5.4.1) is missing its checksums.txt release
+        # asset, which the k3d install script requires, so pin an explicit
+        # version whose release assets are complete.
+        k3d-version: v5.5.0
         args: >-
           --servers 1
           --agents 3
