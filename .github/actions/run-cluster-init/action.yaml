@@ -43,7 +43,7 @@ runs:
           --agents 3
           --port 80:80@agent:*
           --registry-create ${{inputs.local_registry}}
-          --k3s-arg "--no-deploy=traefik,metrics-server@server:*"
+          --k3s-arg "--disable=traefik,metrics-server@server:*"
 
     - name: Publish images to local registry
       env:
