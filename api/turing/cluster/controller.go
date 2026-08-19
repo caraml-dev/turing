@@ -39,6 +39,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
 	"github.com/caraml-dev/turing/api/turing/config"
+	logger "github.com/caraml-dev/turing/api/turing/log"
 )
 
 var ErrNamespaceAlreadyExists = errors.New("namespace already exists")
@@ -258,9 +259,6 @@ func (c *controller) DeleteConfigMap(ctx context.Context, name string, namespace
 
 // Deploy creates / updates a Kubernetes/Knative service with the given specs
 func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeService) error {
-	var existingSvc *knservingv1.Service
-	var err error
-
 	// Build the deployment specs
 	desiredSvc, err := svcConf.BuildKnativeServiceConfig()
 	if err != nil {
@@ -270,39 +268,107 @@ func (c *controller) DeployKnativeService(ctx context.Context, svcConf *KnativeS
 	// Init knative ServicesGetter
 	services := c.knServingClient.Services(svcConf.Namespace)
 
-	// Check if service already exists. If exists, update it. If not, create.
-	existingSvc, err = services.Get(ctx, svcConf.Name, metav1.GetOptions{})
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			// Create new service
-			_, err = services.Create(ctx, desiredSvc, metav1.CreateOptions{})
-		} else {
-			// Unexpected error, return it
-			return err
-		}
-	} else {
-		// Check for differences between current and new specs
-		if !knServiceSemanticEquals(desiredSvc, existingSvc) {
-			_, err = kmp.SafeDiff(
-				desiredSvc.Spec.ConfigurationSpec,
-				existingSvc.Spec.ConfigurationSpec,
-			)
-			if err != nil {
-				return fmt.Errorf("Failed to diff Knative Service: %v", err)
+	// Some clusters' Knative Serving installations reject env[].valueFrom.fieldRef in the
+	// container spec outright (the alpha kubernetes.podspec-fieldref feature gate is disabled by
+	// default). Rather than requiring every cluster to opt into that gate, or requiring a
+	// separate permission to read Knative's own feature-flag ConfigMap, probe for it with a
+	// dry-run of this exact request first, and silently drop those env vars if rejected.
+	if hasFieldRefEnvVars(desiredSvc) {
+		if err := applyKnativeService(ctx, services, svcConf.Name, desiredSvc, true); err != nil {
+			if !isFieldRefRejection(err) {
+				return err
 			}
-			// Update the existing service with the new config
-			existingSvc.Spec.ConfigurationSpec = desiredSvc.Spec.ConfigurationSpec
-			existingSvc.ObjectMeta.Labels = desiredSvc.ObjectMeta.Labels
-			_, err = services.Update(ctx, existingSvc, metav1.UpdateOptions{})
+			logger.Warnf(
+				"cluster rejected env[].valueFrom.fieldRef for Knative service %s/%s (%s); "+
+					"deploying without it",
+				svcConf.Namespace, svcConf.Name, err.Error(),
+			)
+			stripFieldRefEnvVars(desiredSvc)
 		}
 	}
 
-	if err != nil {
+	if err := applyKnativeService(ctx, services, svcConf.Name, desiredSvc, false); err != nil {
 		return err
 	}
 
 	// Wait until service ready and return any errors
 	return c.waitKnativeServiceReady(ctx, svcConf.Name, svcConf.Namespace)
+}
+
+// applyKnativeService creates or updates the Knative service named svcName to match desiredSvc.
+// When dryRun is true, no changes are persisted -- this only exercises the API server's admission
+// chain, to test whether desiredSvc as given would be accepted.
+func applyKnativeService(
+	ctx context.Context,
+	services knservingclient.ServiceInterface,
+	svcName string,
+	desiredSvc *knservingv1.Service,
+	dryRun bool,
+) error {
+	var dryRunOpt []string
+	if dryRun {
+		dryRunOpt = []string{metav1.DryRunAll}
+	}
+
+	existingSvc, err := services.Get(ctx, svcName, metav1.GetOptions{})
+	if err != nil {
+		if !k8serrors.IsNotFound(err) {
+			// Unexpected error, return it
+			return err
+		}
+		// Create new service
+		_, err = services.Create(ctx, desiredSvc, metav1.CreateOptions{DryRun: dryRunOpt})
+		return err
+	}
+
+	// Check for differences between current and new specs
+	if knServiceSemanticEquals(desiredSvc, existingSvc) {
+		return nil
+	}
+	if _, err := kmp.SafeDiff(desiredSvc.Spec.ConfigurationSpec, existingSvc.Spec.ConfigurationSpec); err != nil {
+		return fmt.Errorf("Failed to diff Knative Service: %v", err)
+	}
+	// Update the existing service with the new config
+	existingSvc.Spec.ConfigurationSpec = desiredSvc.Spec.ConfigurationSpec
+	existingSvc.ObjectMeta.Labels = desiredSvc.ObjectMeta.Labels
+	_, err = services.Update(ctx, existingSvc, metav1.UpdateOptions{DryRun: dryRunOpt})
+	return err
+}
+
+// hasFieldRefEnvVars reports whether any container in the service's pod spec sets an env var via
+// the Kubernetes downward API (env[].valueFrom.fieldRef).
+func hasFieldRefEnvVars(svc *knservingv1.Service) bool {
+	for _, container := range svc.Spec.ConfigurationSpec.Template.Spec.Containers {
+		for _, env := range container.Env {
+			if env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// stripFieldRefEnvVars removes, in place, every env[].valueFrom.fieldRef entry from the service's
+// containers.
+func stripFieldRefEnvVars(svc *knservingv1.Service) {
+	containers := svc.Spec.ConfigurationSpec.Template.Spec.Containers
+	for i := range containers {
+		filtered := containers[i].Env[:0]
+		for _, env := range containers[i].Env {
+			if env.ValueFrom != nil && env.ValueFrom.FieldRef != nil {
+				continue
+			}
+			filtered = append(filtered, env)
+		}
+		containers[i].Env = filtered
+	}
+}
+
+// isFieldRefRejection reports whether err is the admission rejection Knative's Revision webhook
+// returns for env[].valueFrom.fieldRef when the cluster's kubernetes.podspec-fieldref feature
+// gate is disabled (the default).
+func isFieldRefRejection(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "valueFrom.fieldRef")
 }
 
 // Delete removes the Kubernetes/Knative service and all related artifacts
