@@ -1,6 +1,9 @@
 .PHONY: setup
 setup:
-	@pip install "setuptools>=64,<75" "wheel" "Cython<3" "numpy>=1.26.0,<2"
+	# setuptools>=71 calls packaging.utils.canonicalize_version(strip_trailing_zero=...),
+	# an argument mlflow's pinned packaging<22 doesn't support, breaking sdist/egg_info
+	# with "unexpected keyword argument 'strip_trailing_zero'". Cap below 71 to avoid it.
+	@pip install "setuptools>=64,<71" "wheel" "Cython<3" "numpy>=1.26.0,<2"
 	@pip install --no-build-isolation -r requirements.txt -r requirements.dev.txt
 
 .PHONY: gen-client
