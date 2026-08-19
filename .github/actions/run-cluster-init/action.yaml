@@ -38,12 +38,17 @@ runs:
         # asset, which the k3d install script requires, so pin an explicit
         # version whose release assets are complete.
         k3d-version: v5.5.0
+        # k3d v5.5.0 defaults to k3s v1.26.4-k3s1 (k8s 1.26), which no
+        # longer serves policy/v1beta1 or autoscaling/v2beta1 - APIs that
+        # Istio 1.12.5's install manifests hardcode. Pin the k3s image to
+        # a pre-1.25 k8s version below so that install keeps working.
         args: >-
           --servers 1
           --agents 3
           --port 80:80@agent:*
           --registry-create ${{inputs.local_registry}}
           --k3s-arg "--disable=traefik,metrics-server@server:*"
+          --image rancher/k3s:v1.24.17-k3s1
 
     - name: Publish images to local registry
       env:
