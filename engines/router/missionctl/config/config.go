@@ -131,8 +131,8 @@ type OtelConfig struct {
 	// CollectorEndpoint is the OTLP HTTP endpoint spans are exported to,
 	// e.g. http://otel-collector:4318
 	CollectorEndpoint string `split_words:"true"`
-	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 1 (sample all).
-	SamplingRatio float64 `split_words:"true" default:"1"`
+	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 0.01.
+	SamplingRatio float64 `split_words:"true" default:"0.01"`
 }
 
 // PyroscopeConfig captures the settings for continuous profiling using Pyroscope

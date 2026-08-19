@@ -155,6 +155,8 @@ RouterDefaults:
   JaegerCollectorEndpoint: http://jaeger-collector.example.com:14268/api/traces
   OtelEnabled: false
   OtelCollectorEndpoint: http://otel-collector.example.com:4318
+  # Fraction of traces routers should sample, between 0 and 1. Defaults to 0.01.
+  OtelSamplingRatio: 0.01
   PyroscopeEnabled: false
   PyroscopeServerAddress: http://pyroscope.example.com:4040
   # HTTP headers attached to every profile push request routers make to
@@ -192,7 +194,7 @@ RouterDefaults:
 Otel:
   Enabled: false
   OtlpEndpoint: http://otel-collector.example.com:4318
-  SamplingRatio: 1
+  SamplingRatio: 0.01
 
 # Pyroscope profiling service configuration
 Pyroscope:

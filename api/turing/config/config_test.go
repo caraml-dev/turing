@@ -175,7 +175,8 @@ func TestLoad(t *testing.T) {
 					UserContainerMemoryLimitRequestFactor: 1,
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -187,7 +188,7 @@ func TestLoad(t *testing.T) {
 					},
 					PyroscopeIncludePodTags: true,
 				},
-				Otel:   config.OtelConfig{SamplingRatio: 1},
+				Otel:   config.OtelConfig{SamplingRatio: 0.01},
 				Sentry: sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
@@ -293,7 +294,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
@@ -313,7 +315,7 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 1},
+				Otel: config.OtelConfig{SamplingRatio: 0.01},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -451,7 +453,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -486,7 +489,7 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 1},
+				Otel: config.OtelConfig{SamplingRatio: 0.01},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -642,7 +645,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -677,7 +681,7 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 1},
+				Otel: config.OtelConfig{SamplingRatio: 0.01},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -777,7 +781,7 @@ func TestLoad_OtelAndPyroscope(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, false, cfg.Otel.Enabled)
-	assert.Equal(t, float64(1), cfg.Otel.SamplingRatio)
+	assert.Equal(t, float64(0.01), cfg.Otel.SamplingRatio)
 	assert.Equal(t, false, cfg.Pyroscope.Enabled)
 	assert.Equal(t, true, cfg.RouterDefaults.PyroscopeEnabled)
 	assert.Equal(t, "http://pyroscope.example.com:4040", cfg.RouterDefaults.PyroscopeServerAddress)

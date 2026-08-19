@@ -131,7 +131,7 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 			Otel: &OtelConfig{
 				Enabled:           false,
 				CollectorEndpoint: "",
-				SamplingRatio:     1,
+				SamplingRatio:     0.01,
 			},
 			Pyroscope: &PyroscopeConfig{
 				Enabled:        false,

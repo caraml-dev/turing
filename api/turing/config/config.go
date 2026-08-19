@@ -341,6 +341,9 @@ type RouterDefaults struct {
 	// OTLP HTTP endpoint routers should export traces to. If OtelEnabled is true,
 	// this value must be set.
 	OtelCollectorEndpoint string `validate:"required_if=OtelEnabled True"`
+	// OtelSamplingRatio is the fraction of traces routers should sample, between 0 and 1.
+	// Defaults to 0.01.
+	OtelSamplingRatio float64
 	// Enable Pyroscope profiling for routers deployed by this instance of the Turing API
 	PyroscopeEnabled bool
 	// Pyroscope server address routers should report profiles to. If PyroscopeEnabled is
@@ -381,7 +384,7 @@ type OtelConfig struct {
 	// OtlpEndpoint is the OTLP HTTP endpoint spans are exported to, e.g. http://otel-collector:4318.
 	// If Enabled is true, this value must be set.
 	OtlpEndpoint string `validate:"required_if=Enabled True"`
-	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 1 (sample all).
+	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 0.01.
 	SamplingRatio float64
 }
 
@@ -659,6 +662,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::JaegerCollectorEndpoint", "")
 	v.SetDefault("RouterDefaults::OtelEnabled", "false")
 	v.SetDefault("RouterDefaults::OtelCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults::OtelSamplingRatio", "0.01")
 	v.SetDefault("RouterDefaults::PyroscopeEnabled", "false")
 	v.SetDefault("RouterDefaults::PyroscopeServerAddress", "")
 	v.SetDefault("RouterDefaults::PyroscopeIncludePodTags", "true")
@@ -676,7 +680,7 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("Otel::Enabled", "false")
 	v.SetDefault("Otel::OtlpEndpoint", "")
-	v.SetDefault("Otel::SamplingRatio", "1")
+	v.SetDefault("Otel::SamplingRatio", "0.01")
 
 	v.SetDefault("Pyroscope::Enabled", "false")
 	v.SetDefault("Pyroscope::ServerAddress", "")

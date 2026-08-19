@@ -42,6 +42,7 @@ const (
 	envJaegerEndpoint                  = "APP_JAEGER_COLLECTOR_ENDPOINT"
 	envOtelEnabled                     = "APP_OTEL_ENABLED"
 	envOtelEndpoint                    = "APP_OTEL_COLLECTOR_ENDPOINT"
+	envOtelSamplingRatio               = "APP_OTEL_SAMPLING_RATIO"
 	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
 	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
 	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
@@ -251,6 +252,7 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envRouterTimeout, Value: ver.Timeout},
 			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint}, //nolint:staticcheck
 			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
+			{Name: envOtelSamplingRatio, Value: strconv.FormatFloat(routerDefaults.OtelSamplingRatio, 'f', -1, 64)},
 			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
 			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
 			{Name: envPyroscopeIncludePodTags, Value: strconv.FormatBool(routerDefaults.PyroscopeIncludePodTags)},
