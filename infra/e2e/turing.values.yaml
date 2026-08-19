@@ -46,6 +46,12 @@ turing:
                 route_name: treatment-a
 
 postgresql: &postgresql
+  # Bitnami stopped retaining versioned tags on docker.io/bitnami/postgresql
+  # (only "latest" remains); the pinned 12.13.0 tag now 404s. The same tags
+  # are still published under bitnamilegacy/postgresql.
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
   primary:
     persistence:
       enabled: false
