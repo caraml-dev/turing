@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/gojek/fiber"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
@@ -199,14 +199,12 @@ func (i *TracingInterceptor) BeforeDispatch(
 	return ctx
 }
 
-// AfterCompletion retrieves the span from the context, if exists, and finishes the trace
+// AfterCompletion retrieves the span from the context and finishes it. If no span was
+// associated with the context, this is a no-op (trace.SpanFromContext never returns nil).
 func (i *TracingInterceptor) AfterCompletion(
 	ctx context.Context,
 	_ fiber.Request,
 	_ fiber.ResponseQueue,
 ) {
-	span := opentracing.SpanFromContext(ctx)
-	if span != nil {
-		span.Finish()
-	}
+	trace.SpanFromContext(ctx).End()
 }

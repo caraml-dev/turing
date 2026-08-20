@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -117,10 +117,10 @@ func (us *Server) PredictValues(ctx context.Context, req *upiv1.PredictValuesReq
 	md.Append(constant.TuringReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
-		var sp opentracing.Span
+		var sp trace.Span
 		sp, ctx = tracing.Glob().StartSpanFromContext(ctx, tracingComponentID)
 		if sp != nil {
-			defer sp.Finish()
+			defer sp.End()
 		}
 	}
 

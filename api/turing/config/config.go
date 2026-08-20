@@ -83,6 +83,8 @@ type Config struct {
 	KnativeServiceDefaults        *KnativeServiceDefaults
 	NewRelicConfig                newrelic.Config
 	Sentry                        sentry.Config
+	Otel                          OtelConfig
+	Pyroscope                     PyroscopeConfig
 	ClusterConfig                 ClusterConfig `validate:"required"`
 	TuringEncryptionKey           string        `validate:"required"`
 	AlertConfig                   *AlertConfig
@@ -324,10 +326,41 @@ type RouterDefaults struct {
 	// Enable router custom metrics
 	CustomMetricsEnabled bool
 	// Enable Jaeger Tracing
+	//
+	// Deprecated: Jaeger's native Thrift ingestion is being phased out; use
+	// OtelEnabled instead unless a specific downstream backend still requires
+	// Thrift. This field will be removed in a future release.
 	JaegerEnabled bool
-	// Jaeger collector endpoint. If JaegerEnabled is true, this value
-	// must be set.
+	// Jaeger collector endpoint (Thrift-over-HTTP). If JaegerEnabled is true, this
+	// value must be set.
+	//
+	// Deprecated: use OtelCollectorEndpoint instead.
 	JaegerCollectorEndpoint string
+	// Enable router tracing via OpenTelemetry, exported over OTLP HTTP
+	OtelEnabled bool
+	// OTLP HTTP endpoint routers should export traces to. If OtelEnabled is true,
+	// this value must be set.
+	OtelCollectorEndpoint string `validate:"required_if=OtelEnabled True"`
+	// OtelSamplingRatio is the fraction of traces routers should sample, between 0 and 1.
+	// Defaults to 0.01.
+	OtelSamplingRatio float64
+	// Enable Pyroscope profiling for routers deployed by this instance of the Turing API
+	PyroscopeEnabled bool
+	// Pyroscope server address routers should report profiles to. If PyroscopeEnabled is
+	// true, this value must be set.
+	PyroscopeServerAddress string `validate:"required_if=PyroscopeEnabled True"`
+	// HTTP headers routers should attach to every profile push request they make to
+	// PyroscopeServerAddress, e.g. for auth (Authorization, X-Scope-OrgID, ...). Optional.
+	PyroscopeHTTPHeaders map[string]string
+	// PyroscopeCustomTags are additional static tags routers should attach to every profile,
+	// on top of the built-in router_name/pod_name/pod_namespace tags. If a key collides with
+	// one of those, the built-in value wins. Optional.
+	PyroscopeCustomTags map[string]string
+	// PyroscopeIncludePodTags controls whether routers tag their Pyroscope profiles with
+	// pod_name/pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), in
+	// addition to the always-present router_name tag. Defaults to true; set to false to opt
+	// out deployment-wide, e.g. if per-pod cardinality is undesirable in Pyroscope.
+	PyroscopeIncludePodTags bool
 	// Router log level
 	LogLevel string `validate:"required"`
 	// Fluentd config for the router
@@ -347,6 +380,33 @@ type RouterDefaults struct {
 	KafkaConfig *KafkaConfig
 	// UPIConfig config for UPI routers
 	UPIConfig *UPIConfig
+}
+
+// OtelConfig captures the settings for HTTP-layer request tracing using OpenTelemetry
+type OtelConfig struct {
+	Enabled bool
+	// OtlpEndpoint is the OTLP HTTP endpoint spans are exported to, e.g. http://otel-collector:4318.
+	// If Enabled is true, this value must be set.
+	OtlpEndpoint string `validate:"required_if=Enabled True"`
+	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 0.01.
+	SamplingRatio float64
+}
+
+// PyroscopeConfig captures the settings for continuous profiling of the Turing API using Pyroscope
+type PyroscopeConfig struct {
+	Enabled bool
+	// ServerAddress is the Pyroscope server address to report profiles to. If Enabled is
+	// true, this value must be set.
+	ServerAddress string `validate:"required_if=Enabled True"`
+	// HTTPHeaders are attached to every profile push request, e.g. for auth
+	// (Authorization, X-Scope-OrgID, ...). Optional.
+	HTTPHeaders map[string]string
+	// CustomTags are additional static tags attached to every profile. Optional.
+	CustomTags map[string]string
+	// IncludePodTags controls whether profiles are additionally tagged with pod_name/
+	// pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), to distinguish
+	// individual replicas of the Turing API deployment. Defaults to true.
+	IncludePodTags bool
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -610,6 +670,13 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::CustomMetricsEnabled", "false")
 	v.SetDefault("RouterDefaults::JaegerEnabled", "false")
 	v.SetDefault("RouterDefaults::JaegerCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults::OtelEnabled", "false")
+	v.SetDefault("RouterDefaults::OtelCollectorEndpoint", "")
+	v.SetDefault("RouterDefaults::OtelSamplingRatio", "0.01")
+	v.SetDefault("RouterDefaults::PyroscopeEnabled", "false")
+	v.SetDefault("RouterDefaults::PyroscopeServerAddress", "")
+	v.SetDefault("RouterDefaults::PyroscopeCustomTags", map[string]interface{}{})
+	v.SetDefault("RouterDefaults::PyroscopeIncludePodTags", "true")
 	v.SetDefault("RouterDefaults::LogLevel", "INFO")
 	v.SetDefault("RouterDefaults::FluentdConfig::Image", "")
 	v.SetDefault("RouterDefaults::FluentdConfig::Tag", "turing-result.log")
@@ -621,6 +688,14 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("Sentry::Enabled", "false")
 	v.SetDefault("Sentry::DSN", "")
+
+	v.SetDefault("Otel::Enabled", "false")
+	v.SetDefault("Otel::OtlpEndpoint", "")
+	v.SetDefault("Otel::SamplingRatio", "0.01")
+
+	v.SetDefault("Pyroscope::Enabled", "false")
+	v.SetDefault("Pyroscope::ServerAddress", "")
+	v.SetDefault("Pyroscope::IncludePodTags", "true")
 
 	v.SetDefault("TuringEncryptionKey", "")
 

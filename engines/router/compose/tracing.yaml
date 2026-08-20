@@ -3,6 +3,18 @@ version: '3.1'
 services:
   jaeger:
     image: jaegertracing/all-in-one:latest
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
+      # 6831/udp and 14268 are for the classic, deprecated Jaeger/Thrift ingestion
+      # (used by APP_JAEGER_*). 4317/4318 are OTLP gRPC/HTTP, used by APP_OTEL_*.
       - 6831:6831/udp
+      - 14268:14268
       - 16686:16686
+      - 4317:4317
+      - 4318:4318
+
+  pyroscope:
+    image: grafana/pyroscope:latest
+    ports:
+      - 4040:4040

@@ -1,28 +1,49 @@
+version: "2"
 run:
   build-tags:
     - e2e
-  skip-dirs:
-    - turing/generated
-
 linters:
   enable:
     - bodyclose
-    - errcheck
     - gocyclo
-    - gofmt
-    - goimports
-    - gosimple
-    - govet
-    - ineffassign
     - lll
     - misspell
     - revive
-    - staticcheck
-    - unused
-
-linters-settings:
-  gocyclo:
-    # Min code complexity to report, 30 by default (recommended 10-20)
-    min-complexity: 25
-  lll:
-    line-length: 120
+  settings:
+    gocyclo:
+      min-complexity: 25
+    lll:
+      line-length: 120
+    staticcheck:
+      # v1 only ever enabled the `staticcheck` (SA*) and `gosimple` (S1*) linters, never
+      # `stylecheck` (ST*) or the quickfix suggestions (QF*). v2 merges gosimple into this
+      # single staticcheck linter, so exclude ST*/QF* here to keep the same check scope
+      # as before, instead of newly linting the whole codebase against rules it was never
+      # checked against.
+      checks:
+        - all
+        - -ST*
+        - -QF*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - turing/generated
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - turing/generated
+      - third_party$
+      - builtin$
+      - examples$

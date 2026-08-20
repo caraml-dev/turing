@@ -110,13 +110,47 @@ type KafkaConfig struct {
 	CompressionType     string              `split_words:"true" default:"none"`
 }
 
-// JaegerConfig captures the settings for tracing using Jaeger client
-// Ref: https://pkg.go.dev/github.com/uber/jaeger-client-go/config
+// JaegerConfig captures the settings for tracing using the classic Jaeger client
+// (OpenTracing API, Thrift transport over a UDP agent or an HTTP collector).
+//
+// Deprecated: Jaeger's native Thrift ingestion is being phased out; use OtelConfig
+// instead unless a specific downstream backend still requires Thrift. This config,
+// and the tracer backend it configures, will be removed in a future release.
 type JaegerConfig struct {
-	Enabled           bool
+	Enabled bool
+	// CollectorEndpoint is a Thrift-over-HTTP Jaeger collector endpoint,
+	// e.g. http://jaeger-collector:14268/api/traces
 	CollectorEndpoint string `split_words:"true"`
 	ReporterAgentHost string `envconfig:"REPORTER_HOST" split_words:"true"`
 	ReporterAgentPort int    `envconfig:"REPORTER_PORT" split_words:"true"`
+}
+
+// OtelConfig captures the settings for tracing using OpenTelemetry, exported via OTLP HTTP.
+type OtelConfig struct {
+	Enabled bool
+	// CollectorEndpoint is the OTLP HTTP endpoint spans are exported to,
+	// e.g. http://otel-collector:4318
+	CollectorEndpoint string `split_words:"true"`
+	// SamplingRatio is the fraction of traces to sample, between 0 and 1. Defaults to 0.01.
+	SamplingRatio float64 `split_words:"true" default:"0.01"`
+}
+
+// PyroscopeConfig captures the settings for continuous profiling using Pyroscope
+type PyroscopeConfig struct {
+	Enabled       bool
+	ServerAddress string `split_words:"true"`
+	// HTTPHeaders are attached to every profile push request, e.g. for auth
+	// (Authorization, X-Scope-OrgID, ...). Optional.
+	HTTPHeaders map[string]string `split_words:"true"`
+	// CustomTags are additional static tags attached to every profile, on top of the
+	// always-present router_name tag (and pod_name/pod_namespace, when IncludePodTags is
+	// true). If a key collides with one of those built-in tags, the built-in value wins.
+	// Optional.
+	CustomTags map[string]string `split_words:"true"`
+	// IncludePodTags controls whether profiles are additionally tagged with pod_name/
+	// pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), on top of the
+	// always-present router_name tag. Defaults to true.
+	IncludePodTags bool `split_words:"true" default:"true"`
 }
 
 // AppConfig is the structure used to the parse the environment configs that correspond
@@ -134,7 +168,9 @@ type AppConfig struct {
 	BigQuery      *BQConfig    `envconfig:"BQ"`
 	Fluentd       *FluentdConfig
 	Kafka         *KafkaConfig
-	Jaeger        *JaegerConfig
+	Jaeger        *JaegerConfig // Deprecated: see JaegerConfig.
+	Otel          *OtelConfig
+	Pyroscope     *PyroscopeConfig
 	Sentry        sentry.Config
 }
 

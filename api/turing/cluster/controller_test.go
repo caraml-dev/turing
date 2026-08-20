@@ -191,6 +191,194 @@ func TestDeployKnativeService(t *testing.T) {
 	}
 }
 
+func TestDeployKnativeServiceFieldRefRejectedFallsBackWithoutIt(t *testing.T) {
+	testName, testNamespace := "test-name", "test-namespace"
+
+	svcWithFieldRef := &knservingv1.Service{
+		ObjectMeta: metav1.ObjectMeta{Name: testName},
+		Spec: knservingv1.ServiceSpec{
+			ConfigurationSpec: knservingv1.ConfigurationSpec{
+				Template: knservingv1.RevisionTemplateSpec{
+					Spec: knservingv1.RevisionSpec{
+						PodSpec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Env: []corev1.EnvVar{
+										{Name: "APP_NAME", Value: "test"},
+										{
+											Name: "POD_NAME",
+											ValueFrom: &corev1.EnvVarSource{
+												FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	svcConf := &KnativeService{
+		BaseService: &BaseService{
+			Name:      testName,
+			Namespace: testNamespace,
+		},
+	}
+
+	getReady := func(_ k8stesting.Action) (bool, runtime.Object, error) {
+		return true, &knservingv1.Service{
+			ObjectMeta: metav1.ObjectMeta{Name: testName},
+			Status: knservingv1.ServiceStatus{
+				Status: duckv1.Status{
+					Conditions: duckv1.Conditions{
+						apis.Condition{Type: apis.ConditionReady, Status: corev1.ConditionTrue},
+					},
+				},
+			},
+		}, nil
+	}
+
+	fieldRefRejection := errors.New(
+		`admission webhook "validation.webhook.serving.knative.dev" denied the request: ` +
+			`validation failed: must not set the field(s): ` +
+			`spec.template.spec.containers[0].env[1].valueFrom.fieldRef`,
+	)
+
+	createCallCount := 0
+
+	cs := knservingclientset.NewSimpleClientset()
+	cs.PrependReactor(reactorVerbs.Get, knativeServicesResource,
+		func(_ k8stesting.Action) (bool, runtime.Object, error) {
+			return true, nil, k8serrors.NewNotFound(schema.GroupResource{}, testName)
+		})
+	cs.PrependReactor(reactorVerbs.Create, knativeServicesResource,
+		func(action k8stesting.Action) (bool, runtime.Object, error) {
+			createCallCount++
+			created := action.(k8stesting.CreateAction).GetObject().(*knservingv1.Service)
+
+			if createCallCount == 1 {
+				// First (dry-run) attempt: still carries the fieldRef env var; cluster rejects it.
+				assert.True(t, hasFieldRefEnvVars(created),
+					"expected first Create attempt to still include the fieldRef env var")
+				return true, nil, fieldRefRejection
+			}
+			// Second (real) attempt, after stripping: must no longer include it.
+			assert.False(t, hasFieldRefEnvVars(created),
+				"expected fieldRef env var to be stripped before the real Create")
+			cs.PrependReactor(reactorVerbs.Get, knativeServicesResource, getReady)
+			return true, created, nil
+		})
+
+	monkey.PatchInstanceMethod(
+		reflect.TypeOf(svcConf),
+		"BuildKnativeServiceConfig",
+		func(*KnativeService) (*knservingv1.Service, error) {
+			return svcWithFieldRef.DeepCopy(), nil
+		})
+	defer monkey.UnpatchAll()
+
+	c := &controller{knServingClient: cs.ServingV1()}
+
+	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutDuration)
+	defer cancel()
+
+	err := c.DeployKnativeService(ctx, svcConf)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 2, createCallCount, "expected exactly two Create attempts: dry-run, then real")
+}
+
+func TestHasFieldRefEnvVars(t *testing.T) {
+	withFieldRef := &knservingv1.Service{Spec: knservingv1.ServiceSpec{
+		ConfigurationSpec: knservingv1.ConfigurationSpec{
+			Template: knservingv1.RevisionTemplateSpec{
+				Spec: knservingv1.RevisionSpec{
+					PodSpec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{
+								Env: []corev1.EnvVar{
+									{Name: "APP_NAME", Value: "test"},
+									{
+										Name: "POD_NAME",
+										ValueFrom: &corev1.EnvVarSource{
+											FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}}
+	withoutFieldRef := &knservingv1.Service{Spec: knservingv1.ServiceSpec{
+		ConfigurationSpec: knservingv1.ConfigurationSpec{
+			Template: knservingv1.RevisionTemplateSpec{
+				Spec: knservingv1.RevisionSpec{
+					PodSpec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{Env: []corev1.EnvVar{{Name: "APP_NAME", Value: "test"}}},
+						},
+					},
+				},
+			},
+		},
+	}}
+
+	assert.True(t, hasFieldRefEnvVars(withFieldRef))
+	assert.False(t, hasFieldRefEnvVars(withoutFieldRef))
+}
+
+func TestStripFieldRefEnvVars(t *testing.T) {
+	svc := &knservingv1.Service{Spec: knservingv1.ServiceSpec{
+		ConfigurationSpec: knservingv1.ConfigurationSpec{
+			Template: knservingv1.RevisionTemplateSpec{
+				Spec: knservingv1.RevisionSpec{
+					PodSpec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{
+								Env: []corev1.EnvVar{
+									{Name: "APP_NAME", Value: "test"},
+									{
+										Name: "POD_NAME",
+										ValueFrom: &corev1.EnvVarSource{
+											FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+										},
+									},
+									{
+										Name: "POD_NAMESPACE",
+										ValueFrom: &corev1.EnvVarSource{
+											FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}}
+
+	stripFieldRefEnvVars(svc)
+
+	assert.Equal(t, []corev1.EnvVar{{Name: "APP_NAME", Value: "test"}},
+		svc.Spec.ConfigurationSpec.Template.Spec.Containers[0].Env)
+}
+
+func TestIsFieldRefRejection(t *testing.T) {
+	assert.True(t, isFieldRefRejection(errors.New(
+		`admission webhook "validation.webhook.serving.knative.dev" denied the request: `+
+			`validation failed: must not set the field(s): `+
+			`spec.template.spec.containers[0].env[1].valueFrom.fieldRef`)))
+	assert.False(t, isFieldRefRejection(errors.New("some other unrelated error")))
+	assert.False(t, isFieldRefRejection(nil))
+}
+
 func TestDeployKubernetesService(t *testing.T) {
 	testName, testNamespace := "test-name", "test-namespace"
 	statefulSetResourceItem := schema.GroupVersionResource{

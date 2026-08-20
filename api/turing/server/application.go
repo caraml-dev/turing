@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"flag"
 	"net/http"
 	"strings"
@@ -73,6 +74,30 @@ func Run() {
 		log.Errorf("Failed to initialize newrelic: %s", err)
 	}
 	defer newrelic.Shutdown(5 * time.Second)
+
+	// Initialise OTel tracer
+	tracerShutdown, err := initTracer(cfg.Otel)
+	if err != nil {
+		log.Errorf("Failed to initialize OTel tracer: %s", err)
+	}
+	defer func() {
+		if err := tracerShutdown(context.Background()); err != nil {
+			log.Errorf("Failed to shut down OTel tracer: %s", err)
+		}
+	}()
+
+	// Initialise Pyroscope profiler
+	profiler, err := initProfiler(cfg.Pyroscope)
+	if err != nil {
+		log.Errorf("Failed to initialize Pyroscope profiler: %s", err)
+	}
+	if profiler != nil {
+		defer func() {
+			if err := profiler.Stop(); err != nil {
+				log.Errorf("Failed to stop Pyroscope profiler: %s", err)
+			}
+		}()
+	}
 
 	// Init app context
 	appCtx, err := api.NewAppContext(db, cfg)

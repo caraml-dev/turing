@@ -119,7 +119,7 @@ func (msb *mockClusterServiceBuilder) NewRouterService(
 			Name:      fmt.Sprintf("%s-router-%d", rv.Router.Name, rv.Version),
 			Namespace: project.Name,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: routerDefaults.JaegerCollectorEndpoint},
+				{Name: "JAEGER_EP", Value: routerDefaults.JaegerCollectorEndpoint}, //nolint:staticcheck
 				{Name: "FLUENTD_TAG", Value: routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: strconv.FormatBool(sentryEnabled)},
@@ -306,7 +306,7 @@ func TestDeployEndpoint(t *testing.T) {
 			Name:      fmt.Sprintf("%s-router-%d", routerVersion.Router.Name, routerVersion.Version),
 			Namespace: testNamespace,
 			Envs: []corev1.EnvVar{
-				{Name: "JAEGER_EP", Value: ds.routerDefaults.JaegerCollectorEndpoint},
+				{Name: "JAEGER_EP", Value: ds.routerDefaults.JaegerCollectorEndpoint}, //nolint:staticcheck
 				{Name: "FLUENTD_TAG", Value: ds.routerDefaults.FluentdConfig.Tag},
 				{Name: "ENVIRONMENT", Value: envType},
 				{Name: "SENTRY_ENABLED", Value: "true"},

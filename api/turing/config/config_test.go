@@ -175,7 +175,8 @@ func TestLoad(t *testing.T) {
 					UserContainerMemoryLimitRequestFactor: 1,
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -185,8 +186,11 @@ func TestLoad(t *testing.T) {
 						MaxMessageBytes: 1048588,
 						CompressionType: "none",
 					},
+					PyroscopeIncludePodTags: true,
 				},
-				Sentry: sentry.Config{},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
+				Sentry:    sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
 				},
@@ -291,7 +295,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 60,
@@ -301,7 +306,18 @@ func TestLoad(t *testing.T) {
 						MaxMessageBytes: 1048588,
 						CompressionType: "none",
 					},
+					PyroscopeEnabled:       true,
+					PyroscopeServerAddress: "http://pyroscope.example.com:4040",
+					// viper lowercases YAML map keys, so header names configured this way
+					// always come out lowercase (harmless: HTTP header names are
+					// case-insensitive).
+					PyroscopeHTTPHeaders:    map[string]string{"authorization": "Bearer token"},
+					PyroscopeIncludePodTags: true,
+					OtelEnabled:             true,
+					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -439,7 +455,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -464,7 +481,18 @@ func TestLoad(t *testing.T) {
 						MaxMessageBytes: 1234567,
 						CompressionType: "snappy",
 					},
+					PyroscopeEnabled:       true,
+					PyroscopeServerAddress: "http://pyroscope.example.com:4040",
+					// viper lowercases YAML map keys, so header names configured this way
+					// always come out lowercase (harmless: HTTP header names are
+					// case-insensitive).
+					PyroscopeHTTPHeaders:    map[string]string{"authorization": "Bearer token"},
+					PyroscopeIncludePodTags: true,
+					OtelEnabled:             true,
+					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -620,7 +648,8 @@ func TestLoad(t *testing.T) {
 					},
 				},
 				RouterDefaults: &config.RouterDefaults{
-					LogLevel: "INFO",
+					LogLevel:          "INFO",
+					OtelSamplingRatio: 0.01,
 					FluentdConfig: &config.FluentdConfig{
 						Tag:                  "turing-result.log",
 						FlushIntervalSeconds: 90,
@@ -645,7 +674,18 @@ func TestLoad(t *testing.T) {
 						MaxMessageBytes: 1234567,
 						CompressionType: "snappy",
 					},
+					PyroscopeEnabled:       true,
+					PyroscopeServerAddress: "http://pyroscope.example.com:4040",
+					// viper lowercases YAML map keys, so header names configured this way
+					// always come out lowercase (harmless: HTTP header names are
+					// case-insensitive).
+					PyroscopeHTTPHeaders:    map[string]string{"authorization": "Bearer token"},
+					PyroscopeIncludePodTags: true,
+					OtelEnabled:             true,
+					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -738,6 +778,21 @@ func TestLoad(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestLoad_OtelAndPyroscope(t *testing.T) {
+	cfg, err := config.Load("testdata/config-1.yaml")
+	require.NoError(t, err)
+
+	assert.Equal(t, false, cfg.Otel.Enabled)
+	assert.Equal(t, float64(0.01), cfg.Otel.SamplingRatio)
+	assert.Equal(t, false, cfg.Pyroscope.Enabled)
+	assert.Equal(t, true, cfg.RouterDefaults.PyroscopeEnabled)
+	assert.Equal(t, "http://pyroscope.example.com:4040", cfg.RouterDefaults.PyroscopeServerAddress)
+	assert.Equal(t, map[string]string{"authorization": "Bearer token"}, cfg.RouterDefaults.PyroscopeHTTPHeaders)
+	assert.Equal(t, true, cfg.RouterDefaults.PyroscopeIncludePodTags)
+	assert.Equal(t, true, cfg.RouterDefaults.OtelEnabled)
+	assert.Equal(t, "http://otel-collector.example.com:4318", cfg.RouterDefaults.OtelCollectorEndpoint)
 }
 
 // Reference:
@@ -1054,6 +1109,43 @@ func TestConfigValidate(t *testing.T) {
 		"batch ensembling enabled but one whole section missing": {
 			validConfigUpdate: func(validConfig config.Config) config.Config {
 				validConfig.BatchEnsemblingConfig.JobConfig = nil
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"otel enabled but missing OtlpEndpoint": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.Otel = config.OtelConfig{Enabled: true}
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"otel enabled with OtlpEndpoint set": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.Otel = config.OtelConfig{Enabled: true, OtlpEndpoint: "http://otel-collector.example.com:4318"}
+				return validConfig
+			},
+			wantErr: false,
+		},
+		"api pyroscope enabled but missing ServerAddress": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.Pyroscope = config.PyroscopeConfig{Enabled: true}
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"router defaults pyroscope enabled but missing PyroscopeServerAddress": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.RouterDefaults.PyroscopeEnabled = true
+				validConfig.RouterDefaults.PyroscopeServerAddress = ""
+				return validConfig
+			},
+			wantErr: true,
+		},
+		"router defaults otel enabled but missing OtelCollectorEndpoint": {
+			validConfigUpdate: func(validConfig config.Config) config.Config {
+				validConfig.RouterDefaults.OtelEnabled = true
+				validConfig.RouterDefaults.OtelCollectorEndpoint = ""
 				return validConfig
 			},
 			wantErr: true,

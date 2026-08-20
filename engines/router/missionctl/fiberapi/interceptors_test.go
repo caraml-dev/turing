@@ -10,15 +10,15 @@ import (
 	"testing"
 	"time"
 
-	"bou.ke/monkey"
 	"github.com/gojek/fiber"
 	fiberHttp "github.com/gojek/fiber/http"
-	"github.com/opentracing/opentracing-go"
-	opentracingLog "github.com/opentracing/opentracing-go/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 
-	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
@@ -96,50 +96,25 @@ func (*mockMetricsCollector) Inc(
 	return nil
 }
 
-// mockSpan satisfies the opentracing.Span interface
-type mockSpan struct {
-	mock.Mock
-}
-
-func (s *mockSpan) Finish() {
-	s.Called()
-}
-func (*mockSpan) FinishWithOptions(_ opentracing.FinishOptions)   {}
-func (*mockSpan) Context() opentracing.SpanContext                { return nil }
-func (*mockSpan) SetOperationName(_ string) opentracing.Span      { return nil }
-func (*mockSpan) SetTag(_ string, _ interface{}) opentracing.Span { return nil }
-func (*mockSpan) LogFields(_ ...opentracingLog.Field)             {}
-func (*mockSpan) LogKV(_ ...interface{})                          {}
-func (*mockSpan) SetBaggageItem(_, _ string) opentracing.Span     { return nil }
-func (*mockSpan) BaggageItem(_ string) string                     { return "" }
-func (*mockSpan) Tracer() opentracing.Tracer                      { return nil }
-func (*mockSpan) LogEvent(_ string)                               {}
-func (*mockSpan) LogEventWithPayload(_ string, _ interface{})     {}
-func (*mockSpan) Log(_ opentracing.LogData)                       {}
-
 // mockTracer implements tracing.Tracer interface
 type mockTracer struct {
 	mock.Mock
 }
 
-func (*mockTracer) IsEnabled() bool   { return false }
-func (*mockTracer) SetEnabled(_ bool) {}
+func (*mockTracer) IsEnabled() bool { return false }
 func (*mockTracer) StartSpanFromRequestHeader(
-	context.Context,
-	string,
-	http.Header,
-) (opentracing.Span, context.Context) {
-	return nil, nil
+	ctx context.Context,
+	_ string,
+	_ http.Header,
+) (trace.Span, context.Context) {
+	return nil, ctx
 }
 func (t *mockTracer) StartSpanFromContext(
 	ctx context.Context,
 	name string,
-) (opentracing.Span, context.Context) {
+) (trace.Span, context.Context) {
 	t.Called(ctx, name)
-	return nil, nil
-}
-func (*mockTracer) InitGlobalTracer(_ string, _ *config.JaegerConfig) (io.Closer, error) {
-	return io.NopCloser(nil), nil
+	return nil, ctx
 }
 
 // Test that a startTimeKey has been associated to the context
@@ -354,24 +329,19 @@ func TestTracingInterceptorBeforeDispatch(t *testing.T) {
 }
 
 func TestTracingInterceptorAfterCompletion(t *testing.T) {
-	// Create mock span
-	mockSp := &mockSpan{}
-	mockSp.On("Finish").Return(nil)
+	exporter := tracetest.NewInMemoryExporter()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exporter))
+	tr := tp.Tracer("test")
 
-	// Patch opentracing.SpanFromContext to return the mock span
-	monkey.Patch(opentracing.SpanFromContext,
-		func(_ context.Context) opentracing.Span {
-			return mockSp
-		})
-	defer monkey.Unpatch(opentracing.SpanFromContext)
+	ctx, span := tr.Start(context.Background(), "test-span")
+	_ = span
 
-	// Run Test
 	i := NewTracingInterceptor()
-	_, ctx := opentracing.StartSpanFromContext(context.Background(), "test")
 	i.AfterCompletion(ctx, nil, nil)
 
-	// Validate that mockSpan.Finish() has been called
-	mockSp.AssertCalled(t, "Finish")
+	spans := exporter.GetSpans()
+	require.Len(t, spans, 1)
+	assert.Equal(t, "test-span", spans[0].Name)
 }
 
 func createTestFiberResponseQueue(respStatus int) fiber.ResponseQueue {

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	fiberProtocol "github.com/gojek/fiber/protocol"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
@@ -56,8 +56,8 @@ func (h *httpHandler) error(
 // enableTracingSpan associates span to context, if applicable
 func (h *httpHandler) enableTracingSpan(ctx context.Context,
 	req *http.Request,
-	httpHandlerID string) (context.Context, opentracing.Span) {
-	var sp opentracing.Span
+	httpHandlerID string) (context.Context, trace.Span) {
+	var sp trace.Span
 	sp, ctx = tracing.Glob().StartSpanFromRequestHeader(ctx, httpHandlerID, req.Header)
 	return ctx, sp
 }
@@ -116,7 +116,7 @@ func (h *httpHandler) getPrediction(
 	if expResp != nil {
 		var expErr *errors.TuringError
 		if expResp.Error != "" {
-			expErr = errors.NewTuringError(fmt.Errorf(expResp.Error), fiberProtocol.HTTP)
+			expErr = errors.NewTuringError(fmt.Errorf("%s", expResp.Error), fiberProtocol.HTTP)
 		}
 		if expResp.Configuration != nil || expErr != nil {
 			h.rl.SendResponseToLogChannel(ctx, respCh, resultlog.ResultLogKeys.Experiment, expResp, expErr)
@@ -172,10 +172,10 @@ func (h *httpHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	req.Header.Set(constant.TuringReqIDHeaderKey, turingReqID)
 
 	if tracing.Glob().IsEnabled() {
-		var sp opentracing.Span
+		var sp trace.Span
 		ctx, sp = h.enableTracingSpan(ctx, req, httpHandlerID)
 		if sp != nil {
-			defer sp.Finish()
+			defer sp.End()
 		}
 	}
 

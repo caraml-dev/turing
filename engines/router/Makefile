@@ -21,7 +21,7 @@ clean:
 .PHONY: setup
 setup:
 	@echo "Setting up tools..."
-	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+	@test -x ${GOPATH}/bin/golangci-lint || go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.12.2
 	@test -x $(shell go env GOPATH)/bin/gotest || go install github.com/rakyll/gotest@latest
 
 .PHONY: fmt

@@ -7,6 +7,7 @@ import (
 
 	"github.com/caraml-dev/mlp/api/pkg/instrumentation/sentry"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	tu "github.com/caraml-dev/turing/engines/router/missionctl/internal/testutils"
 )
@@ -58,9 +59,14 @@ var optionalEnvs = map[string]string{
 	"APP_KAFKA_TOPIC":                "kafka_topic",
 	"APP_KAFKA_SERIALIZATION_FORMAT": "json",
 	"APP_JAEGER_ENABLED":             "true",
-	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:5000",
+	"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:14268/api/traces",
 	"APP_JAEGER_REPORTER_HOST":       "localhost",
-	"APP_JAEGER_REPORTER_PORT":       "5001",
+	"APP_JAEGER_REPORTER_PORT":       "6831",
+	"APP_OTEL_ENABLED":               "true",
+	"APP_OTEL_COLLECTOR_ENDPOINT":    "http://localhost:5000",
+	"APP_OTEL_SAMPLING_RATIO":        "0.8",
+	"APP_PYROSCOPE_ENABLED":          "true",
+	"APP_PYROSCOPE_SERVER_ADDRESS":   "http://localhost:4040",
 	"APP_SENTRY_ENABLED":             "true",
 	"APP_SENTRY_DSN":                 "test:dsn",
 	"APP_SENTRY_LABELS":              "sentry_key1:value1,sentry_key2:value2",
@@ -122,6 +128,16 @@ func TestInitConfigDefaultEnvs(t *testing.T) {
 				ReporterAgentHost: "",
 				ReporterAgentPort: 0,
 			},
+			Otel: &OtelConfig{
+				Enabled:           false,
+				CollectorEndpoint: "",
+				SamplingRatio:     0.01,
+			},
+			Pyroscope: &PyroscopeConfig{
+				Enabled:        false,
+				ServerAddress:  "",
+				IncludePodTags: true,
+			},
 			Sentry: sentry.Config{
 				Enabled: false,
 				DSN:     "",
@@ -182,9 +198,19 @@ func TestInitConfigEnv(t *testing.T) {
 			CustomMetrics: true,
 			Jaeger: &JaegerConfig{
 				Enabled:           true,
-				CollectorEndpoint: "http://localhost:5000",
+				CollectorEndpoint: "http://localhost:14268/api/traces",
 				ReporterAgentHost: "localhost",
-				ReporterAgentPort: 5001,
+				ReporterAgentPort: 6831,
+			},
+			Otel: &OtelConfig{
+				Enabled:           true,
+				CollectorEndpoint: "http://localhost:5000",
+				SamplingRatio:     0.8,
+			},
+			Pyroscope: &PyroscopeConfig{
+				Enabled:        true,
+				ServerAddress:  "http://localhost:4040",
+				IncludePodTags: true,
 			},
 			Sentry: sentry.Config{
 				Enabled: true,
@@ -343,6 +369,45 @@ func TestSerializationFormatDecode(t *testing.T) {
 			assert.Equal(t, data.success, err == nil)
 		})
 	}
+}
+
+func TestInitConfigEnv_JaegerOtelAndPyroscope(t *testing.T) {
+	env := map[string]string{
+		"PORT":                           "8080",
+		"ROUTER_CONFIG_FILE":             "config.yaml",
+		"APP_NAME":                       "test-router",
+		"APP_ENVIRONMENT":                "dev",
+		"APP_JAEGER_ENABLED":             "true",
+		"APP_JAEGER_COLLECTOR_ENDPOINT":  "http://localhost:14268/api/traces",
+		"APP_JAEGER_REPORTER_HOST":       "localhost",
+		"APP_JAEGER_REPORTER_PORT":       "6831",
+		"APP_OTEL_ENABLED":               "true",
+		"APP_OTEL_COLLECTOR_ENDPOINT":    "http://otel-collector:4318",
+		"APP_OTEL_SAMPLING_RATIO":        "0.5",
+		"APP_PYROSCOPE_ENABLED":          "true",
+		"APP_PYROSCOPE_SERVER_ADDRESS":   "http://pyroscope:4040",
+		"APP_PYROSCOPE_HTTP_HEADERS":     "Authorization:Bearer token,X-Scope-OrgID:tenant1",
+		"APP_PYROSCOPE_INCLUDE_POD_TAGS": "false",
+	}
+	setupNewEnv(env)
+
+	cfg, err := InitConfigEnv()
+	require.NoError(t, err)
+
+	assert.Equal(t, true, cfg.AppConfig.Jaeger.Enabled)
+	assert.Equal(t, "http://localhost:14268/api/traces", cfg.AppConfig.Jaeger.CollectorEndpoint)
+	assert.Equal(t, "localhost", cfg.AppConfig.Jaeger.ReporterAgentHost)
+	assert.Equal(t, 6831, cfg.AppConfig.Jaeger.ReporterAgentPort)
+	assert.Equal(t, true, cfg.AppConfig.Otel.Enabled)
+	assert.Equal(t, "http://otel-collector:4318", cfg.AppConfig.Otel.CollectorEndpoint)
+	assert.Equal(t, 0.5, cfg.AppConfig.Otel.SamplingRatio)
+	assert.Equal(t, true, cfg.AppConfig.Pyroscope.Enabled)
+	assert.Equal(t, "http://pyroscope:4040", cfg.AppConfig.Pyroscope.ServerAddress)
+	assert.Equal(t, map[string]string{
+		"Authorization": "Bearer token",
+		"X-Scope-OrgID": "tenant1",
+	}, cfg.AppConfig.Pyroscope.HTTPHeaders)
+	assert.Equal(t, false, cfg.AppConfig.Pyroscope.IncludePodTags)
 }
 
 func setupNewEnv(envMaps ...map[string]string) {

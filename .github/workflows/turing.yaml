@@ -37,8 +37,8 @@ on:
 
 env:
   ARTIFACT_RETENTION_DAYS: 7
-  GO_VERSION: "1.22"
-  GO_LINT_VERSION: v1.56.2
+  GO_VERSION: "1.25"
+  GO_LINT_VERSION: v2.12.2
   CLUSTER_NAME: turing-e2e
   ISTIO_VERSION: 1.9.9
   KNATIVE_VERSION: 1.7.4
@@ -257,7 +257,7 @@ jobs:
         run: make test
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GO_LINT_VERSION }}
           working-directory: api
@@ -292,11 +292,10 @@ jobs:
         run: make benchmark
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/router
-          skip-go-installation: true
           args: --verbose
 
   test-engines-experiment:
@@ -318,11 +317,10 @@ jobs:
         run: make test
 
       - name: Lint code
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GO_LINT_VERSION }}
           working-directory: engines/experiment
-          skip-go-installation: true
           args: --verbose
 
   test-e2e:

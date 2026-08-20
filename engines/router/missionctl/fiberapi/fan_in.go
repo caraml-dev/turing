@@ -10,7 +10,7 @@ import (
 	"github.com/gojek/fiber"
 	fiberHttp "github.com/gojek/fiber/http"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation"
 
@@ -113,10 +113,10 @@ func (fanIn *EnsemblingFanIn) Aggregate(
 
 	// Associate span to context to trace response ensembling, if tracing enabled
 	if tracing.Glob().IsEnabled() {
-		var sp opentracing.Span
+		var sp trace.Span
 		sp, _ = tracing.Glob().StartSpanFromContext(ctx, FanInID)
 		if sp != nil {
-			defer sp.Finish()
+			defer sp.End()
 		}
 	}
 	return fanIn.collectResponses(responses, experimentResponse)

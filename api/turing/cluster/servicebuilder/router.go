@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -25,18 +26,28 @@ import (
 
 // Define env var names for the router
 const (
-	envAppName                         = "APP_NAME"
-	envAppEnvironment                  = "APP_ENVIRONMENT"
-	envRouterTimeout                   = "ROUTER_TIMEOUT"
-	envEnricherEndpoint                = "ENRICHER_ENDPOINT"
-	envEnricherTimeout                 = "ENRICHER_TIMEOUT"
-	envEnsemblerEndpoint               = "ENSEMBLER_ENDPOINT"
-	envEnsemblerTimeout                = "ENSEMBLER_TIMEOUT"
-	envLogLevel                        = "APP_LOGLEVEL"
-	envFiberDebugLog                   = "APP_FIBER_DEBUG_LOG"
-	envCustomMetrics                   = "APP_CUSTOM_METRICS"
-	envJaegerEnabled                   = "APP_JAEGER_ENABLED"
+	envAppName           = "APP_NAME"
+	envAppEnvironment    = "APP_ENVIRONMENT"
+	envRouterTimeout     = "ROUTER_TIMEOUT"
+	envEnricherEndpoint  = "ENRICHER_ENDPOINT"
+	envEnricherTimeout   = "ENRICHER_TIMEOUT"
+	envEnsemblerEndpoint = "ENSEMBLER_ENDPOINT"
+	envEnsemblerTimeout  = "ENSEMBLER_TIMEOUT"
+	envLogLevel          = "APP_LOGLEVEL"
+	envFiberDebugLog     = "APP_FIBER_DEBUG_LOG"
+	envCustomMetrics     = "APP_CUSTOM_METRICS"
+	// Deprecated: use envOtel* instead.
+	envJaegerEnabled = "APP_JAEGER_ENABLED"
+	// Deprecated: use envOtel* instead.
 	envJaegerEndpoint                  = "APP_JAEGER_COLLECTOR_ENDPOINT"
+	envOtelEnabled                     = "APP_OTEL_ENABLED"
+	envOtelEndpoint                    = "APP_OTEL_COLLECTOR_ENDPOINT"
+	envOtelSamplingRatio               = "APP_OTEL_SAMPLING_RATIO"
+	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
+	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
+	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
+	envPyroscopeCustomTags             = "APP_PYROSCOPE_CUSTOM_TAGS"
+	envPyroscopeIncludePodTags         = "APP_PYROSCOPE_INCLUDE_POD_TAGS"
 	envSentryEnabled                   = "APP_SENTRY_ENABLED"
 	envSentryDSN                       = "APP_SENTRY_DSN"
 	envResultLogger                    = "APP_RESULT_LOGGER"
@@ -58,6 +69,11 @@ const (
 	envExpGoogleApplicationCredentials = "GOOGLE_APPLICATION_CREDENTIALS_EXPERIMENT_ENGINE"
 	envPluginName                      = "PLUGIN_NAME"
 	envPluginsDir                      = "PLUGINS_DIR"
+	// envPodName and envPodNamespace are set via the Kubernetes downward API so the router
+	// can tag its Pyroscope profiles with the identity of the individual pod, since a router
+	// deployment can run multiple replicas behind the same APP_NAME.
+	envPodName      = "POD_NAME"
+	envPodNamespace = "POD_NAMESPACE"
 )
 
 // Router service constants
@@ -202,6 +218,22 @@ func (sb *clusterSvcBuilder) GetRouterServiceName(routerVersion *models.RouterVe
 	return GetComponentName(routerVersion, ComponentTypes.Router)
 }
 
+// formatMapEnvVar serializes a map into the "Key1:Val1,Key2:Val2" format expected by the
+// router's envconfig-based map decoding, with keys sorted for deterministic output.
+func formatMapEnvVar(m map[string]string) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	pairs := make([]string, 0, len(keys))
+	for _, k := range keys {
+		pairs = append(pairs, fmt.Sprintf("%s:%s", k, m[k]))
+	}
+	return strings.Join(pairs, ",")
+}
+
 func (sb *clusterSvcBuilder) buildRouterEnvs(
 	namespace string,
 	environmentType string,
@@ -212,17 +244,35 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 ) ([]corev1.EnvVar, error) {
 	envs := sb.getEnvVars(ver.ResourceRequest, nil, nil, "")
 
-	// Add app name, router timeout, jaeger collector
+	// Add app name, router timeout, jaeger collector (deprecated) and otel collector
 	envs = mergeEnvVars(envs,
 		[]corev1.EnvVar{
 			{Name: envAppName, Value: fmt.Sprintf("%s-%d.%s", ver.Router.Name, ver.Version, namespace)},
 			{Name: envAppEnvironment, Value: environmentType},
 			{Name: envRouterTimeout, Value: ver.Timeout},
-			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint},
+			{Name: envJaegerEndpoint, Value: routerDefaults.JaegerCollectorEndpoint}, //nolint:staticcheck
+			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
+			{Name: envOtelSamplingRatio, Value: strconv.FormatFloat(routerDefaults.OtelSamplingRatio, 'f', -1, 64)},
+			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
+			{Name: envPyroscopeHTTPHeaders, Value: formatMapEnvVar(routerDefaults.PyroscopeHTTPHeaders)},
+			{Name: envPyroscopeCustomTags, Value: formatMapEnvVar(routerDefaults.PyroscopeCustomTags)},
+			{Name: envPyroscopeIncludePodTags, Value: strconv.FormatBool(routerDefaults.PyroscopeIncludePodTags)},
 			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
 			{Name: envRouterProtocol, Value: string(ver.Protocol)},
 			{Name: envSentryEnabled, Value: strconv.FormatBool(sentryEnabled)},
 			{Name: envSentryDSN, Value: sentryDSN},
+			{
+				Name: envPodName,
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+				},
+			},
+			{
+				Name: envPodNamespace,
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+				},
+			},
 		})
 
 	// Add enricher / ensembler related env vars, if enabled
@@ -259,7 +309,9 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 	envs = mergeEnvVars(envs, []corev1.EnvVar{
 		{Name: envLogLevel, Value: string(logConfig.LogLevel)},
 		{Name: envCustomMetrics, Value: strconv.FormatBool(logConfig.CustomMetricsEnabled)},
-		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)},
+		{Name: envJaegerEnabled, Value: strconv.FormatBool(logConfig.JaegerEnabled)}, //nolint:staticcheck
+		{Name: envOtelEnabled, Value: strconv.FormatBool(logConfig.OtelEnabled)},
+		{Name: envPyroscopeEnabled, Value: strconv.FormatBool(logConfig.PyroscopeEnabled)},
 		{Name: envResultLogger, Value: string(logConfig.ResultLoggerType)},
 		{Name: envFiberDebugLog, Value: strconv.FormatBool(logConfig.FiberDebugLogEnabled)},
 	})
@@ -607,8 +659,7 @@ func buildFiberConfigMap(
 	}
 
 	if ver.Ensembler != nil && ver.Ensembler.Type == models.EnsemblerStandardType {
-		if ver.Ensembler.StandardConfig.ExperimentMappings != nil &&
-			len(ver.Ensembler.StandardConfig.ExperimentMappings) != 0 {
+		if len(ver.Ensembler.StandardConfig.ExperimentMappings) != 0 {
 			propsMap["experiment_mappings"] = ver.Ensembler.StandardConfig.ExperimentMappings
 		}
 		if ver.Ensembler.StandardConfig.RouteNamePath != "" {
@@ -631,7 +682,7 @@ func buildFiberConfigMap(
 	// if the version is configured with traffic splitting rules on it,
 	// then define root-level fiber component as a lazy router with
 	// a traffic-splitting strategy based on these rules
-	if ver.TrafficRules != nil && len(ver.TrafficRules) > 0 {
+	if len(ver.TrafficRules) > 0 {
 		// TrafficRule struct used requires the name and conditions field to be specified. But
 		// Default Traffic Rule has no name and a hardcoded name can be used instead since
 		// the name field is not used for traffic splitting strategy. Likewise, an empty slice

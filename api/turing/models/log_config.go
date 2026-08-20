@@ -64,7 +64,13 @@ type LogConfig struct {
 	// Enable debug logs for Fiber. Defaults to false.
 	FiberDebugLogEnabled bool `json:"fiber_debug_log_enabled"`
 	// Enable Jaeger tracing.
+	//
+	// Deprecated: use OtelEnabled instead. Will be removed in a future release.
 	JaegerEnabled bool `json:"jaeger_enabled"`
+	// Enable OpenTelemetry tracing.
+	OtelEnabled bool `json:"otel_enabled"`
+	// Enable Pyroscope profiling.
+	PyroscopeEnabled bool `json:"pyroscope_enabled"`
 	// Result Logger type. The associated config must not be null.
 	ResultLoggerType ResultLogger `json:"result_logger_type"`
 	// Configuration necessary to log results to BigQuery. Cannot be empty if

@@ -2,74 +2,96 @@ package tracing
 
 import (
 	"context"
-	"io"
+	"errors"
 	"net/http"
 
-	"github.com/opentracing/opentracing-go"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 )
 
-// Tracer represents a generic tracer that supports initialization of a global
-// tracing client and creation of opentracing spans
+// ShutdownFunc flushes and shuts down the tracer provider(s) created by InitGlobalTracer.
+type ShutdownFunc func(context.Context) error
+
+// Tracer represents a generic tracer that supports creation of OpenTelemetry spans.
+// Concrete tracers are constructed via their own typed newXTracer function (see
+// newOtelTracer, newJaegerTracer, newMultiTracer) rather than through this interface,
+// since different backends take different config types.
 type Tracer interface {
-	InitGlobalTracer(string, *config.JaegerConfig) (io.Closer, error)
 	IsEnabled() bool
 	StartSpanFromRequestHeader(
 		context.Context,
 		string,
 		http.Header,
-	) (opentracing.Span, context.Context)
-	StartSpanFromContext(context.Context, string) (opentracing.Span, context.Context)
-}
-
-// baseTracer partially implements the Tracer interface and can be used by all tracers
-// to support creation of opentracing spans
-type baseTracer struct {
-}
-
-// StartSpanFromRequestHeader attempts to extract span info from the request header and creates a
-// new / child span accordingly, which is associated to the given context.Context object.
-func (t *baseTracer) StartSpanFromRequestHeader(
-	ctx context.Context,
-	opName string,
-	header http.Header,
-) (opentracing.Span, context.Context) {
-	tr := opentracing.GlobalTracer()
-	spanCtx, _ := tr.Extract(
-		opentracing.HTTPHeaders, opentracing.HTTPHeadersCarrier(header))
-	var sp opentracing.Span
-	if spanCtx != nil {
-		// Start child span
-		sp = opentracing.StartSpan(opName, opentracing.ChildOf(spanCtx))
-		if sp != nil {
-			// A (new / child) span has been created, add it to the context
-			ctx = opentracing.ContextWithSpan(ctx, sp)
-		}
-	}
-	return sp, ctx
-}
-
-// StartSpanFromContext attempts to extract span info from the given context.Context and creates
-// a new / child span accordingly, which is associated to the same context object.
-func (t *baseTracer) StartSpanFromContext(
-	ctx context.Context,
-	opName string,
-) (opentracing.Span, context.Context) {
-	return opentracing.StartSpanFromContext(ctx, opName)
+	) (trace.Span, context.Context)
+	StartSpanFromContext(context.Context, string) (trace.Span, context.Context)
 }
 
 // globalTracer is initialised to a Nop tracer, calling InitGlobalTracer will reset this
 var globalTracer = newNopTracer()
 
-// InitGlobalTracer creates a new Jaeger tracer, and sets it as global tracer.
-func InitGlobalTracer(name string, jaegerCfg *config.JaegerConfig) (io.Closer, error) {
-	// If jaeger config has been set and the tracing enabled, initialise the JaegerTracer
-	if jaegerCfg != nil && jaegerCfg.Enabled {
-		globalTracer = newJaegerTracer()
+// InitGlobalTracer initialises whichever of jaegerCfg/otelCfg are enabled, and sets the
+// global tracer to: the Nop tracer if neither is enabled, that single backend's tracer
+// if exactly one is enabled, or a MultiTracer fanning out to both if both are enabled.
+// The returned ShutdownFunc is always non-nil and safe to call, even when a non-nil
+// error is also returned, so callers can unconditionally defer it.
+func InitGlobalTracer(
+	name string,
+	jaegerCfg *config.JaegerConfig, //nolint:staticcheck
+	otelCfg *config.OtelConfig,
+) (ShutdownFunc, error) {
+	var tracers []Tracer
+	var shutdowns []ShutdownFunc
+
+	// NOTE: order matters here. Otel is appended before Jaeger so that, when both are
+	// enabled, tracers[0] (and thus spans[0] in the resulting multiSpan) is always the
+	// Otel tracer/span. multiSpan's SpanContext()/IsRecording()/TracerProvider() delegate
+	// to spans[0] as the composite's "primary" identity (see multi.go's multiSpan doc
+	// comment) -- reordering these two blocks would silently flip which backend that
+	// primary identity comes from, so don't reorder casually.
+	if otelCfg != nil && otelCfg.Enabled {
+		t, shutdown, err := newOtelTracer(name, otelCfg)
+		if err != nil {
+			return aggregateShutdown(shutdowns), err
+		}
+		tracers = append(tracers, t)
+		shutdowns = append(shutdowns, shutdown)
 	}
-	// Initialise the tracer
-	return globalTracer.InitGlobalTracer(name, jaegerCfg)
+
+	// Must stay after the Otel block above -- see the ordering note there.
+	if jaegerCfg != nil && jaegerCfg.Enabled {
+		t, shutdown, err := newJaegerTracer(name, jaegerCfg)
+		if err != nil {
+			return aggregateShutdown(shutdowns), err
+		}
+		tracers = append(tracers, t)
+		shutdowns = append(shutdowns, shutdown)
+	}
+
+	switch len(tracers) {
+	case 0:
+		globalTracer = newNopTracer()
+	case 1:
+		globalTracer = tracers[0]
+	default:
+		globalTracer = newMultiTracer(tracers)
+	}
+
+	return aggregateShutdown(shutdowns), nil
+}
+
+// aggregateShutdown returns a ShutdownFunc that always attempts every shutdown func
+// in shutdowns (even if an earlier one errors), combining any errors.
+func aggregateShutdown(shutdowns []ShutdownFunc) ShutdownFunc {
+	return func(ctx context.Context) error {
+		var errs []error
+		for _, shutdown := range shutdowns {
+			if err := shutdown(ctx); err != nil {
+				errs = append(errs, err)
+			}
+		}
+		return errors.Join(errs...)
+	}
 }
 
 // Glob returns the global tracer

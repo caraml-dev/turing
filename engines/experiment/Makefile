@@ -7,7 +7,7 @@ default: test
 setup:
 	@echo "Setting up tools..."
 	@test -x $(shell go env GOPATH)/bin/golangci-lint || \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v1.48.0/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.48.0
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/v2.12.2/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v2.12.2
 
 .PHONY: tidy
 tidy:

@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/rs/cors"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/caraml-dev/turing/api/turing/api"
 	"github.com/caraml-dev/turing/api/turing/config"
@@ -59,7 +60,9 @@ func AddAPIRoutesHandler(r *mux.Router, path string, appCtx *api.AppContext, cfg
 	for _, c := range controllers {
 		for _, route := range c.Routes() {
 			// NewRelic handler
-			_, handler := newrelic.WrapHandle(route.Name(), route.HandlerFunc(validator))
+			_, nrHandler := newrelic.WrapHandle(route.Name(), route.HandlerFunc(validator))
+			// Wrap with OTel span, alongside (not replacing) the New Relic instrumentation above
+			handler := otelhttp.NewHandler(nrHandler, route.Name())
 
 			apiRouter.Name(route.Name()).
 				Methods(route.Method()).

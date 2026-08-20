@@ -124,13 +124,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -227,13 +247,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -329,10 +369,28 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "ENRICHER_ENDPOINT", Value: enrEndpoint},
 						{Name: "ENRICHER_TIMEOUT", Value: "2s"},
 						{Name: "ENSEMBLER_ENDPOINT", Value: ensEndpoint},
@@ -340,6 +398,8 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -438,13 +498,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -539,13 +619,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -640,13 +740,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -741,13 +861,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "bigquery"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 						{Name: "APP_GCP_PROJECT", Value: "gcp-project-id"},
@@ -842,15 +982,35 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "GOOGLE_APPLICATION_CREDENTIALS_EXPERIMENT_ENGINE",
 							Value: "/var/secret/exp-engine/exp-engine-service-account.json"},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "nop"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 					},
@@ -972,13 +1132,33 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_ENVIRONMENT", Value: "test-env"},
 						{Name: "ROUTER_TIMEOUT", Value: "5s"},
 						{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: "jaeger-endpoint"},
+						{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "otel-endpoint"},
+						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
+						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 						{Name: "APP_SENTRY_ENABLED", Value: "true"},
 						{Name: "APP_SENTRY_DSN", Value: "sentry-dsn"},
+						{
+							Name: "POD_NAME",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+							},
+						},
+						{
+							Name: "POD_NAMESPACE",
+							ValueFrom: &corev1.EnvVarSource{
+								FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+							},
+						},
 						{Name: "APP_LOGLEVEL", Value: "INFO"},
 						{Name: "APP_CUSTOM_METRICS", Value: "false"},
 						{Name: "APP_JAEGER_ENABLED", Value: "false"},
+						{Name: "APP_OTEL_ENABLED", Value: "false"},
+						{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 						{Name: "APP_RESULT_LOGGER", Value: "nop"},
 						{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 					},
@@ -1048,6 +1228,9 @@ func TestNewRouterService(t *testing.T) {
 				data.expRawConfig,
 				&config.RouterDefaults{
 					JaegerCollectorEndpoint: "jaeger-endpoint",
+					OtelCollectorEndpoint:   "otel-endpoint",
+					PyroscopeServerAddress:  "pyroscope-address",
+					PyroscopeIncludePodTags: true,
 					FluentdConfig:           &config.FluentdConfig{Tag: "fluentd-tag"},
 				},
 				true,
@@ -1138,6 +1321,9 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				environmentType: "dev",
 				routerDefaults: &config.RouterDefaults{
 					JaegerCollectorEndpoint: "",
+					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
+					PyroscopeServerAddress:  "http://pyroscope.example.com:4040",
+					PyroscopeCustomTags:     map[string]string{"team": "fraud"},
 					FluentdConfig:           &config.FluentdConfig{Tag: ""},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 123,
@@ -1171,13 +1357,33 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_ENVIRONMENT", Value: "dev"},
 				{Name: "ROUTER_TIMEOUT", Value: "10s"},
 				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: "http://otel-collector.example.com:4318"},
+				{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "http://pyroscope.example.com:4040"},
+				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+				{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: "team:fraud"},
+				{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "false"},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
 				{Name: "APP_SENTRY_ENABLED", Value: "false"},
 				{Name: "APP_SENTRY_DSN", Value: ""},
+				{
+					Name: "POD_NAME",
+					ValueFrom: &corev1.EnvVarSource{
+						FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+					},
+				},
+				{
+					Name: "POD_NAMESPACE",
+					ValueFrom: &corev1.EnvVarSource{
+						FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+					},
+				},
 				{Name: "APP_LOGLEVEL", Value: "DEBUG"},
 				{Name: "APP_CUSTOM_METRICS", Value: "false"},
 				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_OTEL_ENABLED", Value: "false"},
+				{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 				{Name: "APP_RESULT_LOGGER", Value: "kafka"},
 				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 				{Name: "APP_KAFKA_BROKERS", Value: "1.1.1.1:1111"},
@@ -1216,13 +1422,33 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_ENVIRONMENT", Value: ""},
 				{Name: "ROUTER_TIMEOUT", Value: ""},
 				{Name: "APP_JAEGER_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "APP_OTEL_COLLECTOR_ENDPOINT", Value: ""},
+				{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
+				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: ""},
+				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+				{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
+				{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "false"},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
 				{Name: "APP_SENTRY_ENABLED", Value: "false"},
 				{Name: "APP_SENTRY_DSN", Value: ""},
+				{
+					Name: "POD_NAME",
+					ValueFrom: &corev1.EnvVarSource{
+						FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"},
+					},
+				},
+				{
+					Name: "POD_NAMESPACE",
+					ValueFrom: &corev1.EnvVarSource{
+						FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"},
+					},
+				},
 				{Name: "APP_LOGLEVEL", Value: ""},
 				{Name: "APP_CUSTOM_METRICS", Value: "false"},
 				{Name: "APP_JAEGER_ENABLED", Value: "false"},
+				{Name: "APP_OTEL_ENABLED", Value: "false"},
+				{Name: "APP_PYROSCOPE_ENABLED", Value: "false"},
 				{Name: "APP_RESULT_LOGGER", Value: "upi"},
 				{Name: "APP_FIBER_DEBUG_LOG", Value: "false"},
 				{Name: "APP_KAFKA_BROKERS", Value: "broker"},
@@ -1247,6 +1473,48 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				tt.args.sentryDSN,
 				tt.args.ver)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestFormatMapEnvVar(t *testing.T) {
+	tests := []struct {
+		name string
+		m    map[string]string
+		want string
+	}{
+		{
+			name: "nil",
+			m:    nil,
+			want: "",
+		},
+		{
+			name: "empty",
+			m:    map[string]string{},
+			want: "",
+		},
+		{
+			name: "single entry",
+			m:    map[string]string{"Authorization": "Bearer token"},
+			want: "Authorization:Bearer token",
+		},
+		{
+			name: "multiple entries sorted by key regardless of map order",
+			m: map[string]string{
+				"X-Scope-OrgID": "tenant1",
+				"Authorization": "Bearer token",
+				"X-Custom":      "value",
+			},
+			want: "Authorization:Bearer token,X-Custom:value,X-Scope-OrgID:tenant1",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Run repeatedly since Go map iteration order is randomized per run,
+			// to catch any accidental reliance on iteration order.
+			for i := 0; i < 5; i++ {
+				assert.Equal(t, tt.want, formatMapEnvVar(tt.m))
+			}
 		})
 	}
 }

@@ -357,6 +357,9 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 		CustomMetricsEnabled:    true,
 		JaegerEnabled:           true,
 		JaegerCollectorEndpoint: "jaegerendpoint",
+		OtelEnabled:             true,
+		OtelCollectorEndpoint:   "otelendpoint",
+		PyroscopeEnabled:        true,
 		LogLevel:                "DEBUG",
 		FluentdConfig: &config.FluentdConfig{
 			Image: "fluentdimage",
@@ -404,6 +407,8 @@ func TestRequestBuildRouterVersionWithDefaultConfig(t *testing.T) {
 			CustomMetricsEnabled: true,
 			FiberDebugLogEnabled: true,
 			JaegerEnabled:        true,
+			OtelEnabled:          true,
+			PyroscopeEnabled:     true,
 			ResultLoggerType:     models.BigQueryLogger,
 			BigQueryConfig: &models.BigQueryConfig{
 				Table:                "project.dataset.table",

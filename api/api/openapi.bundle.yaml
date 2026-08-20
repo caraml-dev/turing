@@ -2112,11 +2112,13 @@ components:
         error: error
         version: 5
         log_config:
+          otel_enabled: true
           custom_metrics_enabled: true
           bigquery_config:
             batch_load: true
             table: table
             service_account_secret: service_account_secret
+          pyroscope_enabled: true
           kafka_config:
             brokers: brokers
             topic: topic
@@ -3704,11 +3706,13 @@ components:
       type: object
     RouterVersion_log_config:
       example:
+        otel_enabled: true
         custom_metrics_enabled: true
         bigquery_config:
           batch_load: true
           table: table
           service_account_secret: service_account_secret
+        pyroscope_enabled: true
         kafka_config:
           brokers: brokers
           topic: topic
@@ -3723,6 +3727,12 @@ components:
         fiber_debug_log_enabled:
           type: boolean
         jaeger_enabled:
+          description: 'Deprecated: use otel_enabled instead. Will be removed in a
+            future release.'
+          type: boolean
+        otel_enabled:
+          type: boolean
+        pyroscope_enabled:
           type: boolean
         result_logger_type:
           $ref: '#/components/schemas/ResultLoggerType'

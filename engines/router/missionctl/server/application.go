@@ -1,8 +1,8 @@
 package server
 
 import (
+	"context"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 
@@ -14,6 +14,7 @@ import (
 	"github.com/caraml-dev/turing/engines/router/missionctl/config"
 	"github.com/caraml-dev/turing/engines/router/missionctl/errors"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/metrics"
+	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/profiling"
 	"github.com/caraml-dev/turing/engines/router/missionctl/instrumentation/tracing"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log"
 	"github.com/caraml-dev/turing/engines/router/missionctl/log/resultlog"
@@ -128,26 +129,34 @@ func Run() {
 	}
 }
 
-// initInstrumentation initializes the metrics collector and tracing client
+// initInstrumentation initializes the metrics collector, tracing client and profiler
 func initInstrumentation(cfg *config.Config) func() {
-	var tracingCloser io.Closer
-	var err error
-
 	// Init metrics collector
-	err = metrics.InitMetricsCollector(cfg.AppConfig.CustomMetrics)
-	if err != nil {
+	if err := metrics.InitMetricsCollector(cfg.AppConfig.CustomMetrics); err != nil {
 		log.Glob().Fatalf("Failed initializing Metrics Collector: %v", err)
 	}
 
 	// Init tracing client
-	tracingCloser, err = tracing.InitGlobalTracer(cfg.AppConfig.Name, cfg.AppConfig.Jaeger)
+	tracingShutdown, err := tracing.InitGlobalTracer(cfg.AppConfig.Name, cfg.AppConfig.Jaeger, cfg.AppConfig.Otel)
 	if err != nil {
 		log.Glob().Fatalf("Failed initializing Tracer: %v", err)
 	}
+
+	// Init profiler
+	profiler, err := profiling.Start(cfg.AppConfig.Name, cfg.AppConfig.Pyroscope)
+	if err != nil {
+		log.Glob().Fatalf("Failed initializing Profiler: %v", err)
+	}
+
 	// Return closer function
 	return func() {
-		if err := tracingCloser.Close(); err != nil {
-			panic(err)
+		if err := tracingShutdown(context.Background()); err != nil {
+			log.Glob().Errorf("Failed shutting down tracer: %v", err)
+		}
+		if profiler != nil {
+			if err := profiler.Stop(); err != nil {
+				log.Glob().Errorf("Failed stopping profiler: %v", err)
+			}
 		}
 	}
 }
