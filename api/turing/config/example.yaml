@@ -165,6 +165,11 @@ RouterDefaults:
   # loader; this is harmless since HTTP header names are case-insensitive.
   PyroscopeHTTPHeaders:
     Authorization: <e.g. "Basic <base64 user:pass>" or "Bearer <token>">
+  # Additional static tags attached to every profile, on top of the built-in
+  # router_name/pod_name/pod_namespace tags. If a key collides with one of those, the
+  # built-in value wins. Optional, omit entirely if not needed.
+  PyroscopeCustomTags:
+    team: fraud
   # Tag Pyroscope profiles with pod_name/pod_namespace (in addition to the always-present
   # router_name tag), so individual pods of a multi-replica router deployment can be told
   # apart. Defaults to true; set to false to opt out deployment-wide.
@@ -206,6 +211,14 @@ Pyroscope:
   # are case-insensitive.
   HTTPHeaders:
     Authorization: <e.g. "Basic <base64 user:pass>" or "Bearer <token>">
+  # Additional static tags attached to every profile. Optional, omit entirely if not needed.
+  CustomTags:
+    team: fraud
+  # Tag Pyroscope profiles with pod_name/pod_namespace, so individual replicas of the
+  # Turing API deployment can be told apart. Requires the POD_NAME/POD_NAMESPACE env vars
+  # to be populated, e.g. via the Kubernetes downward API (turing.extraEnvs in the Helm
+  # chart). Defaults to true; set to false to opt out.
+  IncludePodTags: true
 
 # Sentry application monitoring service configuration
 # https://docs.sentry.io/product/sentry-basics/dsn-explainer/

@@ -352,6 +352,10 @@ type RouterDefaults struct {
 	// HTTP headers routers should attach to every profile push request they make to
 	// PyroscopeServerAddress, e.g. for auth (Authorization, X-Scope-OrgID, ...). Optional.
 	PyroscopeHTTPHeaders map[string]string
+	// PyroscopeCustomTags are additional static tags routers should attach to every profile,
+	// on top of the built-in router_name/pod_name/pod_namespace tags. If a key collides with
+	// one of those, the built-in value wins. Optional.
+	PyroscopeCustomTags map[string]string
 	// PyroscopeIncludePodTags controls whether routers tag their Pyroscope profiles with
 	// pod_name/pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), in
 	// addition to the always-present router_name tag. Defaults to true; set to false to opt
@@ -397,6 +401,12 @@ type PyroscopeConfig struct {
 	// HTTPHeaders are attached to every profile push request, e.g. for auth
 	// (Authorization, X-Scope-OrgID, ...). Optional.
 	HTTPHeaders map[string]string
+	// CustomTags are additional static tags attached to every profile. Optional.
+	CustomTags map[string]string
+	// IncludePodTags controls whether profiles are additionally tagged with pod_name/
+	// pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), to distinguish
+	// individual replicas of the Turing API deployment. Defaults to true.
+	IncludePodTags bool
 }
 
 // FluentdConfig captures the defaults used by the Turing Router when Fluentd is enabled
@@ -665,6 +675,7 @@ func setDefaultValues(v *viper.Viper) {
 	v.SetDefault("RouterDefaults::OtelSamplingRatio", "0.01")
 	v.SetDefault("RouterDefaults::PyroscopeEnabled", "false")
 	v.SetDefault("RouterDefaults::PyroscopeServerAddress", "")
+	v.SetDefault("RouterDefaults::PyroscopeCustomTags", map[string]interface{}{})
 	v.SetDefault("RouterDefaults::PyroscopeIncludePodTags", "true")
 	v.SetDefault("RouterDefaults::LogLevel", "INFO")
 	v.SetDefault("RouterDefaults::FluentdConfig::Image", "")
@@ -684,6 +695,7 @@ func setDefaultValues(v *viper.Viper) {
 
 	v.SetDefault("Pyroscope::Enabled", "false")
 	v.SetDefault("Pyroscope::ServerAddress", "")
+	v.SetDefault("Pyroscope::IncludePodTags", "true")
 
 	v.SetDefault("TuringEncryptionKey", "")
 

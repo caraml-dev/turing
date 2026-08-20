@@ -188,8 +188,9 @@ func TestLoad(t *testing.T) {
 					},
 					PyroscopeIncludePodTags: true,
 				},
-				Otel:   config.OtelConfig{SamplingRatio: 0.01},
-				Sentry: sentry.Config{},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
+				Sentry:    sentry.Config{},
 				ClusterConfig: config.ClusterConfig{
 					InClusterConfig: false,
 				},
@@ -315,7 +316,8 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 0.01},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -489,7 +491,8 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 0.01},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},
@@ -681,7 +684,8 @@ func TestLoad(t *testing.T) {
 					OtelEnabled:             true,
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 				},
-				Otel: config.OtelConfig{SamplingRatio: 0.01},
+				Otel:      config.OtelConfig{SamplingRatio: 0.01},
+				Pyroscope: config.PyroscopeConfig{IncludePodTags: true},
 				Sentry: sentry.Config{
 					Enabled: true,
 					Labels:  map[string]string{"foo": "bar"},

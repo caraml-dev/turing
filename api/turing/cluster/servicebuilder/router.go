@@ -46,6 +46,7 @@ const (
 	envPyroscopeEnabled                = "APP_PYROSCOPE_ENABLED"
 	envPyroscopeServerAddress          = "APP_PYROSCOPE_SERVER_ADDRESS"
 	envPyroscopeHTTPHeaders            = "APP_PYROSCOPE_HTTP_HEADERS"
+	envPyroscopeCustomTags             = "APP_PYROSCOPE_CUSTOM_TAGS"
 	envPyroscopeIncludePodTags         = "APP_PYROSCOPE_INCLUDE_POD_TAGS"
 	envSentryEnabled                   = "APP_SENTRY_ENABLED"
 	envSentryDSN                       = "APP_SENTRY_DSN"
@@ -217,19 +218,18 @@ func (sb *clusterSvcBuilder) GetRouterServiceName(routerVersion *models.RouterVe
 	return GetComponentName(routerVersion, ComponentTypes.Router)
 }
 
-// formatHTTPHeaders serializes headers into the "Key1:Val1,Key2:Val2" format
-// expected by the router's envconfig-based map decoding, with keys sorted for
-// deterministic output.
-func formatHTTPHeaders(headers map[string]string) string {
-	keys := make([]string, 0, len(headers))
-	for k := range headers {
+// formatMapEnvVar serializes a map into the "Key1:Val1,Key2:Val2" format expected by the
+// router's envconfig-based map decoding, with keys sorted for deterministic output.
+func formatMapEnvVar(m map[string]string) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
 	pairs := make([]string, 0, len(keys))
 	for _, k := range keys {
-		pairs = append(pairs, fmt.Sprintf("%s:%s", k, headers[k]))
+		pairs = append(pairs, fmt.Sprintf("%s:%s", k, m[k]))
 	}
 	return strings.Join(pairs, ",")
 }
@@ -254,7 +254,8 @@ func (sb *clusterSvcBuilder) buildRouterEnvs(
 			{Name: envOtelEndpoint, Value: routerDefaults.OtelCollectorEndpoint},
 			{Name: envOtelSamplingRatio, Value: strconv.FormatFloat(routerDefaults.OtelSamplingRatio, 'f', -1, 64)},
 			{Name: envPyroscopeServerAddress, Value: routerDefaults.PyroscopeServerAddress},
-			{Name: envPyroscopeHTTPHeaders, Value: formatHTTPHeaders(routerDefaults.PyroscopeHTTPHeaders)},
+			{Name: envPyroscopeHTTPHeaders, Value: formatMapEnvVar(routerDefaults.PyroscopeHTTPHeaders)},
+			{Name: envPyroscopeCustomTags, Value: formatMapEnvVar(routerDefaults.PyroscopeCustomTags)},
 			{Name: envPyroscopeIncludePodTags, Value: strconv.FormatBool(routerDefaults.PyroscopeIncludePodTags)},
 			{Name: envRouterConfigFile, Value: routerConfigMapMountPath + routerConfigFileName},
 			{Name: envRouterProtocol, Value: string(ver.Protocol)},

@@ -142,6 +142,11 @@ type PyroscopeConfig struct {
 	// HTTPHeaders are attached to every profile push request, e.g. for auth
 	// (Authorization, X-Scope-OrgID, ...). Optional.
 	HTTPHeaders map[string]string `split_words:"true"`
+	// CustomTags are additional static tags attached to every profile, on top of the
+	// always-present router_name tag (and pod_name/pod_namespace, when IncludePodTags is
+	// true). If a key collides with one of those built-in tags, the built-in value wins.
+	// Optional.
+	CustomTags map[string]string `split_words:"true"`
 	// IncludePodTags controls whether profiles are additionally tagged with pod_name/
 	// pod_namespace (from the POD_NAME/POD_NAMESPACE downward API env vars), on top of the
 	// always-present router_name tag. Defaults to true.

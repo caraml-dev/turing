@@ -128,6 +128,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -250,6 +251,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
@@ -371,6 +373,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -499,6 +502,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -619,6 +623,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -739,6 +744,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -859,6 +865,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -979,6 +986,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -1128,6 +1136,7 @@ func TestNewRouterService(t *testing.T) {
 						{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 						{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "pyroscope-address"},
 						{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+						{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 						{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "true"},
 						{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 						{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -1314,6 +1323,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 					JaegerCollectorEndpoint: "",
 					OtelCollectorEndpoint:   "http://otel-collector.example.com:4318",
 					PyroscopeServerAddress:  "http://pyroscope.example.com:4040",
+					PyroscopeCustomTags:     map[string]string{"team": "fraud"},
 					FluentdConfig:           &config.FluentdConfig{Tag: ""},
 					KafkaConfig: &config.KafkaConfig{
 						MaxMessageBytes: 123,
@@ -1351,6 +1361,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: "http://pyroscope.example.com:4040"},
 				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+				{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: "team:fraud"},
 				{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "false"},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.HTTP)},
@@ -1415,6 +1426,7 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 				{Name: "APP_OTEL_SAMPLING_RATIO", Value: "0"},
 				{Name: "APP_PYROSCOPE_SERVER_ADDRESS", Value: ""},
 				{Name: "APP_PYROSCOPE_HTTP_HEADERS", Value: ""},
+				{Name: "APP_PYROSCOPE_CUSTOM_TAGS", Value: ""},
 				{Name: "APP_PYROSCOPE_INCLUDE_POD_TAGS", Value: "false"},
 				{Name: "ROUTER_CONFIG_FILE", Value: "/app/config/fiber.yml"},
 				{Name: "ROUTER_PROTOCOL", Value: string(routerConfig.UPI)},
@@ -1465,30 +1477,30 @@ func TestBuildRouterEnvsResultLogger(t *testing.T) {
 	}
 }
 
-func TestFormatHTTPHeaders(t *testing.T) {
+func TestFormatMapEnvVar(t *testing.T) {
 	tests := []struct {
-		name    string
-		headers map[string]string
-		want    string
+		name string
+		m    map[string]string
+		want string
 	}{
 		{
-			name:    "nil",
-			headers: nil,
-			want:    "",
+			name: "nil",
+			m:    nil,
+			want: "",
 		},
 		{
-			name:    "empty",
-			headers: map[string]string{},
-			want:    "",
+			name: "empty",
+			m:    map[string]string{},
+			want: "",
 		},
 		{
-			name:    "single header",
-			headers: map[string]string{"Authorization": "Bearer token"},
-			want:    "Authorization:Bearer token",
+			name: "single entry",
+			m:    map[string]string{"Authorization": "Bearer token"},
+			want: "Authorization:Bearer token",
 		},
 		{
-			name: "multiple headers sorted by key regardless of map order",
-			headers: map[string]string{
+			name: "multiple entries sorted by key regardless of map order",
+			m: map[string]string{
 				"X-Scope-OrgID": "tenant1",
 				"Authorization": "Bearer token",
 				"X-Custom":      "value",
@@ -1501,7 +1513,7 @@ func TestFormatHTTPHeaders(t *testing.T) {
 			// Run repeatedly since Go map iteration order is randomized per run,
 			// to catch any accidental reliance on iteration order.
 			for i := 0; i < 5; i++ {
-				assert.Equal(t, tt.want, formatHTTPHeaders(tt.headers))
+				assert.Equal(t, tt.want, formatMapEnvVar(tt.m))
 			}
 		})
 	}

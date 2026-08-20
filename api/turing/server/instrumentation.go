@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/grafana/pyroscope-go"
 	"go.opentelemetry.io/otel"
@@ -16,6 +17,14 @@ import (
 )
 
 const appName = "turing-api"
+
+// envPodName and envPodNamespace are expected to be populated via the Kubernetes downward
+// API, e.g. through turing.extraEnvs in the Helm chart. They are absent when running
+// outside a pod (e.g. local dev) or when not configured.
+const (
+	envPodName      = "POD_NAME"
+	envPodNamespace = "POD_NAMESPACE"
+)
 
 // initTracer initializes the global OpenTelemetry tracer provider for api, exporting
 // spans via OTLP HTTP, and returns its shutdown function. When cfg.Enabled is false,
@@ -72,6 +81,7 @@ func initProfiler(cfg config.PyroscopeConfig) (*pyroscope.Profiler, error) {
 		ApplicationName: appName,
 		ServerAddress:   cfg.ServerAddress,
 		HTTPHeaders:     cfg.HTTPHeaders,
+		Tags:            buildTags(cfg),
 		ProfileTypes: []pyroscope.ProfileType{
 			pyroscope.ProfileCPU,
 			pyroscope.ProfileAllocObjects,
@@ -81,4 +91,25 @@ func initProfiler(cfg config.PyroscopeConfig) (*pyroscope.Profiler, error) {
 			pyroscope.ProfileGoroutines,
 		},
 	})
+}
+
+// buildTags returns the static Pyroscope tags for this process: cfg.CustomTags first, then
+// pod_name/pod_namespace -- when cfg.IncludePodTags is true -- for whichever of the
+// corresponding downward API env vars are set, to distinguish individual replicas of the
+// Turing API deployment. pod_name/pod_namespace are applied last, so they always win over
+// a colliding custom tag key.
+func buildTags(cfg config.PyroscopeConfig) map[string]string {
+	tags := make(map[string]string, len(cfg.CustomTags)+2)
+	for k, v := range cfg.CustomTags {
+		tags[k] = v
+	}
+	if cfg.IncludePodTags {
+		if podName := os.Getenv(envPodName); podName != "" {
+			tags["pod_name"] = podName
+		}
+		if podNamespace := os.Getenv(envPodNamespace); podNamespace != "" {
+			tags["pod_namespace"] = podNamespace
+		}
+	}
+	return tags
 }
