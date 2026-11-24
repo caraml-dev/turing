@@ -1,23 +1,19 @@
 import setuptools
 import pathlib
-import pkg_resources
 
 with pathlib.Path("turing/version.py").open() as version_py:
     _locals = locals()
     exec(version_py.read(), globals(), _locals)
     version = _locals["VERSION"]
 
-with pathlib.Path("requirements.txt").open() as requirements_txt:
-    requirements = [
-        str(requirement)
-        for requirement in pkg_resources.parse_requirements(requirements_txt)
-    ]
+def parse_requirements(path):
+    """Requirement lines of a requirements file, without comments and blank lines."""
+    lines = (line.split(" #")[0].strip() for line in pathlib.Path(path).read_text().splitlines())
+    return [line for line in lines if line and not line.startswith(("#", "-"))]
 
-with pathlib.Path("requirements.dev.txt").open() as dev_requirements_test:
-    dev_requirements = [
-        str(requirement)
-        for requirement in pkg_resources.parse_requirements(dev_requirements_test)
-    ]
+
+requirements = parse_requirements("requirements.txt")
+dev_requirements = parse_requirements("requirements.dev.txt")
 
 setuptools.setup(
     name="turing-sdk",
