@@ -58,10 +58,12 @@ jobs:
     # Dev build can be released either from the 'main' branch or
     # by running this workflow manually with `workflow_dispatch` event.
     if: >-
-      (contains('release,pre-release', needs.release-rules.outputs.release-type)
-        || ( github.event_name != 'pull_request' )
-        || ( github.event.pull_request.head.repo.full_name == github.repository )) &&
-        ${{ github.event.workflow_run.conclusion == 'success' }}
+      ${{
+        (contains('release,pre-release', needs.release-rules.outputs.release-type)
+          || github.event_name != 'pull_request'
+          || github.event.pull_request.head.repo.full_name == github.repository)
+        && github.event.workflow_run.conclusion == 'success'
+      }}
     environment: ${{ needs.release-rules.outputs.release-type == 'dev' && 'manual' || '' }}
     runs-on: ubuntu-latest
     needs:
