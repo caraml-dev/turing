@@ -87,7 +87,7 @@ jobs:
         run: |
           set -o pipefail
           make build-image | tee output.log
-          echo "::set-output name=pyfunc-ensembler-service-image::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+          echo "pyfunc-ensembler-service-image=$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)" >> "$GITHUB_OUTPUT"
 
       - name: Publish Pyfunc Ensembler Service Docker Image
         run: docker push ${{ steps.build.outputs.pyfunc-ensembler-service-image }}

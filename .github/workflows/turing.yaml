@@ -70,7 +70,7 @@ jobs:
         run: |
           set -o pipefail
           make build-image | tee output.log
-          echo "::set-output name=api-version::$(sed -n 's%turing-api version: \(.*\)%\1%p' output.log)"
+          echo "api-version=$(sed -n 's%turing-api version: \(.*\)%\1%p' output.log)" >> "$GITHUB_OUTPUT"
 
       - name: Save Docker image
         run: |
@@ -109,7 +109,7 @@ jobs:
         run: |
           set -o pipefail
           make build-image | tee output.log
-          echo "::set-output name=router-version::$(sed -n 's%turing-router version: \(.*\)%\1%p' output.log)"
+          echo "router-version=$(sed -n 's%turing-router version: \(.*\)%\1%p' output.log)" >> "$GITHUB_OUTPUT"
 
       - name: Save Docker image
         run: |
