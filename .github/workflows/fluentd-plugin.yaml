@@ -65,7 +65,7 @@ jobs:
         run: |
           set -o pipefail
           make build-image | tee output.log
-          echo "::set-output name=fluentd-image::$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)"
+          echo "fluentd-image=$(sed -n 's%Building docker image: \(.*\)%\1%p' output.log)" >> "$GITHUB_OUTPUT"
 
       - name: Publish Fluentd Plugin Docker Image
         run: docker push ${{ steps.build-image.outputs.fluentd-image }}
